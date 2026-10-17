@@ -6,6 +6,7 @@ const schema = {
   remoteYoutubeLikeButton: true,
   holodexButtonInYoutube: true,
   openHolodexInNewTab: true,
+  twitchAudioLock: true,
   // openInHolodexContextMenu: false,
 };
 type Schema = typeof schema;
@@ -21,6 +22,11 @@ const descriptions: Partial<Record<keyof Schema, { name: string, description: st
   openHolodexInNewTab: {
     name: "Open in New Tab",
     description: "When clicking the extension icon, open Holodex in a new tab instead of the current one",
+  },
+  twitchAudioLock: {
+    name: "Keep selected audio in multiview",
+    description:
+      "Prevent players from taking over audio when Holodex Mute Others is on. Use Holodex media controls to choose audio reliably. Changes apply to open Holodex tabs.",
   },
   // openInHolodexContextMenu: {
   //   name: "Holodex Context Menu",
