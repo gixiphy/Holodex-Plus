@@ -25,7 +25,6 @@ import {
   flushMicrotasks,
   removeFakeCell,
   replaceCellContent,
-  replacePlayer,
   type FakeEnv,
   type FakeVideoCell,
 } from "./fixtures";

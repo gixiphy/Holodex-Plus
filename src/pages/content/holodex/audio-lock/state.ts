@@ -703,7 +703,7 @@ export function transition(
 
     case "PLAYER_READY": {
       if (!state.extensionEnabled || !state.muteOthers) return { state, effects };
-      let next = {
+      const next = {
         ...state,
         cells: {
           ...state.cells,

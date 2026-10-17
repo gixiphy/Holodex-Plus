@@ -151,10 +151,6 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     }
   };
 
-  const report = (code: string) => {
-    failSession(code);
-  };
-
   const cancelStoreSettle = () => {
     if (session?.storeSettleTimer) {
       cancel(session.storeSettleTimer);
