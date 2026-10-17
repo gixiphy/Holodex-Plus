@@ -15,7 +15,8 @@ Headless Google Chrome harness that loads an unpacked extension, opens real `htt
 2. Loads the unpacked extension via CDP `Extensions.loadUnpacked`
 3. Opens real holodex.net/multiview and seeds a YouTube + Twitch layout with Mute Others on
 4. Intercepts Twitch/YouTube player scripts with fakes
-5. Runs the five-phase scenario below and writes a JSON result
+5. Samples store `muted` before reload, during post-reload settle, and just before playback (`prePlay`)
+6. Runs the five-phase scenario below and writes a JSON result
 
 This harness is **not** part of `test:audio-lock` and is not picked up by Vitest.
 
@@ -28,6 +29,22 @@ Profiles are created under `.cache/e2e-browser/` (ignored via `.gitignore` `.cac
 3. Twitch self-unmutes once (no user input)
 4. Twitch mute lag 2.5s; self-unmutes every 4s × 6; then observe 5s
 5. Real CDP mouse click into the Twitch player, then Twitch unmutes (audio should switch to Twitch)
+
+## Pre-play sampling and pass criteria
+
+`run.mjs` records `result.prePlay` every 250ms in three windows:
+
+- `pre-reload` (3s after seeding layout, before `Page.reload`)
+- `post-reload-settle` (each 8s settle loop after reload)
+- `pre-play` (1.5s after settle, before `__startPlaying`)
+
+`compare.mjs` fails the candidate when any of these hold:
+
+- `preReloadYtStoreMuted !== 0` or `preReloadSamples < 10`
+- `prePlayYtStoreMuted !== 0` or `prePlaySamples < 30`
+- `checks.initial.storeA === true`
+
+Timeline sampling after play (168 + 20) is unchanged so results stay comparable to MVP evidence.
 
 ## Commands
 
@@ -43,6 +60,17 @@ node tests/e2e-browser/audio-lock/run.mjs mvp  /Applications/Extensions/holodex-
 node tests/e2e-browser/audio-lock/run.mjs none none .cache/e2e-browser/none.json
 node tests/e2e-browser/audio-lock/compare.mjs .cache/e2e-browser/fix.json .cache/e2e-browser/mvp.json \
   docs/plans/evidence/twitch-audio-lock-fix-3/results/mvp.json .cache/e2e-browser/none.json
+
+# Consecutive 3 fix runs (restart the streak on any failure):
+for n in 1 2 3; do
+  node tests/e2e-browser/audio-lock/run.mjs fix-$n dist_chrome .cache/e2e-browser/fix-$n.json || exit 1
+  node tests/e2e-browser/audio-lock/compare.mjs .cache/e2e-browser/fix-$n.json \
+    docs/plans/evidence/twitch-audio-lock-fix-3/results/mvp.json || exit 1
+done
+node tests/e2e-browser/audio-lock/run.mjs mvp /Applications/Extensions/holodex-plus-audiolock-chrome .cache/e2e-browser/mvp.json
+node tests/e2e-browser/audio-lock/run.mjs none none .cache/e2e-browser/none.json
+node tests/e2e-browser/audio-lock/compare.mjs .cache/e2e-browser/fix-1.json .cache/e2e-browser/fix-2.json \
+  .cache/e2e-browser/fix-3.json .cache/e2e-browser/mvp.json .cache/e2e-browser/none.json
 ```
 
 Exit codes for `run.mjs`: `0` finished, `2` exception, `3` global timeout (240s).  

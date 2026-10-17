@@ -23,6 +23,13 @@ function passCandidate(result) {
   if (!(c.flags?.v3 === true && c.flags?.newHandle === true)) {
     reasons.push('flags.v3/newHandle');
   }
+  if (c.preReloadYtStoreMuted !== 0 || !(c.preReloadSamples >= 10)) {
+    reasons.push('preReloadYtStoreMuted');
+  }
+  if (c.prePlayYtStoreMuted !== 0 || !(c.prePlaySamples >= 30)) {
+    reasons.push('prePlayYtStoreMuted');
+  }
+  if (c.initial?.storeA === true) reasons.push('initialYtStoreMuted');
   if (c.afterBothPlay?.audible !== 'YT') reasons.push('afterBothPlay');
   if (c.afterSelfUnmute1?.audible !== 'YT') reasons.push('afterSelfUnmute1');
   if (c.afterLaggedRepeats?.audible !== 'YT') reasons.push('afterLaggedRepeats');
@@ -44,6 +51,16 @@ function cell(result, key) {
   switch (key) {
     case '頁面腳本有跑':
       return c.flags?.v3 === true ? 'yes' : 'no';
+    case 'reload 前 YT 被設靜音取樣':
+      return c.preReloadSamples == null
+        ? '—'
+        : `${c.preReloadYtStoreMuted ?? 0}/${c.preReloadSamples}`;
+    case 'reload 後播放前 YT 被設靜音取樣':
+      return c.prePlaySamples == null
+        ? '—'
+        : `${c.prePlayYtStoreMuted ?? 0}/${c.prePlaySamples}`;
+    case '播放前初始 YT store':
+      return c.initial ? String(c.initial.storeA) : '—';
     case 'Twitch 晚播後':
       return c.afterBothPlay?.audible ?? '—';
     case '自己取消靜音後':
@@ -69,6 +86,9 @@ function cell(result, key) {
 
 const rows = [
   '頁面腳本有跑',
+  'reload 前 YT 被設靜音取樣',
+  'reload 後播放前 YT 被設靜音取樣',
+  '播放前初始 YT store',
   'Twitch 晚播後',
   '自己取消靜音後',
   '延遲＋重複 6 次後',

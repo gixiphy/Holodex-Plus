@@ -20,16 +20,20 @@ let errTail = ''; proc.stderr.on('data', d => { errTail = (errTail + d).slice(-4
 const out = proc.stdio[3], inp = proc.stdio[4];
 let id = 0; const pend = new Map(); const handlers = []; let buf = '';
 inp.on('data', d => { buf += d.toString('utf8'); let i; while ((i = buf.indexOf('\0')) >= 0) { const m = JSON.parse(buf.slice(0, i)); buf = buf.slice(i + 1);
-  if (m.id && pend.has(m.id)) { const p = pend.get(m.id); pend.delete(m.id); m.error ? p.rej(new Error(JSON.stringify(m.error))) : p.res(m.result); }
+  if (m.id && pend.has(m.id)) {
+    const p = pend.get(m.id); pend.delete(m.id);
+    if (m.error) p.rej(new Error(JSON.stringify(m.error)));
+    else p.res(m.result);
+  }
   else handlers.forEach(h => h(m)); } });
 const send = (method, params = {}, sessionId) => new Promise((res, rej) => { const m = { id: ++id, method, params }; if (sessionId) m.sessionId = sessionId; pend.set(m.id, { res, rej }); out.write(JSON.stringify(m) + '\0'); });
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const result = { label, extDir: extDirArg, console: [], timeline: [], checks: {}, errors: [] };
+const result = { label, extDir: extDirArg, console: [], timeline: [], prePlay: [], checks: {}, errors: [] };
 const done = async (code) => {
-  try { fs.writeFileSync(outFile, JSON.stringify(result, null, 1)); } catch {}
-  try { proc.kill('SIGKILL'); } catch {}
-  try { await new Promise((r) => setTimeout(r, 200)); } catch {}
-  try { fs.rmSync(prof, { recursive: true, force: true }); } catch {}
+  try { fs.writeFileSync(outFile, JSON.stringify(result, null, 1)); } catch { /* ignore */ }
+  try { proc.kill('SIGKILL'); } catch { /* ignore */ }
+  try { await new Promise((r) => setTimeout(r, 200)); } catch { /* ignore */ }
+  try { fs.rmSync(prof, { recursive: true, force: true }); } catch { /* ignore */ }
   process.exit(code);
 };
 setTimeout(() => { result.errors.push('global timeout'); done(3); }, 240000);
@@ -73,27 +77,45 @@ try {
   // harness only: keep Holodex's service worker from installing and reloading the page mid-test
   await send('Page.addScriptToEvaluateOnNewDocument', { source: `try{const sw={register:()=>new Promise(()=>{}),getRegistration:()=>Promise.resolve(undefined),getRegistrations:()=>Promise.resolve([]),addEventListener(){},removeEventListener(){},ready:new Promise(()=>{}),controller:null,oncontrollerchange:null,onmessage:null,startMessages(){}};Object.defineProperty(Navigator.prototype,'serviceWorker',{configurable:true,get(){return sw}})}catch(e){}` }, S);
   await send('Page.navigate', { url: 'https://holodex.net/multiview' }, S);
-  const waitFor = async (expr, ms, what) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { try { if (await E(expr)) return true; } catch {} await sleep(250); } throw new Error('timeout waiting ' + what); };
+  const waitFor = async (expr, ms, what) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { try { if (await E(expr)) return true; } catch { /* ignore */ } await sleep(250); } throw new Error('timeout waiting ' + what); };
+  const samplePre = async (tag, ms) => {
+    const t0 = Date.now();
+    while (Date.now() - t0 < ms) {
+      try {
+        const s = await E(`(()=>{const st=document.querySelector('#app').__vue__.$store.state.multiview;return {t:Date.now(),tag:${JSON.stringify(tag)},storeA:st.layoutContent.a&&st.layoutContent.a.muted,storeB:st.layoutContent.b&&st.layoutContent.b.muted,ytN:window.__fake?window.__fake.yt.length:-1,twN:window.__fake?window.__fake.tw.length:-1};})()`);
+        result.prePlay.push(s);
+      } catch (e) {
+        result.prePlay.push({ t: Date.now(), tag, err: String(e && e.message || e) });
+      }
+      await sleep(250);
+    }
+  };
   await waitFor(`!!(document.querySelector('#app')&&document.querySelector('#app').__vue__&&document.querySelector('#app').__vue__.$store)`, 60000, 'vue store');
   await E(`(()=>{const st=document.querySelector('#app').__vue__.$store;
     st.commit('multiview/setLayout',[{x:0,y:0,w:12,h:12,i:'a'},{x:12,y:0,w:12,h:12,i:'b'}]);
     st.commit('multiview/setLayoutContent',{a:{type:'video',id:'ytFAKE00001',video:{id:'ytFAKE00001',type:'stream',status:'live',title:'YT',channel:{id:'c1',name:'yt'}}},
       b:{type:'video',id:'fakechannel',video:{id:'fakechannel',type:'twitch',status:'live',title:'TW',channel:{name:'fakechannel'}}}});
     st.commit('multiview/setMuteOthers',true); return JSON.stringify(st.state.multiview.layoutContent);})()`);
-  await sleep(1500);
+  await samplePre('pre-reload', 3000);
   await send('Page.reload', {}, S);
   await sleep(1000);
   const ready = `!!(document.querySelector('#app')&&document.querySelector('#app').__vue__&&window.__fake&&window.__fake.tw.length>=1&&window.__fake.yt.length>=1)`;
   await waitFor(ready, 60000, 'fake players');
   // Holodex sometimes reloads itself once shortly after load; wait until the page stays put for 8s
-  for (let k = 0; k < 4; k++) { const navs = result.console.filter(x => x[1] === 'NAV').length; await sleep(8000); await waitFor(ready, 60000, 'fake players after settle'); if (result.console.filter(x => x[1] === 'NAV').length === navs) break; }
-  await sleep(1500);
+  for (let k = 0; k < 4; k++) { const navs = result.console.filter(x => x[1] === 'NAV').length; await samplePre('post-reload-settle', 8000); await waitFor(ready, 60000, 'fake players after settle'); if (result.console.filter(x => x[1] === 'NAV').length === navs) break; }
+  await samplePre('pre-play', 1500);
   result.checks.flags = await E(`({v3:!!window.HOLODEX_PLUS_INSTALLED_V3, mvpLock:!!window.__HDX_AUDIO_LOCK__, newHandle:!!window.__HDX_AUDIO_LOCK_HANDLE__, scripts:[...document.querySelectorAll('script')].map(s=>s.src).filter(x=>x.startsWith('chrome-extension')), path:location.pathname})`);
   const snap = `(()=>{const st=document.querySelector('#app').__vue__.$store.state.multiview;const tw=window.__fake.tw.at(-1),yt=window.__fake.yt.at(-1);
     return {t:Date.now(),storeA:st.layoutContent.a&&st.layoutContent.a.muted,storeB:st.layoutContent.b&&st.layoutContent.b.muted,ytMuted:yt.state.muted,twMuted:tw.state.muted,muteOthers:st.muteOthers,twCalls:tw.state.setMutedCalls.length};})()`;
   const record = async (tag, ms) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { const s = await E(snap); s.tag = tag; result.timeline.push(s); await sleep(250); } };
   const audible = (s) => (s.ytMuted ? '' : 'YT') + (s.twMuted ? '' : 'TW') || 'none';
   result.checks.initial = await E(snap);
+  const preReload = result.prePlay.filter((x) => x.tag === 'pre-reload');
+  const prePlaySamples = result.prePlay.filter((x) => x.tag === 'post-reload-settle' || x.tag === 'pre-play');
+  result.checks.preReloadSamples = preReload.length;
+  result.checks.preReloadYtStoreMuted = preReload.filter((x) => x.storeA === true).length;
+  result.checks.prePlaySamples = prePlaySamples.length;
+  result.checks.prePlayYtStoreMuted = prePlaySamples.filter((x) => x.storeA === true).length;
   // 2. play YouTube first, Twitch 3s later (Twitch loads slower in real life)
   await E(`window.__fake.yt.at(-1).__startPlaying()`); await record('yt-play', 3000);
   await E(`window.__fake.tw.at(-1).__startPlaying()`); await record('tw-play', 4000);
