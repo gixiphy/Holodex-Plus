@@ -150,8 +150,11 @@ try {
       const sid = m.params.sessionId;
       const url = m.params.targetInfo?.url || '';
       if (/player\.twitch\.tv/.test(url)) iframeSessions.set('twitch', sid);
-      if (/youtube\.com\/embed\//.test(url)) iframeSessions.set('youtube', sid);
+      if (/youtube\.com\/embed\/|youtube-nocookie\.com\/embed\//.test(url)) {
+        iframeSessions.set('youtube', sid);
+      }
       send('Runtime.enable', {}, sid).catch(() => {});
+      send('Page.enable', {}, sid).catch(() => {});
       send('Runtime.runIfWaitingForDebugger', {}, sid).catch(() => {});
       if (/player\.twitch\.tv/.test(url)) {
         send('Runtime.evaluate', {
@@ -233,20 +236,52 @@ try {
   const iframeBox = async (which) => E(`(()=>{
     const ifr=[...document.querySelectorAll('iframe')];
     const hit=ifr.find(f=>${which === 'youtube'
-      ? `/youtube\\.com\\/embed\\//.test(f.src)`
+      ? `/youtube\\.com\\/embed\\/|youtube-nocookie\\.com\\/embed\\//.test(f.src)`
       : `/player\\.twitch\\.tv/.test(f.src)`});
     if(!hit)return null;
     const r=hit.getBoundingClientRect();
     return {x:r.left,y:r.top,w:r.width,h:r.height,src:hit.src};
   })()`);
 
+  const waitSession = async (which, ms) => {
+    const t0 = Date.now();
+    while (Date.now() - t0 < ms) {
+      if (iframeSessions.has(which)) return iframeSessions.get(which);
+      // refresh from Target.getTargets in case attach event was missed
+      try {
+        const tg = await send('Target.getTargets');
+        for (const t of tg.targetInfos || []) {
+          const url = t.url || '';
+          if (which === 'twitch' && /player\.twitch\.tv/.test(url)) {
+            const { sessionId } = await send('Target.attachToTarget', { targetId: t.targetId, flatten: true });
+            iframeSessions.set('twitch', sessionId);
+            await send('Runtime.enable', {}, sessionId);
+            await send('Runtime.runIfWaitingForDebugger', {}, sessionId).catch(() => {});
+            return sessionId;
+          }
+          if (which === 'youtube' && /youtube\.com\/embed\/|youtube-nocookie\.com\/embed\//.test(url)) {
+            const { sessionId } = await send('Target.attachToTarget', { targetId: t.targetId, flatten: true });
+            iframeSessions.set('youtube', sessionId);
+            await send('Runtime.enable', {}, sessionId);
+            await send('Runtime.runIfWaitingForDebugger', {}, sessionId).catch(() => {});
+            return sessionId;
+          }
+        }
+      } catch { /* ignore */ }
+      await sleep(500);
+    }
+    return null;
+  };
+
   const readVideo = async (which) => {
-    const sid = iframeSessions.get(which);
+    let sid = iframeSessions.get(which);
+    if (!sid) sid = await waitSession(which, 2000);
     if (!sid) return null;
     try {
-      return await E(`(()=>{const v=[...document.querySelectorAll('video')].find(x=>x.readyState>0)||document.querySelector('video');
-        if(!v)return null;
-        return {muted:v.muted,volume:v.volume,paused:v.paused,readyState:v.readyState,currentTime:v.currentTime,currentSrcEmpty:!v.currentSrc};
+      return await E(`(()=>{const vs=[...document.querySelectorAll('video')];
+        const v=vs.find(x=>x.readyState>0)||vs[0];
+        if(!v)return {muted:null,volume:null,paused:true,readyState:0,currentTime:0,currentSrcEmpty:true,videoCount:vs.length};
+        return {muted:v.muted,volume:v.volume,paused:v.paused,readyState:v.readyState,currentTime:v.currentTime,currentSrcEmpty:!v.currentSrc,videoCount:vs.length};
       })()`, sid);
     } catch {
       return null;
@@ -291,19 +326,56 @@ try {
   };
 
   // Wait for youtube iframe attach + play
-  await waitFor(`!![...document.querySelectorAll('iframe')].find(f=>/youtube\\.com\\/embed\\//.test(f.src))`, 60000, 'yt iframe');
+  await waitFor(`!![...document.querySelectorAll('iframe')].find(f=>/youtube\\.com\\/embed\\/|youtube-nocookie\\.com\\/embed\\//.test(f.src))`, 60000, 'yt iframe');
+  await waitSession('youtube', 30000);
   await sleep(2000);
   await clickPlay('youtube');
-  let ytPlaying = await waitPlaying('youtube', 60000);
+  let ytPlaying = await waitPlaying('youtube', 45000);
   if (!ytPlaying) {
-    // retry center click
     await clickPlay('youtube');
-    ytPlaying = await waitPlaying('youtube', 30000);
+    ytPlaying = await waitPlaying('youtube', 20000);
   }
   if (!ytPlaying) {
-    result.verdict = 'SKIP';
-    result.skipReason = 'no-live-youtube';
-    await done(4);
+    // pick alternate live from Holodex home (max 2 more = 3 total with default)
+    result.picks.defaultFailed = {
+      youtubeId,
+      session: iframeSessions.has('youtube'),
+      lastVideo: await readVideo('youtube'),
+      iframe: await iframeBox('youtube'),
+    };
+    const alts = await E(`(()=>{
+      try{
+        const links=[...document.querySelectorAll('a[href*=\"/watch/\"]')].map(a=>a.getAttribute('href')).filter(Boolean);
+        const ids=[];
+        for(const h of links){const m=h.match(/\\/watch\\/([\\w-]{6,})/);if(m&&!ids.includes(m[1]))ids.push(m[1]);if(ids.length>=5)break;}
+        return ids;
+      }catch(e){return []}
+    })()`).catch(() => []);
+    let ok = false;
+    for (const alt of (alts || []).slice(0, 2)) {
+      if (alt === youtubeId) continue;
+      result.picks.tried = [...(result.picks.tried || []), alt];
+      await E(`(()=>{const st=document.querySelector('#app').__vue__.$store;const id=${JSON.stringify(alt)};
+        st.commit('multiview/setLayout',[{x:0,y:0,w:24,h:24,i:'a'}]);
+        st.commit('multiview/setLayoutContent',{a:{type:'video',id,video:{id,type:'stream',status:'live',title:'YT',channel:{id:'c1',name:'yt'}},muted:false}});
+        return id;})()`);
+      iframeSessions.delete('youtube');
+      await sleep(3000);
+      await waitSession('youtube', 20000);
+      await clickPlay('youtube');
+      ytPlaying = await waitPlaying('youtube', 30000);
+      if (ytPlaying) {
+        result.picks.youtube = alt;
+        result.picks.method = 'holodex-live-card';
+        ok = true;
+        break;
+      }
+    }
+    if (!ok) {
+      result.verdict = 'SKIP';
+      result.skipReason = 'no-live-youtube';
+      await done(4);
+    }
   }
 
   // Calibration YouTube
@@ -338,14 +410,21 @@ try {
     return true;})()`);
 
   await waitFor(`!![...document.querySelectorAll('iframe')].find(f=>/player\\.twitch\\.tv/.test(f.src))`, 60000, 'twitch iframe');
+  await waitSession('twitch', 30000);
   await sleep(3000);
   await clickPlay('twitch');
-  let twPlaying = await waitPlaying('twitch', 60000);
+  let twPlaying = await waitPlaying('twitch', 45000);
   if (!twPlaying) {
     await clickPlay('twitch');
-    twPlaying = await waitPlaying('twitch', 30000);
+    twPlaying = await waitPlaying('twitch', 20000);
   }
   if (!twPlaying) {
+    result.picks.twitchFailed = {
+      channel: twitchChannel,
+      session: iframeSessions.has('twitch'),
+      lastVideo: await readVideo('twitch'),
+      iframe: await iframeBox('twitch'),
+    };
     result.verdict = 'SKIP';
     result.skipReason = 'no-live-twitch';
     await done(4);
