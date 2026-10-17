@@ -227,10 +227,23 @@ try {
   const blankClick = { x: 20, y: 20 };
   result.clickPoints.blank = blankClick;
 
-  const clickAt = async (x, y) => {
+  const clickAt = async (x, y, sessionId = S) => {
     for (const type of ['mousePressed', 'mouseReleased']) {
-      await send('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: 1 }, S);
+      await send('Input.dispatchMouseEvent', { type, x, y, button: 'left', clickCount: 1 }, sessionId);
     }
+  };
+
+  /** Click a control inside an iframe using iframe-local coordinates. */
+  const clickInIframe = async (which, localX, localY) => {
+    const sid = iframeSessions.get(which) || await waitSession(which, 5000);
+    const box = await iframeBox(which);
+    if (!box) return false;
+    if (sid) {
+      await clickAt(localX, localY, sid);
+      return true;
+    }
+    await clickAt(box.x + localX, box.y + localY, S);
+    return true;
   };
 
   const iframeBox = async (which) => E(`(()=>{
@@ -399,25 +412,21 @@ try {
   const ytMuteBtn = iframeSessions.get('youtube')
     ? await E(`(()=>{const el=document.querySelector('.ytp-mute-button,button.ytp-mute-button');if(!el)return null;const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};})()`, iframeSessions.get('youtube')).catch(() => null)
     : null;
-  if (ytMuteBtn && ytBox) {
-    await clickAt(ytBox.x + ytMuteBtn.x, ytBox.y + ytMuteBtn.y);
+  result.clickPoints.youtubeMute = ytMuteBtn;
+  if (ytMuteBtn) {
+    await clickInIframe('youtube', ytMuteBtn.x, ytMuteBtn.y);
     await sleep(800);
-  } else if (ytBox) {
-    // fallback: press 'm' while iframe focused
-    await clickAt(ytBox.x + ytBox.w / 2, ytBox.y + ytBox.h / 2);
-    await sleep(200);
-    await send('Input.dispatchKeyEvent', { type: 'keyDown', text: 'm', key: 'm', code: 'KeyM', windowsVirtualKeyCode: 77 }, S);
-    await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'm', code: 'KeyM', windowsVirtualKeyCode: 77 }, S);
+  } else {
+    // fallback: element.click() inside iframe (still player UI)
+    await E(`(()=>{const el=document.querySelector('.ytp-mute-button');if(el)el.click();return!!el})()`, iframeSessions.get('youtube')).catch(() => false);
     await sleep(800);
   }
   const ytAfter = await readVideo('youtube');
   const ytCalOk = ytBefore && ytAfter && (ytBefore.muted !== ytAfter.muted || Math.abs((ytBefore.volume || 0) - (ytAfter.volume || 0)) > 0.01);
-  // restore audible if we muted
   if (ytAfter && ytAfter.muted) {
-    if (ytMuteBtn && ytBox) {
-      await clickAt(ytBox.x + ytMuteBtn.x, ytBox.y + ytMuteBtn.y);
-      await sleep(400);
-    }
+    if (ytMuteBtn) await clickInIframe('youtube', ytMuteBtn.x, ytMuteBtn.y);
+    else await E(`(()=>{const el=document.querySelector('.ytp-mute-button');if(el)el.click();return!!el})()`, iframeSessions.get('youtube')).catch(() => false);
+    await sleep(400);
   }
   await clickAt(blankClick.x, blankClick.y);
   result.calibration.youtube = { ok: !!ytCalOk, before: ytBefore, after: ytAfter };
@@ -512,27 +521,26 @@ try {
   const twMuteBtn = iframeSessions.get('twitch')
     ? await E(`(()=>{const el=document.querySelector('button[data-a-target="player-mute-unmute-button"],button[aria-label*="Mute"],button[aria-label*="Unmute"],button[aria-label*="靜音"],button[aria-label*="静音"]');if(!el)return null;const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,label:el.getAttribute('aria-label')};})()`, iframeSessions.get('twitch')).catch(() => null)
     : null;
-  result.clickPoints.twitchMute = twMuteBtn && twBox
-    ? { x: twBox.x + twMuteBtn.x, y: twBox.y + twMuteBtn.y, label: twMuteBtn.label }
-    : null;
-  if (twMuteBtn && twBox) {
-    await clickAt(twBox.x + twMuteBtn.x, twBox.y + twMuteBtn.y);
+  result.clickPoints.twitchMute = twMuteBtn;
+  if (twMuteBtn) {
+    await clickInIframe('twitch', twMuteBtn.x, twMuteBtn.y);
     await sleep(1000);
-  } else if (twBox) {
-    await clickAt(twBox.x + twBox.w / 2, twBox.y + twBox.h / 2);
-    await sleep(200);
-    await send('Input.dispatchKeyEvent', { type: 'keyDown', text: 'm', key: 'm', code: 'KeyM', windowsVirtualKeyCode: 77 }, S);
-    await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'm', code: 'KeyM', windowsVirtualKeyCode: 77 }, S);
+  } else {
+    await E(`(()=>{const el=document.querySelector('button[data-a-target="player-mute-unmute-button"]');if(el)el.click();return!!el})()`, iframeSessions.get('twitch')).catch(() => false);
     await sleep(1000);
   }
-  const twAfter = await readVideo('twitch');
+  let twAfter = await readVideo('twitch');
+  if (twBefore && twAfter && twBefore.muted === twAfter.muted) {
+    // second try via DOM click in iframe
+    await E(`(()=>{const el=document.querySelector('button[data-a-target="player-mute-unmute-button"]');if(el)el.click();return!!el})()`, iframeSessions.get('twitch')).catch(() => false);
+    await sleep(1000);
+    twAfter = await readVideo('twitch');
+  }
   const twCalOk = twBefore && twAfter && (twBefore.muted !== twAfter.muted || Math.abs((twBefore.volume || 0) - (twAfter.volume || 0)) > 0.01);
   result.calibration.twitch = { ok: !!twCalOk, before: twBefore, after: twAfter };
-  // restore muted Twitch before re-enabling lock
-  if (twAfter && !twAfter.muted && twMuteBtn && twBox) {
-    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: twBox.x + twBox.w / 2, y: twBox.y + twBox.h - 40 }, S);
-    await sleep(300);
-    await clickAt(twBox.x + twMuteBtn.x, twBox.y + twMuteBtn.y);
+  if (twAfter && !twAfter.muted) {
+    if (twMuteBtn) await clickInIframe('twitch', twMuteBtn.x, twMuteBtn.y);
+    else await E(`(()=>{const el=document.querySelector('button[data-a-target="player-mute-unmute-button"]');if(el)el.click();return!!el})()`, iframeSessions.get('twitch')).catch(() => false);
     await sleep(500);
   }
   await clickAt(blankClick.x, blankClick.y);
