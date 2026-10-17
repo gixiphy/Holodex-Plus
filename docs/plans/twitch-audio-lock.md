@@ -677,3 +677,20 @@ Git metadata 寫入已在 `DISPATCH-2610171431178858` 核准必要例外，本�
 | N4 low：模組／review 面偏大 | **接受，採安全合併** | 意圖追蹤併 controller；protocol 型別／validator 併原窄型別成純 contracts，而非併入會 import Options/storage 的 settings。`src/utils/options.ts:1` 明確 import webextension-polyfill，page script 不能間接載入；contracts 無 side effect／extension import，供本功能兩 context 使用。新產品模組由 8 減到 6、預估總檔案約 22 減到 20；白名單、步驟、scope lint 與估計同步更新，不拿掉安全回歸，也不抽成兩功能共用 helper。 |
 
 本次交付仍只有這份計畫文件。臨時 lint 安裝與 SDK grant 的產品程式均留待之後實作；第 3 版回應章節是驗收回應次序，本文件此次提交標記使用 r4。
+
+## 決定紀錄（Fi，2026-10-17 15:41 +08）
+
+Fi 核准本計畫（版本 cd5207c），「待 Fi 決定的問題」全部採建議預設：
+
+| 題 | 決定 |
+| --- | --- |
+| 1 | A：尚未選格時允許一次原生首播 bootstrap；已有 active 或全靜音後，Twitch／YouTube 新首播都不搶聲（接受 YouTube 原生行為改變） |
+| 2 | A：舊選擇非 silence 才對新 preset 重新 bootstrap；合併保留 active；全靜音維持全靜音 |
+| 3 | A：`twitchAudioLock=true`，不遷移網站 localStorage 的 off |
+| 4 | A：直接操作 iframe 用 2500ms 一次性焦點訊號，面板為可靠入口 |
+| 5 | A：active 因廣告／政策回報 muted，settle 後同步全靜音，需重新選擇 |
+| 6 | A：降級只一次 console.warn |
+| 7 | A：不修 Holodex 自身 SecurityError |
+| 8 | A：接受兩個 PR 使用不同測試工具（本案 Vitest＋jsdom）；@typescript-eslint 不加回產品依賴，lint 用 worktree `.cache` 臨時環境 |
+
+其他：送上游的產品 commit 訊息只用英文（Fi 確認的例外）。本計畫可交給 Cursor 實作；仍禁止 push、PR、merge。
