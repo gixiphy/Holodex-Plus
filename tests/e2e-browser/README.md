@@ -75,3 +75,46 @@ node tests/e2e-browser/audio-lock/compare.mjs .cache/e2e-browser/fix-1.json .cac
 
 Exit codes for `run.mjs`: `0` finished, `2` exception, `3` global timeout (240s).  
 `compare.mjs` exits `0` only when the first (candidate) result passes all lock criteria.
+
+## Live players
+
+Real Twitch (`player.twitch.tv`) + YouTube embeds on holodex.net/multiview. **Run only on M5** with a logged-in desktop session. Uses a headed Google Chrome and a temporary profile under `.cache/e2e-browser/live-prof-*` (deleted on exit). Never touches the operator's Chrome/Vivaldi profiles.
+
+### Modes
+
+- `normal` (default): extension guard + `__v_skip` path. Expects `twitchObserved=false`, `vIsRefErrors=0`.
+- `fallback`: before page scripts, defines `window.Twitch` as a non-configurable data property so the construct guard fails. Expects `twitchObserved=true`, `vIsRefErrors>0`, and iframe `UPDATE_STATE` / postMessage SetMuted still lock audio.
+
+### Defaults and env
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `HPLUS_E2E_TWITCH_CHANNEL` | `eslcs` | Twitch channel |
+| `HPLUS_E2E_YOUTUBE_ID` | `1-LpQekNa9g` | YouTube video id |
+| `HPLUS_E2E_TMP` | `.cache/e2e-browser` | temp root |
+| `HPLUS_E2E_HEADLESS` | unset | set `1` for `--headless=new` (debug only) |
+| `CHROME` | Google Chrome.app | browser binary |
+
+If the default stream cannot play within 60s, the harness may try alternate picks (Twitch directory top cards / Holodex live cards), up to 3 each. No usable live → `verdict: "SKIP"` exit 4 (`no-live-twitch` / `no-live-youtube`). SKIP is not PASS.
+
+### Start playback and focus
+
+Holodex Twitch uses `autoplay:false`; calling `video.play()` inside the iframe does not start playback. The harness uses trusted CDP mouse clicks on the player play button (YouTube `.ytp-large-play-button`, Twitch `button[data-a-target="player-play-pause-button"]`, else iframe center), then clicks page blank `(20,20)` so focus leaves the iframe.
+
+### Truth method
+
+Per-iframe CDP sessions read `<video>` `{ muted, volume, paused, readyState, currentTime }`. Audible = `!paused && readyState >= 2 && !muted && volume > 0.01`. Calibration toggles mute once per player before scenarios; failure → `truth-method-invalid`.
+
+### Commands
+
+```bash
+export npm_config_cache=$PWD/.cache/npm YARN_CACHE_FOLDER=$PWD/.cache/yarn TMPDIR=$PWD/.cache/tmp
+npx --yes yarn@1.22.22 build
+node tests/e2e-browser/audio-lock/live.mjs live-fix dist_chrome .cache/e2e-browser/live-fix.json
+node tests/e2e-browser/audio-lock/live.mjs live-fix-fallback dist_chrome .cache/e2e-browser/live-fix-fallback.json --mode=fallback
+node tests/e2e-browser/audio-lock/live.mjs live-mvp /Applications/Extensions/holodex-plus-audiolock-chrome .cache/e2e-browser/live-mvp.json
+node tests/e2e-browser/audio-lock/live-compare.mjs .cache/e2e-browser/live-fix.json .cache/e2e-browser/live-fix-fallback.json .cache/e2e-browser/live-mvp.json
+# or: yarn e2e:audio-lock:live
+```
+
+Exit codes: `0` PASS, `1` FAIL, `2` exception, `3` timeout after scenario a started, `4` SKIP.

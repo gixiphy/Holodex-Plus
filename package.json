@@ -18,6 +18,7 @@
     "test:audio-lock:watch": "vitest --config vitest.audio-lock.config.ts",
     "test:artifacts": "node --test --test-timeout=60000 tests/build-artifacts/",
     "e2e:audio-lock": "node tests/e2e-browser/audio-lock/run.mjs fix dist_chrome .cache/e2e-browser/fix.json && node tests/e2e-browser/audio-lock/compare.mjs .cache/e2e-browser/fix.json docs/plans/evidence/twitch-audio-lock-fix-3/results/mvp.json",
+    "e2e:audio-lock:live": "node tests/e2e-browser/audio-lock/live.mjs fix dist_chrome .cache/e2e-browser/live-fix.json",
     "typecheck:audio-lock": "tsc --noEmit && tsc --noEmit -p tsconfig.audio-lock.tests.json"
   },
   "type": "module",
