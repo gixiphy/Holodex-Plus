@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "bundler"
+  },
+  "include": [
+    "tests/audio-lock/**/*.ts",
+    "vitest.audio-lock.config.ts"
+  ]
+}
