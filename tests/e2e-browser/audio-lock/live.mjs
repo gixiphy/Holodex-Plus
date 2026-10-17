@@ -577,38 +577,48 @@ try {
     }
     result.clickPoints.panelClose = { method: 'timeout', closed: false, point: outside };
   };
+  const closeMediaPanel = async () => {
+    await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27},S);
+    await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27},S);
+    await waitPanelClosed();
+    await blank();
+  };
   const panelUnmuteYoutube = async () => {
     const opener = await E(`(()=>{let mv;function walk(v){if(v.$options?.name==='MultiView')mv=v;for(const c of v.$children||[])walk(c)}walk(document.querySelector('#app').__vue__.$root);if(!mv)throw Error('MultiView missing');const d=mv.buttons.find(b=>String(b.tooltip).toLowerCase().includes('media')||String(b.color)==='orange');const i=d?.icon;const btn=[...mv.$el.querySelectorAll('button')].find(b=>[...b.querySelectorAll('path')].some(p=>p.getAttribute('d')===i));if(!btn)return null;const r=btn.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2}})()`);
     if (!opener) throw new Error('media controls toolbar button not found');
     result.clickPoints.panelOpen=opener;await clickAt(opener.x,opener.y);
     await waitFor(`!!document.querySelector('.v-dialog--active .media-controls-list')`,5000,'media dialog');
     // Per-cell mute is the last icon button on the YouTube row (MediaControls.vue).
-    // Skip the global toolbar row (no channel title). Scroll into view, mouseMoved, then click once.
-    const pt = await E(`(()=>{
-      const list=document.querySelector('.v-dialog--active .media-controls-list');
-      if(!list)return null;
-      const rows=[...list.querySelectorAll('.v-list-item')].filter(r=>r.querySelector('.v-list-item-title'));
-      const row=rows.find(r=>/YT|YouTube/i.test(r.querySelector('.v-list-item-title')?.textContent||''))||rows[0];
-      if(!row)return null;
-      const buttons=[...row.querySelectorAll('button')];
-      const b=buttons[buttons.length-1];
-      if(!b)return null;
-      b.scrollIntoView({block:'center',inline:'center'});
-      const r=b.getBoundingClientRect();
-      const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
-      return {x:r.left+r.width/2,y:r.top+r.height/2,text:(row.querySelector('.v-list-item-title')?.textContent||'').slice(0,40),buttonCount:buttons.length,hitTag:hit?.tagName||null,hitCls:typeof hit?.className==='string'?hit.className.slice(0,80):null};
-    })()`);
-    if(!pt)throw new Error('YouTube panel row mute button missing');
-    result.clickPoints.panelYoutube=pt;
-    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: pt.x, y: pt.y }, S);
-    const t=Date.now();
-    await clickAt(pt.x,pt.y);
-    return {t,close:async()=>{
-      await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27},S);
-      await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27},S);
-      await waitPanelClosed();
-      await blank();
-    }};
+    // Match by title text, seeded "YT", or first titled row. Always close on failure.
+    let pt = null;
+    try {
+      pt = await E(`(()=>{
+        const list=document.querySelector('.v-dialog--active .media-controls-list');
+        if(!list)return {error:'no-list'};
+        const titled=[...list.querySelectorAll('.v-list-item')].filter(r=>r.querySelector('.v-list-item-title,button'));
+        const row=titled.find(r=>/YT|YouTube/i.test(r.textContent||''))||titled.find(r=>r.querySelector('.v-list-item-title'))||titled[1]||titled[0];
+        if(!row)return {error:'no-row',itemCount:list.querySelectorAll('.v-list-item').length};
+        const buttons=[...row.querySelectorAll('button')];
+        const b=buttons[buttons.length-1];
+        if(!b)return {error:'no-button',text:(row.textContent||'').slice(0,60)};
+        b.scrollIntoView({block:'center',inline:'center'});
+        const r=b.getBoundingClientRect();
+        const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+        return {x:r.left+r.width/2,y:r.top+r.height/2,text:(row.querySelector('.v-list-item-title')?.textContent||row.textContent||'').slice(0,40),buttonCount:buttons.length,hitTag:hit?.tagName||null,hitCls:typeof hit?.className==='string'?hit.className.slice(0,80):null};
+      })()`);
+      if (!pt || !Number.isFinite(pt.x) || !Number.isFinite(pt.y)) {
+        result.clickPoints.panelYoutube = pt;
+        throw new Error('YouTube panel row mute button missing: ' + JSON.stringify(pt).slice(0, 300));
+      }
+      result.clickPoints.panelYoutube=pt;
+      await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: pt.x, y: pt.y }, S);
+      const t=Date.now();
+      await clickAt(pt.x,pt.y);
+      return {t,close:closeMediaPanel};
+    } catch (e) {
+      try { await closeMediaPanel(); } catch { /* ignore close errors */ }
+      throw e;
+    }
   };
   const runScenario = async (name, fn) => {
     try {
