@@ -615,7 +615,7 @@ describe("controller", () => {
     expect(env.cells.get("b")!.manualCheckMuted).toBe(patchedBefore);
   });
 
-  it("reenable_or_route_reentry_clears_degraded", async () => {
+  it("reenable_clears_degraded", async () => {
     const env = setupEnv([{ key: "a", provider: "twitch", muted: false }]);
     handle = createAudioLockController({ window, document }) as TestableHandle;
     handle.setEnabled(true);
@@ -625,13 +625,129 @@ describe("controller", () => {
       mode: "degraded",
       reportedCodes: { "player-unavailable": true },
     });
-    // teardown wrappers manually to simulate failSession
     handle.setEnabled(false);
     handle.setEnabled(true);
     handle.__tryDiscover();
     expect(handle.__lastBindings.has("a")).toBe(true);
     expect(handle.__getState().mode).not.toBe("degraded");
     void env;
+  });
+
+  it("degraded_route_reentry_recovers", async () => {
+    const env = setupEnv([
+      { key: "a", provider: "twitch", muted: false },
+      { key: "b", provider: "twitch", muted: true },
+    ]);
+    const hang = createTwitchSdk({ hangRead: true });
+    {
+      const __p = createFakePlayerComponent("twitch", hang);
+      mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
+    }
+    env.sdks.set("b", hang);
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    handle.setEnabled(true);
+    const idB = handle.__lastBindings.get("b")!.identity;
+    for (let i = 0; i < 3; i++) {
+      const p = handle.__reconcile(idB);
+      await vi.advanceTimersByTimeAsync(750);
+      await p;
+    }
+    expect(handle.__getState().mode).toBe("degraded");
+    // Restore a healthy player for B so rediscovery can succeed
+    {
+      const sdk = createTwitchSdk({ muted: true });
+      const __p = createFakePlayerComponent("twitch", sdk);
+      mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
+      env.sdks.set("b", sdk);
+    }
+    const origA = env.cells.get("a")!.__orig!.setMuted;
+    window.history.pushState({}, "", "/");
+    await vi.advanceTimersByTimeAsync(2000);
+    window.history.pushState({}, "", "/multiview");
+    await vi.advanceTimersByTimeAsync(4000);
+    expect(handle.__getState().mode).not.toBe("degraded");
+    expect(handle.__lastBindings.size).toBe(2);
+    expect(env.cells.get("a")!.setMuted).not.toBe(origA);
+    expect(env.cells.get("b")!.setMuted).not.toBe(
+      env.cells.get("b")!.__orig!.setMuted,
+    );
+  });
+
+  it("route_watch_released_on_disable_and_dispose", async () => {
+    const env = setupEnv([
+      { key: "a", provider: "twitch", muted: false },
+      { key: "b", provider: "twitch", muted: true },
+    ]);
+    const hang = createTwitchSdk({ hangRead: true });
+    {
+      const __p = createFakePlayerComponent("twitch", hang);
+      mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
+    }
+    env.sdks.set("b", hang);
+    const baseline = vi.getTimerCount();
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    handle.setEnabled(true);
+    const idB = handle.__lastBindings.get("b")!.identity;
+    for (let i = 0; i < 3; i++) {
+      const p = handle.__reconcile(idB);
+      await vi.advanceTimersByTimeAsync(750);
+      await p;
+    }
+    expect(handle.__getState().mode).toBe("degraded");
+    expect(vi.getTimerCount()).toBeGreaterThanOrEqual(baseline + 1);
+    handle.setEnabled(false);
+    expect(vi.getTimerCount()).toBe(baseline);
+    void env;
+  });
+
+  it("route_watch_released_on_dispose", async () => {
+    const env = setupEnv([
+      { key: "a", provider: "twitch", muted: false },
+      { key: "b", provider: "twitch", muted: true },
+    ]);
+    const hang = createTwitchSdk({ hangRead: true });
+    {
+      const __p = createFakePlayerComponent("twitch", hang);
+      mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
+    }
+    env.sdks.set("b", hang);
+    const baseline = vi.getTimerCount();
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    handle.setEnabled(true);
+    const idB = handle.__lastBindings.get("b")!.identity;
+    for (let i = 0; i < 3; i++) {
+      const p = handle.__reconcile(idB);
+      await vi.advanceTimersByTimeAsync(750);
+      await p;
+    }
+    expect(handle.__getState().mode).toBe("degraded");
+    handle.dispose();
+    expect(vi.getTimerCount()).toBe(baseline);
+    const setMutedBefore = env.cells.get("a")!.setMuted;
+    window.history.pushState({}, "", "/");
+    await vi.advanceTimersByTimeAsync(2000);
+    window.history.pushState({}, "", "/multiview");
+    await vi.advanceTimersByTimeAsync(4000);
+    expect(env.cells.get("a")!.setMuted).toBe(setMutedBefore);
+  });
+
+  it("non_multiview_start_waits_for_route", async () => {
+    const env = setupEnv([{ key: "a", provider: "twitch", muted: false }]);
+    window.history.pushState({}, "", "/");
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const origSet = env.cells.get("a")!.setMuted;
+    handle.setEnabled(true);
+    await vi.advanceTimersByTimeAsync(121_000);
+    expect(warn).not.toHaveBeenCalled();
+    expect(handle.__getState().mode).not.toBe("degraded");
+    expect(env.cells.get("a")!.setMuted).toBe(origSet);
+    window.history.pushState({}, "", "/multiview");
+    await vi.advanceTimersByTimeAsync(2000);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(env.cells.get("a")!.setMuted).not.toBe(origSet);
+    expect(handle.__getState().mode).toBe("locked");
+    warn.mockRestore();
   });
 
   it("early_return_supplement_exactly_once_without_fixture_counter", async () => {

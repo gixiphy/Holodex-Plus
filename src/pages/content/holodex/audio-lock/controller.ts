@@ -76,7 +76,6 @@ type Session = {
   stopObserver: () => void;
   stopStore: () => void;
   heartbeatTimer: ReturnType<typeof setTimeout> | null;
-  pathnameTimer: ReturnType<typeof setTimeout> | null;
   rafHandle: number | null;
   coalesceTimer: ReturnType<typeof setTimeout> | null;
   settleTimers: Map<string, ReturnType<typeof setTimeout>>;
@@ -129,7 +128,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
   let storeSettleTarget: CellIdentity | null = null;
   let storeSettleEpoch = 0;
   let bootstrapFallbackStarted = 0;
-  let pathnameWatching = false;
+  let routeTimer: ReturnType<typeof setTimeout> | null = null;
 
   const currentAssignment = (key: string) => {
     const binding = lastBindings.get(key);
@@ -885,7 +884,6 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     if (s.rafHandle != null) cancelRaf(s.rafHandle);
     if (s.coalesceTimer) cancel(s.coalesceTimer);
     if (s.heartbeatTimer) cancel(s.heartbeatTimer);
-    if (s.pathnameTimer) cancel(s.pathnameTimer);
     if (s.storeSettleTimer) cancel(s.storeSettleTimer);
     if (s.fallbackTimer) cancel(s.fallbackTimer);
     for (const t of s.settleTimers.values()) cancel(t);
@@ -907,19 +905,29 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     bootstrapFallbackStarted = 0;
   };
 
-  const startPathnameWatch = () => {
-    if (pathnameWatching || !session) return;
-    pathnameWatching = true;
+  const isOnMultiview = (): boolean =>
+    /^\/multiview(?:\/|$)/.test(win.location.pathname);
+
+  const stopRouteWatch = () => {
+    if (routeTimer) {
+      cancel(routeTimer);
+      routeTimer = null;
+    }
+  };
+
+  const startRouteWatch = () => {
+    if (routeTimer) return;
     const tick = () => {
-      if (!enabled || disposed) {
-        pathnameWatching = false;
-        return;
-      }
-      const onMv = /^\/multiview(?:\/|$)/.test(win.location.pathname);
-      if (!onMv) {
-        if (session) {
-          teardownSession();
+      routeTimer = null;
+      if (!enabled || disposed) return;
+      if (!isOnMultiview()) {
+        if (!leftMultiview) {
           leftMultiview = true;
+          if (discoveryTimer) {
+            cancel(discoveryTimer);
+            discoveryTimer = null;
+          }
+          teardownSession();
         }
       } else if (leftMultiview) {
         leftMultiview = false;
@@ -927,22 +935,11 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
           const r = transition(state, { type: "RESET_DEGRADED", now: now() });
           state = r.state;
         }
-        if (enabled) startDiscoveryLoop();
+        startDiscoveryLoop();
       }
-      if (session) {
-        session.pathnameTimer = schedule(tick, TIMING.PATHNAME_CHECK_MS);
-      } else if (enabled && !disposed) {
-        // keep watching for re-entry even without session
-        schedule(tick, TIMING.PATHNAME_CHECK_MS);
-      } else {
-        pathnameWatching = false;
-      }
+      routeTimer = schedule(tick, TIMING.PATHNAME_CHECK_MS);
     };
-    if (session) {
-      session.pathnameTimer = schedule(tick, TIMING.PATHNAME_CHECK_MS);
-    } else {
-      schedule(tick, TIMING.PATHNAME_CHECK_MS);
-    }
+    routeTimer = schedule(tick, TIMING.PATHNAME_CHECK_MS);
   };
 
   const beginSession = (
@@ -962,7 +959,6 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       if (prev.rafHandle != null) cancelRaf(prev.rafHandle);
       if (prev.coalesceTimer) cancel(prev.coalesceTimer);
       if (prev.heartbeatTimer) cancel(prev.heartbeatTimer);
-      if (prev.pathnameTimer) cancel(prev.pathnameTimer);
       if (prev.storeSettleTimer) cancel(prev.storeSettleTimer);
       if (prev.fallbackTimer) cancel(prev.fallbackTimer);
       for (const t of prev.settleTimers.values()) cancel(t);
@@ -987,7 +983,6 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       stopObserver,
       stopStore,
       heartbeatTimer: null,
-      pathnameTimer: null,
       rafHandle: null,
       coalesceTimer: null,
       settleTimers: new Map(),
@@ -1002,7 +997,6 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       session.heartbeatTimer = schedule(beat, TIMING.HEARTBEAT_MS);
     };
     session.heartbeatTimer = schedule(beat, TIMING.HEARTBEAT_MS);
-    startPathnameWatch();
     processLayout();
   };
 
@@ -1044,6 +1038,10 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       discoveryTimer = null;
     }
     if (state.mode === "degraded") return;
+    if (!isOnMultiview()) {
+      leftMultiview = true;
+      return;
+    }
     discoveryStarted = now();
     const tick = () => {
       if (!enabled || disposed || state.mode === "degraded") return;
@@ -1191,14 +1189,15 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       if (value) {
         const result = transition(state, { type: "ENABLE", now: now() });
         state = result.state;
+        startRouteWatch();
         startDiscoveryLoop();
       } else {
         const result = transition(state, { type: "DISABLE", now: now() });
         state = result.state;
         if (discoveryTimer) cancel(discoveryTimer);
         discoveryTimer = null;
+        stopRouteWatch();
         teardownSession();
-        pathnameWatching = false;
       }
     },
     dispose() {
@@ -1207,8 +1206,8 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       enabled = false;
       if (discoveryTimer) cancel(discoveryTimer);
       discoveryTimer = null;
+      stopRouteWatch();
       teardownSession();
-      pathnameWatching = false;
       for (const d of disposers) d();
       disposers.length = 0;
       adapter?.dispose();
