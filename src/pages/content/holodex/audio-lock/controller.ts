@@ -5,7 +5,7 @@ import type {
   LockState,
   StoreSnapshot,
 } from "./contracts";
-import { TIMING, sameIdentity } from "./contracts";
+import { TIMING, identityCore, sameIdentity } from "./contracts";
 import {
   createHolodexAdapter,
   type CellBinding,
@@ -756,17 +756,60 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
         unpatches.get(key)?.unpatch();
         unpatches.delete(key);
       }
-      const removed = transition(state, {
-        type: "CELL_REMOVED",
-        now: now(),
-        identity: old.identity,
-      });
-      state = removed.state;
-      void applyEffects(removed.effects);
+      if (identityCore(old.identity) === identityCore(neu.identity)) {
+        const rebound = transition(state, {
+          type: "BINDING_REBOUND",
+          now: now(),
+          previous: old.identity,
+          identity: neu.identity,
+          reason: "remount",
+        });
+        state = rebound.state;
+        void applyEffects(rebound.effects);
+        if (storeSettleTarget && sameIdentity(storeSettleTarget, old.identity)) {
+          storeSettleTarget = neu.identity;
+          storeSettleEpoch = state.epoch;
+        }
+      } else {
+        const removed = transition(state, {
+          type: "CELL_REMOVED",
+          now: now(),
+          identity: old.identity,
+        });
+        state = removed.state;
+        void applyEffects(removed.effects);
+      }
       installBinding(neu);
     }
     for (const [key, neu] of nextMap) {
       if (!lastBindings.has(key)) installBinding(neu);
+    }
+    reboundActive();
+    if (adapter) checkStoreSettle(adapter.buildSnapshot());
+  };
+
+  const reboundActive = (): void => {
+    if (!state.active) return;
+    for (const binding of lastBindings.values()) {
+      if (sameIdentity(binding.identity, state.active)) return;
+    }
+    const binding = lastBindings.get(state.active.key);
+    if (!binding || binding.identity.contentId !== state.active.contentId) {
+      return;
+    }
+    const previous = state.active;
+    const result = transition(state, {
+      type: "BINDING_REBOUND",
+      now: now(),
+      previous,
+      identity: binding.identity,
+      reason: "late-bind",
+    });
+    state = result.state;
+    void applyEffects(result.effects);
+    if (storeSettleTarget && sameIdentity(storeSettleTarget, previous)) {
+      storeSettleTarget = state.active;
+      storeSettleEpoch = state.epoch;
     }
   };
 
@@ -824,6 +867,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     });
     state = snap.state;
     void applyEffects(snap.effects);
+    reboundActive();
     checkStoreSettle(snapshot);
     prevSnapshot = snapshot;
   };
