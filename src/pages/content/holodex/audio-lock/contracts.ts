@@ -59,6 +59,8 @@ export type CellRuntime = {
   lastGuardMuteAt: number;
   settleUntil: number;
   ownMuteGeneration: number | null;
+  lastObservedMuted: boolean | null;
+  unsettledMuteCount: number;
 };
 
 export type LockState = {
@@ -84,6 +86,20 @@ export type StoreSnapshot = {
   cells: StoreCellSnapshot[];
 };
 
+export type LayoutClassification = {
+  kind:
+    | "none"
+    | "reorder"
+    | "add"
+    | "remove-active"
+    | "replace-active"
+    | "preset"
+    | "merge-preset";
+  added: CellIdentity[];
+  removed: CellIdentity[];
+  preservedActive: CellIdentity | null;
+};
+
 export type LockEvent =
   | { type: "ENABLE"; now: number }
   | { type: "DISABLE"; now: number }
@@ -101,7 +117,12 @@ export type LockEvent =
       snapshot: StoreSnapshot;
       preservedActive?: CellIdentity | null;
     }
-  | { type: "PLAYER_READY"; now: number; identity: CellIdentity }
+  | {
+      type: "PLAYER_READY";
+      now: number;
+      identity: CellIdentity;
+      assignment: MutedAssignment;
+    }
   | {
       type: "EXPLICIT_SET_MUTED";
       now: number;
@@ -119,8 +140,11 @@ export type LockEvent =
       now: number;
       identity: CellIdentity;
       muted: boolean;
-      hasValidToken: boolean;
+      assignment: MutedAssignment;
+      origin: "poll" | "refresh";
     }
+  | { type: "MUTE_SENT"; now: number; identity: CellIdentity }
+  | { type: "RESET_DEGRADED"; now: number }
   | { type: "STORE_SNAPSHOT"; now: number; snapshot: StoreSnapshot }
   | { type: "CELL_REMOVED"; now: number; identity: CellIdentity }
   | { type: "CONTRACT_FAILED"; now: number; code: string }
@@ -171,6 +195,9 @@ export const TIMING = {
   DISCOVERY_SLOW_MS: 2000,
   DISCOVERY_TOTAL_MS: 120_000,
   BOOTSTRAP_FALLBACK_MS: 1000,
+  BOOTSTRAP_WAIT_MS: 120_000,
+  HEARTBEAT_MS: 2000,
+  PATHNAME_CHECK_MS: 2000,
   STORAGE_READ_TIMEOUT_MS: 5000,
   MAX_INSTANCE_SCAN: 2000,
   MAX_DOM_SCAN: 500,

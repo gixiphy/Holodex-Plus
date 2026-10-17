@@ -16,6 +16,7 @@ import {
 import { createPlayerPort, type PlayerBinding } from "./players";
 import {
   createInitialState,
+  emptyCellRuntime,
   pollObservation,
   transition,
 } from "./state";
@@ -128,15 +129,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
             cells: {
               ...state.cells,
               [effect.identity.key]: {
-                ...(state.cells[effect.identity.key] ?? {
-                  readInFlight: false,
-                  muteInFlight: false,
-                  lastMuteAt: 0,
-                  consecutiveFailures: 0,
-                  lastGuardMuteAt: 0,
-                  settleUntil: 0,
-                  ownMuteGeneration: null,
-                }),
+                ...(state.cells[effect.identity.key] ?? emptyCellRuntime()),
                 lastMuteAt: t,
                 lastGuardMuteAt: t,
                 settleUntil: t + TIMING.SETTLE_MS,
@@ -340,15 +333,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
           cells: {
             ...state.cells,
             [key]: {
-              ...(state.cells[key] ?? {
-                readInFlight: false,
-                muteInFlight: false,
-                lastMuteAt: 0,
-                consecutiveFailures: 0,
-                lastGuardMuteAt: 0,
-                settleUntil: 0,
-                ownMuteGeneration: null,
-              }),
+              ...(state.cells[key] ?? emptyCellRuntime()),
               consecutiveFailures: failures,
               lastMuteAt: t,
             },
@@ -372,15 +357,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
         cells: {
           ...state.cells,
           [key]: {
-            ...(state.cells[key] ?? {
-              readInFlight: false,
-              muteInFlight: false,
-              lastMuteAt: 0,
-              consecutiveFailures: 0,
-              lastGuardMuteAt: 0,
-              settleUntil: 0,
-              ownMuteGeneration: null,
-            }),
+            ...(state.cells[key] ?? emptyCellRuntime()),
             consecutiveFailures: 0,
           },
         },
@@ -390,19 +367,12 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       const assignment =
         (binding?.cell as { muted?: boolean | undefined } | undefined)?.muted;
 
-      const hasToken =
-        !!state.intent &&
-        !state.intent.consumed &&
-        state.intent.expiresAt >= t &&
-        sameIdentity(state.intent.identity, identity);
-
       const result = pollObservation(
         state,
         identity,
         assignment,
         read.muted,
         t,
-        hasToken,
       );
       state = result.state;
       await applyEffects(result.effects);
@@ -455,33 +425,16 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
             void applyEffects(result.effects);
             return;
           }
-          // observation path — do not treat false as command without token
-          if (value === false) {
-            const hasToken =
-              !!state.intent &&
-              !state.intent.consumed &&
-              state.intent.expiresAt >= now() &&
-              sameIdentity(state.intent.identity, identity);
-            if (hasToken) {
-              const result = transition(state, {
-                type: "OBSERVED_MUTED",
-                now: now(),
-                identity,
-                muted: false,
-                hasValidToken: true,
-              });
-              state = result.state;
-              void applyEffects(result.effects);
-              return;
-            }
-            // ignore unauthorized setMuted(false) from refresh
-            return;
-          }
+          // Temporary until controller lifecycle rewrite: refresh → OBSERVED_MUTED
+          const assignment =
+            (cell as { muted?: boolean | undefined }).muted;
           const result = transition(state, {
-            type: "EXPLICIT_SET_MUTED",
+            type: "OBSERVED_MUTED",
             now: now(),
             identity,
-            muted: true,
+            muted: value,
+            assignment,
+            origin: "refresh",
           });
           state = result.state;
           void applyEffects(result.effects);

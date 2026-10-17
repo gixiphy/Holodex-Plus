@@ -1,6 +1,8 @@
 import {
   type CellIdentity,
+  type CellRuntime,
   type DesiredMute,
+  type LayoutClassification,
   type LockEffect,
   type LockEvent,
   type LockState,
@@ -14,7 +16,7 @@ import {
   sameIdentity,
 } from "./contracts";
 
-function emptyCellRuntime() {
+export function emptyCellRuntime(): CellRuntime {
   return {
     readInFlight: false,
     muteInFlight: false,
@@ -22,7 +24,9 @@ function emptyCellRuntime() {
     consecutiveFailures: 0,
     lastGuardMuteAt: 0,
     settleUntil: 0,
-    ownMuteGeneration: null as number | null,
+    ownMuteGeneration: null,
+    lastObservedMuted: null,
+    unsettledMuteCount: 0,
   };
 }
 
@@ -63,7 +67,6 @@ export function desiredMute(
     return "muted";
   }
 
-  // selected
   if (state.active && sameIdentity(state.active, identity)) {
     return "audible";
   }
@@ -75,6 +78,18 @@ function ensureCell(state: LockState, key: string): LockState {
   return {
     ...state,
     cells: { ...state.cells, [key]: emptyCellRuntime() },
+  };
+}
+
+function patchCell(
+  state: LockState,
+  key: string,
+  patch: Partial<CellRuntime>,
+): LockState {
+  const base = state.cells[key] ?? emptyCellRuntime();
+  return {
+    ...state,
+    cells: { ...state.cells, [key]: { ...base, ...patch } },
   };
 }
 
@@ -93,20 +108,15 @@ function bumpEpoch(state: LockState): LockState {
 function withActive(
   state: LockState,
   identity: CellIdentity,
-  selection: "bootstrap" | "selected",
   source: "bootstrap" | "explicit",
+  now: number,
 ): { state: LockState; effects: LockEffect[]; grant: SelectionGrant } {
   let next = bumpEpoch(clearIntent(state));
   next = {
     ...next,
     mode: "locked",
-    selection: selection === "bootstrap" ? "selected" : selection,
-    active: identity,
-  };
-  // bootstrap first-play also becomes selected after choosing
-  next = {
-    ...next,
     selection: "selected",
+    active: identity,
   };
   const grant: SelectionGrant = {
     identity,
@@ -117,6 +127,10 @@ function withActive(
     ...next,
     selectionGrant: { grant, consumed: false },
   };
+  next = patchCell(next, identity.key, {
+    settleUntil: now + TIMING.SETTLE_MS,
+    lastObservedMuted: null,
+  });
   return { state: next, effects: [], grant };
 }
 
@@ -129,6 +143,17 @@ function toSilence(state: LockState): LockState {
       active: null,
     }),
   );
+}
+
+function resetFromDegraded(state: LockState): LockState {
+  return {
+    ...bumpEpoch(state),
+    mode: "discovering",
+    selection: "bootstrap",
+    active: null,
+    intent: null,
+    selectionGrant: null,
+  };
 }
 
 function tokenValid(state: LockState, identity: CellIdentity, now: number): boolean {
@@ -228,7 +253,6 @@ function applySnapshotSelection(
     return { state: next, effects };
   }
 
-  // all U, multiple false, or U+true mix without unique false → bootstrap
   return {
     state: {
       ...next,
@@ -240,6 +264,123 @@ function applySnapshotSelection(
   };
 }
 
+export function classifyLayout(
+  prev: StoreSnapshot | null,
+  next: StoreSnapshot,
+  mutationTypes: ReadonlySet<string>,
+  active: CellIdentity | null,
+): LayoutClassification {
+  const empty: LayoutClassification = {
+    kind: "none",
+    added: [],
+    removed: [],
+    preservedActive: null,
+  };
+
+  const nextByKey = new Map(next.cells.map((c) => [c.identity.key, c]));
+  const prevByKey = new Map((prev?.cells ?? []).map((c) => [c.identity.key, c]));
+
+  const added: CellIdentity[] = [];
+  const removed: CellIdentity[] = [];
+  for (const [key, cell] of nextByKey) {
+    if (!prevByKey.has(key)) added.push(cell.identity);
+  }
+  for (const [key, cell] of prevByKey) {
+    if (!nextByKey.has(key)) removed.push(cell.identity);
+  }
+  // content/provider change on existing key → remove old + add new
+  for (const [key, nextCell] of nextByKey) {
+    const prevCell = prevByKey.get(key);
+    if (!prevCell) continue;
+    if (identityCore(prevCell.identity) !== identityCore(nextCell.identity)) {
+      if (!removed.some((r) => r.key === key)) removed.push(prevCell.identity);
+      if (!added.some((a) => a.key === key)) added.push(nextCell.identity);
+    }
+  }
+
+  const isPreset =
+    mutationTypes.has("multiview/setLayout") ||
+    mutationTypes.has("multiview/setLayoutContent");
+
+  if (isPreset) {
+    if (active) {
+      const match = next.cells.find(
+        (c) => identityCore(c.identity) === identityCore(active),
+      );
+      if (match) {
+        return {
+          kind: "merge-preset",
+          added,
+          removed,
+          preservedActive: match.identity,
+        };
+      }
+    }
+    return { kind: "preset", added, removed, preservedActive: null };
+  }
+
+  if (active) {
+    const still = nextByKey.get(active.key);
+    if (!still) {
+      return { kind: "remove-active", added, removed, preservedActive: null };
+    }
+    if (identityCore(still.identity) !== identityCore(active)) {
+      return { kind: "replace-active", added, removed, preservedActive: null };
+    }
+  }
+
+  if (!prev) {
+    if (added.length) return { kind: "add", added, removed, preservedActive: null };
+    return empty;
+  }
+
+  const prevKeys = [...prevByKey.keys()].sort().join(",");
+  const nextKeys = [...nextByKey.keys()].sort().join(",");
+  const coresEqual =
+    prev.cells.length === next.cells.length &&
+    prev.cells.every((pc) => {
+      const nc = nextByKey.get(pc.identity.key);
+      return nc && identityCore(pc.identity) === identityCore(nc.identity);
+    });
+
+  if (prevKeys === nextKeys && coresEqual) {
+    const sameOrder = prev.cells.every(
+      (pc, i) => pc.identity.key === next.cells[i]?.identity.key,
+    );
+    if (sameOrder) return { ...empty, kind: "none" };
+    return { kind: "reorder", added: [], removed: [], preservedActive: null };
+  }
+
+  if (added.length && removed.length === 0) {
+    return { kind: "add", added, removed, preservedActive: null };
+  }
+
+  if (added.length || removed.length) {
+    return { kind: "add", added, removed, preservedActive: null };
+  }
+
+  return empty;
+}
+
+export function storeConverged(
+  snapshot: StoreSnapshot,
+  active: CellIdentity | null,
+  pendingKeys: ReadonlySet<string>,
+): boolean {
+  if (!active) return false;
+  const activeCell = snapshot.cells.find((c) => sameIdentity(c.identity, active));
+  if (!activeCell || activeCell.assignment !== false) return false;
+  for (const cell of snapshot.cells) {
+    if (sameIdentity(cell.identity, active)) continue;
+    if (pendingKeys.has(cell.identity.key)) {
+      if (cell.assignment !== undefined && cell.assignment !== true) return false;
+      continue;
+    }
+    if (cell.assignment !== true) return false;
+  }
+  return true;
+}
+
 export function transition(
   state: LockState,
   event: LockEvent,
@@ -248,11 +389,22 @@ export function transition(
 
   switch (event.type) {
     case "ENABLE": {
-      const next = {
+      let next = {
         ...state,
         extensionEnabled: true,
-        mode: state.muteOthers ? ("discovering" as const) : ("disabled" as const),
       };
+      if (state.mode === "degraded") {
+        next = {
+          ...resetFromDegraded(next),
+          extensionEnabled: true,
+          muteOthers: state.muteOthers,
+        };
+      } else {
+        next = {
+          ...next,
+          mode: state.muteOthers ? ("discovering" as const) : ("disabled" as const),
+        };
+      }
       return { state: next, effects };
     }
 
@@ -269,8 +421,20 @@ export function transition(
       return { state: next, effects };
     }
 
+    case "RESET_DEGRADED": {
+      if (state.mode !== "degraded") return { state, effects };
+      return { state: resetFromDegraded(state), effects };
+    }
+
     case "DISCOVERED": {
       if (!state.extensionEnabled) return { state, effects };
+      if (state.mode === "degraded") return { state, effects };
+      if (state.mode === "locked") {
+        return {
+          state: { ...state, muteOthers: event.muteOthers },
+          effects,
+        };
+      }
       const next = {
         ...state,
         muteOthers: event.muteOthers,
@@ -317,8 +481,6 @@ export function transition(
           effects,
         };
       }
-      // If already selected/silence/bootstrap with known policy, only update muteOthers
-      // and let layout events drive structural changes. Initial adoption:
       if (
         state.mode === "discovering" ||
         state.mode === "disabled" ||
@@ -343,15 +505,14 @@ export function transition(
         return { state, effects };
       }
       if (state.selection === "silence" || state.selection === "selected") {
-        // block unauthorized first play
         return { state, effects };
       }
       if (state.selection === "bootstrap" && !state.active) {
         const { state: next, grant } = withActive(
           state,
           event.identity,
-          "selected",
           "bootstrap",
+          event.now,
         );
         effects.push({
           type: "CALL_ORIGINAL_MUTE_OTHERS",
@@ -369,8 +530,8 @@ export function transition(
       const { state: next, grant } = withActive(
         state,
         event.identity,
-        "selected",
         "bootstrap",
+        event.now,
       );
       effects.push({
         type: "CALL_ORIGINAL_MUTE_OTHERS",
@@ -384,14 +545,17 @@ export function transition(
       if (!state.extensionEnabled || !state.muteOthers) return { state, effects };
       if (event.muted) {
         if (state.active && sameIdentity(state.active, event.identity)) {
-          return { state: toSilence(state), effects: [
-            {
-              type: "CALL_ORIGINAL_SET_MUTED",
-              identity: event.identity,
-              muted: true,
-              epoch: state.epoch + 1,
-            },
-          ] };
+          return {
+            state: toSilence(state),
+            effects: [
+              {
+                type: "CALL_ORIGINAL_SET_MUTED",
+                identity: event.identity,
+                muted: true,
+                epoch: state.epoch + 1,
+              },
+            ],
+          };
         }
         effects.push({
           type: "CALL_ORIGINAL_SET_MUTED",
@@ -401,9 +565,8 @@ export function transition(
         });
         return { state, effects };
       }
-      // unmuted → select this cell
       const next = consumeToken(state);
-      const chosen = withActive(next, event.identity, "selected", "explicit");
+      const chosen = withActive(next, event.identity, "explicit", event.now);
       effects.push({
         type: "CALL_ORIGINAL_SET_MUTED",
         identity: event.identity,
@@ -427,56 +590,77 @@ export function transition(
       return { state: next, effects };
     }
 
+    case "MUTE_SENT": {
+      const runtime = state.cells[event.identity.key] ?? emptyCellRuntime();
+      return {
+        state: patchCell(state, event.identity.key, {
+          lastMuteAt: event.now,
+          settleUntil: event.now + TIMING.SETTLE_MS,
+          ownMuteGeneration: event.identity.generation,
+          unsettledMuteCount: runtime.unsettledMuteCount + 1,
+        }),
+        effects,
+      };
+    }
+
     case "OBSERVED_MUTED": {
       if (!state.extensionEnabled || !state.muteOthers) return { state, effects };
       if (state.mode === "degraded" || state.mode === "disabled") {
         return { state, effects };
       }
 
-      const desired = desiredMute(state, undefined, event.identity);
-      // Use assignment unknown for desired from selection only — callers pass
-      // observation separately. Recompute with known assignment when silencing:
-      void desired;
+      const key = event.identity.key;
+      let next = ensureCell(state, key);
+      const prev = next.cells[key]?.lastObservedMuted ?? null;
+      const unsettledPatch: Partial<CellRuntime> = {
+        lastObservedMuted: event.muted,
+      };
+      if (event.muted === true) {
+        unsettledPatch.unsettledMuteCount = 0;
+      }
+      next = patchCell(next, key, unsettledPatch);
+      const runtime = next.cells[key]!;
 
-      if (event.muted) {
-        // player reports muted
+      if (event.muted === true) {
+        // bootstrap: observation only
+        if (next.selection === "bootstrap") {
+          return { state: next, effects };
+        }
         if (
-          state.selection === "selected" &&
-          state.active &&
-          sameIdentity(state.active, event.identity)
+          next.selection === "selected" &&
+          next.active &&
+          sameIdentity(next.active, event.identity)
         ) {
-          // pending grant / settle: do not silence yet
-          if (
-            state.selectionGrant &&
-            !state.selectionGrant.consumed &&
-            sameIdentity(state.selectionGrant.grant.identity, event.identity)
-          ) {
-            return { state, effects };
+          const hasGrant =
+            next.selectionGrant &&
+            !next.selectionGrant.consumed &&
+            sameIdentity(next.selectionGrant.grant.identity, event.identity);
+          if (hasGrant || runtime.settleUntil > event.now) {
+            return { state: next, effects };
           }
-          const runtime = state.cells[event.identity.key];
-          if (runtime && runtime.settleUntil > event.now) {
-            return { state, effects };
-          }
-          // active muted → silence
           return {
-            state: toSilence(state),
+            state: toSilence(next),
             effects: [
               {
                 type: "CALL_ORIGINAL_SET_MUTED",
                 identity: event.identity,
                 muted: true,
-                epoch: state.epoch + 1,
+                epoch: next.epoch + 1,
               },
             ],
           };
         }
-        return { state, effects };
+        return { state: next, effects };
       }
 
-      // player reports unmuted (false)
-      if (event.hasValidToken || tokenValid(state, event.identity, event.now)) {
-        const next = consumeToken(state);
-        const chosen = withActive(next, event.identity, "selected", "explicit");
+      // muted === false
+      if (
+        tokenValid(next, event.identity, event.now) &&
+        prev === true &&
+        runtime.settleUntil <= event.now
+      ) {
+        const consumed = consumeToken(next);
+        const chosen = withActive(consumed, event.identity, "explicit", event.now);
         effects.push({
           type: "CALL_ORIGINAL_SET_MUTED",
           identity: event.identity,
@@ -486,66 +670,68 @@ export function transition(
         return { state: chosen.state, effects };
       }
 
-      // Plan: bootstrap U/false = unassigned — no MUTE_PLAYER
-      // selected non-active / silence = muted → MUTE_PLAYER
-      // selected active = audible → no mute
-      let want: DesiredMute;
-      if (state.selection === "bootstrap") {
-        want = "unassigned";
-      } else if (state.selection === "silence") {
-        want = "muted";
-      } else if (state.active && sameIdentity(state.active, event.identity)) {
-        want = "audible";
-      } else {
-        want = "muted";
-      }
-
+      const want = desiredMute(next, event.assignment, event.identity);
       if (want === "muted") {
+        if (runtime.settleUntil > event.now) {
+          return { state: next, effects };
+        }
+        if (runtime.unsettledMuteCount >= TIMING.MAX_CONSECUTIVE_FAILURES) {
+          const code = "player-mute-did-not-settle";
+          const already = next.reportedCodes[code];
+          const degraded: LockState = {
+            ...clearGrant(clearIntent(bumpEpoch(next))),
+            mode: "degraded",
+            active: null,
+            selection: "bootstrap",
+            reportedCodes: already
+              ? next.reportedCodes
+              : { ...next.reportedCodes, [code]: true },
+          };
+          if (!already) {
+            effects.push({ type: "REPORT_ONCE", code });
+          }
+          return { state: degraded, effects };
+        }
         effects.push({
           type: "MUTE_PLAYER",
           identity: event.identity,
-          epoch: state.epoch,
+          epoch: next.epoch,
         });
       }
-      return { state, effects };
+      return { state: next, effects };
     }
 
     case "PLAYER_READY": {
       if (!state.extensionEnabled || !state.muteOthers) return { state, effects };
+      let next = {
+        ...state,
+        cells: {
+          ...state.cells,
+          [event.identity.key]: emptyCellRuntime(),
+        },
+      };
       if (state.selection === "selected" && state.active) {
         if (!sameIdentity(state.active, event.identity)) {
+          if (event.assignment !== true) {
+            effects.push({
+              type: "SET_STORE_MUTED",
+              identity: event.identity,
+              value: true,
+              epoch: next.epoch,
+            });
+          }
+        }
+      } else if (state.selection === "silence") {
+        if (event.assignment !== true) {
           effects.push({
             type: "SET_STORE_MUTED",
             identity: event.identity,
             value: true,
-            epoch: state.epoch,
+            epoch: next.epoch,
           });
-          effects.push({
-            type: "MUTE_PLAYER",
-            identity: event.identity,
-            epoch: state.epoch,
-          });
-        } else if (
-          state.selectionGrant &&
-          !state.selectionGrant.consumed &&
-          sameIdentity(state.selectionGrant.grant.identity, event.identity)
-        ) {
-          // grant may restore after ready — controller decides after fresh read
         }
-      } else if (state.selection === "silence") {
-        effects.push({
-          type: "SET_STORE_MUTED",
-          identity: event.identity,
-          value: true,
-          epoch: state.epoch,
-        });
-        effects.push({
-          type: "MUTE_PLAYER",
-          identity: event.identity,
-          epoch: state.epoch,
-        });
       }
-      return { state: ensureCell(state, event.identity.key), effects };
+      return { state: next, effects };
     }
 
     case "LAYOUT_CHANGED": {
@@ -556,24 +742,22 @@ export function transition(
       switch (event.kind) {
         case "reorder":
           return { state, effects };
-        case "add": {
-          // keep active/selection; normalize new cells via PLAYER_READY
+        case "add":
           return { state, effects };
-        }
         case "remove-active":
         case "replace-active":
           return { state: toSilence(state), effects };
         case "merge-preset": {
           if (event.preservedActive) {
-            next = {
-              ...state,
+            next = clearGrant({
+              ...bumpEpoch(state),
               active: event.preservedActive,
               selection: "selected",
               mode: "locked",
-            };
-            return { state: clearGrant(next), effects };
+            });
+            return { state: next, effects };
           }
-          // fallthrough to preset
+          // fallthrough
         }
         // eslint-disable-next-line no-fallthrough
         case "preset": {
@@ -587,7 +771,6 @@ export function transition(
               effects,
             };
           }
-          // new bootstrap
           next = clearGrant(
             clearIntent({
               ...bumpEpoch(state),
@@ -661,7 +844,6 @@ export function pollObservation(
   assignment: MutedAssignment,
   playerMuted: boolean,
   now: number,
-  hasValidToken = false,
 ): { state: LockState; effects: LockEffect[]; desired: DesiredMute } {
   const desired = desiredMute(state, assignment, identity);
   if (
@@ -674,44 +856,13 @@ export function pollObservation(
     return { state, effects: [], desired };
   }
 
-  if (playerMuted) {
-    const result = transition(state, {
-      type: "OBSERVED_MUTED",
-      now,
-      identity,
-      muted: true,
-      hasValidToken,
-    });
-    return { ...result, desired };
-  }
-
-  // unmuted
-  if (hasValidToken || tokenValid(state, identity, now)) {
-    const result = transition(state, {
-      type: "OBSERVED_MUTED",
-      now,
-      identity,
-      muted: false,
-      hasValidToken: true,
-    });
-    return { ...result, desired };
-  }
-
-  if (desired === "muted") {
-    return {
-      state,
-      effects: [
-        { type: "MUTE_PLAYER", identity, epoch: state.epoch },
-      ],
-      desired,
-    };
-  }
-
-  if (desired === "audible") {
-    // may restore via grant — controller handles after fresh read
-    return { state, effects: [], desired };
-  }
-
-  // unassigned — no MUTE_PLAYER
-  return { state, effects: [], desired };
+  const result = transition(state, {
+    type: "OBSERVED_MUTED",
+    now,
+    identity,
+    muted: playerMuted,
+    assignment,
+    origin: "poll",
+  });
+  return { ...result, desired };
 }

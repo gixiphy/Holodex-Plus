@@ -366,7 +366,8 @@ describe("controller", () => {
       now: 1000 + TIMING.USER_INTENT_MS + 1,
       identity: id,
       muted: false,
-      hasValidToken: false,
+      assignment: true,
+      origin: "poll",
     });
     expect(late.state.active?.key).toBe("a");
   });
