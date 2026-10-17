@@ -5,6 +5,12 @@ import type {
   SelectionGrant,
 } from "./contracts";
 import { TIMING } from "./contracts";
+import {
+  isTwitchStateFresh,
+  isVueObserved,
+  postTwitchSetMuted,
+  readTwitchIframeState,
+} from "./twitch-embed";
 
 export type PlayerBinding = {
   identity: CellIdentity;
@@ -71,6 +77,11 @@ async function callMaybePromise(fn: () => unknown): Promise<unknown> {
   return result;
 }
 
+/**
+ * Vue 2.7 observes Twitch.Player when Holodex stores it in reactive data.
+ * Reading `_embedWindow` then throws SecurityError via isRef(), so SDK
+ * getMuted/setMuted are unusable. Prefer iframe UPDATE_STATE / postMessage.
+ */
 function bindTwitch(instance: object): BoundMethods | null {
   const rec = instance as Record<string, unknown>;
   const getMuted = rec.getMuted;
@@ -112,6 +123,18 @@ function interpretMuted(value: unknown): ReadMuted {
   return { kind: "known", muted: value };
 }
 
+function twitchIframe(
+  binding: PlayerBinding,
+): HTMLIFrameElement | null {
+  try {
+    const el = binding.playerComponent.$el;
+    if (!el || typeof el.querySelector !== "function") return null;
+    return el.querySelector("iframe");
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Late-bind when READY fired before our $on (VideoCell.vue:79-80, :210-216).
  * Twitch: cell.twPlayer === playerComponent.player (TwitchPlayer.vue:94).
@@ -151,6 +174,7 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
   let boundInstance: object | null = null;
   let readySignal = false;
   let mismatched = false;
+  let iframeChannel = false;
   let mismatchReported = false;
   let readyListener: ((...args: unknown[]) => void) | null = null;
   let onReadyFired = false;
@@ -186,25 +210,45 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
 
   const tryBind = (): boolean => {
     if (disposed || mismatched) return false;
-    if (methods) return true;
+    if (methods || iframeChannel) return true;
     if (!(readySignal || lateBindReady(binding))) return false;
     const instance = binding.playerComponent.player;
     if (!instance || typeof instance !== "object") return false;
 
     if (binding.provider === "twitch") {
       methods = bindTwitch(instance as object);
+      if (!methods) {
+        reportMismatchOnce();
+        iframeChannel = true;
+        boundInstance = instance as object;
+        fireOnReadyOnce();
+        return true;
+      }
     } else {
       methods = bindYoutube(instance as object);
-    }
-    if (!methods) {
-      // Ready + instance object but required public methods missing → contract mismatch
-      mismatched = true;
-      reportMismatchOnce();
-      return false;
+      if (!methods) {
+        mismatched = true;
+        reportMismatchOnce();
+        return false;
+      }
     }
     boundInstance = instance as object;
     fireOnReadyOnce();
     return true;
+  };
+
+  const useIframeChannel = (): boolean => {
+    if (iframeChannel) return true;
+    if (!boundInstance) return false;
+    return isVueObserved(boundInstance);
+  };
+
+  const readViaIframe = (): ReadMuted => {
+    const state = readTwitchIframeState(twitchIframe(binding));
+    if (!state) {
+      return { kind: "unavailable", reason: "untrusted" };
+    }
+    return { kind: "known", muted: state.muted };
   };
 
   if (!tryBind() && typeof binding.playerComponent.$on === "function") {
@@ -221,7 +265,7 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
 
   const port: BoundPlayerPort = {
     isBound(): boolean {
-      return methods !== null && !disposed;
+      return (methods !== null || iframeChannel) && !disposed;
     },
 
     async readMuted(): Promise<ReadMuted> {
@@ -229,7 +273,20 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
       if (mismatched) {
         return { kind: "unavailable", reason: "access-error" };
       }
-      if (!tryBind() || !methods) {
+      if (!tryBind()) {
+        return { kind: "unavailable", reason: "not-ready" };
+      }
+      if (binding.provider === "twitch" && useIframeChannel()) {
+        return readViaIframe();
+      }
+      if (!methods) {
+        return { kind: "unavailable", reason: "not-ready" };
+      }
+      if (
+        binding.provider === "twitch" &&
+        boundInstance &&
+        isTwitchStateFresh(boundInstance) === false
+      ) {
         return { kind: "unavailable", reason: "not-ready" };
       }
       try {
@@ -251,7 +308,28 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
 
     async mute(): Promise<boolean> {
       if (disposed) return false;
-      if (!tryBind() || !methods) return false;
+      if (!tryBind()) return false;
+      if (binding.provider === "twitch" && useIframeChannel()) {
+        return postTwitchSetMuted(twitchIframe(binding), true);
+      }
+      if (!methods) return false;
+      if (binding.provider === "twitch") {
+        let started: unknown;
+        try {
+          started = methods.mute();
+        } catch {
+          return postTwitchSetMuted(twitchIframe(binding), true);
+        }
+        try {
+          const raced = await withTimeout(
+            callMaybePromise(() => started),
+            TIMING.READ_TIMEOUT_MS,
+          );
+          return raced.ok;
+        } catch {
+          return false;
+        }
+      }
       try {
         const raced = await withTimeout(
           callMaybePromise(() => methods!.mute()),
@@ -275,8 +353,29 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
       ) {
         return false;
       }
-      if (!tryBind() || !methods) return false;
+      if (!tryBind()) return false;
       usedGrants.add(grantKey);
+      if (binding.provider === "twitch" && useIframeChannel()) {
+        return postTwitchSetMuted(twitchIframe(binding), false);
+      }
+      if (!methods) return false;
+      if (binding.provider === "twitch") {
+        let started: unknown;
+        try {
+          started = methods.unmute();
+        } catch {
+          return postTwitchSetMuted(twitchIframe(binding), false);
+        }
+        try {
+          const raced = await withTimeout(
+            callMaybePromise(() => started),
+            TIMING.READ_TIMEOUT_MS,
+          );
+          return raced.ok;
+        } catch {
+          return false;
+        }
+      }
       try {
         const raced = await withTimeout(
           callMaybePromise(() => methods!.unmute()),
@@ -301,6 +400,7 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
       readyListener = null;
       methods = null;
       boundInstance = null;
+      iframeChannel = false;
       usedGrants.clear();
       portsByCell.delete(cellKey as object);
     },

@@ -10,12 +10,17 @@ import {
   fireReady,
   flushMicrotasks,
   mountPlayerOnCell,
+  postTwitchUpdateState,
   replaceCellContent,
   youtubeRawFor,
   type FakePlayerComponent,
   type FakeVideoCell,
   type FakeEnv,
 } from "./fixtures";
+import {
+  installTwitchPlayerGuard,
+  installTwitchStateListener,
+} from "../../src/pages/content/holodex/audio-lock/twitch-embed";
 
 function identity(
   key = "a",
@@ -401,7 +406,7 @@ describe("createPlayerPort", () => {
       expect(mismatch).toBe(1);
       expect(await port!.readMuted()).toEqual({
         kind: "unavailable",
-        reason: "access-error",
+        reason: "untrusted",
       });
       fireReady(comp);
       await port!.readMuted();
@@ -487,5 +492,194 @@ describe("createPlayerPort", () => {
     expect(port!.isBound()).toBe(true);
     port!.dispose();
     expect(port!.isBound()).toBe(false);
+  });
+
+  it("twitch_vue_observed_read_is_untrusted", async () => {
+    installTwitchStateListener(window, () => Date.now());
+    const sdk = createTwitchSdk({ muted: true, brokenByVue: true });
+    const getSpy = vi.spyOn(sdk, "getMuted");
+    const comp = createFakePlayerComponent("twitch", sdk);
+    const cell = fakeCellFor(comp, "twitch", { readyBeforeInstall: false });
+    const port = portFor(comp, "twitch", cell);
+    fireReady(comp);
+    expect(await port!.readMuted()).toEqual({
+      kind: "unavailable",
+      reason: "untrusted",
+    });
+    expect(getSpy).toHaveBeenCalledTimes(0);
+    port!.dispose();
+  });
+
+  it("twitch_vue_observed_read_uses_iframe_state", async () => {
+    const sdk = createTwitchSdk({ muted: true, brokenByVue: true });
+    const getSpy = vi.spyOn(sdk, "getMuted");
+    const comp = createFakePlayerComponent("twitch", sdk);
+    const cell = fakeCellFor(comp, "twitch", { readyBeforeInstall: false });
+    const iframe = comp.$el.querySelector("iframe") as HTMLIFrameElement;
+    const other = document.createElement("iframe");
+    other.src = "https://player.twitch.tv/?channel=other";
+    document.body.appendChild(other);
+    const port = portFor(comp, "twitch", cell);
+    fireReady(comp);
+    postTwitchUpdateState(iframe, { muted: true });
+    expect(await port!.readMuted()).toEqual({ kind: "known", muted: true });
+    postTwitchUpdateState(iframe, { muted: false });
+    expect(await port!.readMuted()).toEqual({ kind: "known", muted: false });
+    expect(getSpy).toHaveBeenCalledTimes(0);
+    postTwitchUpdateState(other, { muted: true });
+    expect(await port!.readMuted()).toEqual({ kind: "known", muted: false });
+    port!.dispose();
+  });
+
+  it("twitch_missing_sdk_methods_uses_iframe_channel", async () => {
+    const sdk = createTwitchSdk({ muted: true });
+    delete sdk.getMuted;
+    delete sdk.setMuted;
+    const comp = createFakePlayerComponent("twitch", sdk);
+    const cell = fakeCellFor(comp, "twitch", { readyBeforeInstall: false });
+    const iframe = comp.$el.querySelector("iframe") as HTMLIFrameElement;
+    const spy = vi.fn();
+    const cw = { postMessage: spy };
+    Object.defineProperty(iframe, "contentWindow", {
+      value: cw,
+      configurable: true,
+    });
+    let mismatch = 0;
+    const port = portFor(comp, "twitch", cell, {
+      onContractMismatch: () => {
+        mismatch += 1;
+      },
+    });
+    fireReady(comp);
+    await flushMicrotasks();
+    expect(mismatch).toBe(1);
+    expect(await port!.readMuted()).toEqual({
+      kind: "unavailable",
+      reason: "untrusted",
+    });
+    expect(await port!.mute()).toBe(true);
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0][0]).toMatchObject({ params: true });
+    postTwitchUpdateState(iframe, { muted: true });
+    expect(await port!.readMuted()).toEqual({ kind: "known", muted: true });
+    port!.dispose();
+  });
+
+  it("twitch_vue_observed_mute_posts_to_iframe", async () => {
+    const sdk = createTwitchSdk({ muted: false, brokenByVue: true });
+    const setSpy = vi.spyOn(sdk, "setMuted");
+    const comp = createFakePlayerComponent("twitch", sdk);
+    const cell = fakeCellFor(comp, "twitch", { readyBeforeInstall: false });
+    const iframe = comp.$el.querySelector("iframe") as HTMLIFrameElement;
+    const spy = vi.fn();
+    Object.defineProperty(iframe, "contentWindow", {
+      value: { postMessage: spy },
+      configurable: true,
+    });
+    const port = portFor(comp, "twitch", cell);
+    fireReady(comp);
+    expect(await port!.mute()).toBe(true);
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0][0]).toMatchObject({ params: true });
+    expect(setSpy).not.toHaveBeenCalled();
+    port!.dispose();
+  });
+
+  it("twitch_setMuted_throw_falls_back_to_postmessage", async () => {
+    const sdk = createTwitchSdk({ muted: false });
+    sdk.setMuted = () => {
+      throw new DOMException("Blocked a frame with origin", "SecurityError");
+    };
+    const comp = createFakePlayerComponent("twitch", sdk);
+    const cell = fakeCellFor(comp, "twitch", { readyBeforeInstall: false });
+    const iframe = comp.$el.querySelector("iframe") as HTMLIFrameElement;
+    const spy = vi.fn();
+    Object.defineProperty(iframe, "contentWindow", {
+      value: { postMessage: spy },
+      configurable: true,
+    });
+    const port = portFor(comp, "twitch", cell);
+    fireReady(comp);
+    expect(await port!.mute()).toBe(true);
+    expect(spy).toHaveBeenCalledTimes(1);
+    port!.dispose();
+  });
+
+  it("twitch_vue_observed_restore_posts_unmute_once", async () => {
+    const sdk = createTwitchSdk({ muted: true, brokenByVue: true });
+    const comp = createFakePlayerComponent("twitch", sdk);
+    const cell = fakeCellFor(comp, "twitch", { readyBeforeInstall: false });
+    const iframe = comp.$el.querySelector("iframe") as HTMLIFrameElement;
+    const spy = vi.fn();
+    Object.defineProperty(iframe, "contentWindow", {
+      value: { postMessage: spy },
+      configurable: true,
+    });
+    const port = portFor(comp, "twitch", cell);
+    fireReady(comp);
+    const grant = {
+      identity: identity("a", "twitch"),
+      epoch: 1,
+      source: "explicit" as const,
+    };
+    expect(await port!.restoreSelectedAudio(grant)).toBe(true);
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(spy.mock.calls[0][0]).toMatchObject({ params: false });
+    expect(await port!.restoreSelectedAudio(grant)).toBe(false);
+    expect(spy).toHaveBeenCalledTimes(1);
+    port!.dispose();
+  });
+
+  it("twitch_read_before_first_state_update_is_not_ready", async () => {
+    type TwitchWin = Window & { Twitch?: unknown };
+    const saved = Object.getOwnPropertyDescriptor(window, "Twitch");
+    try {
+      delete (window as TwitchWin).Twitch;
+    } catch {
+      /* ignore */
+    }
+    function FakeCtor(this: {
+      _s: object;
+      getPlayerState: () => object;
+      getMuted: () => boolean;
+      setMuted: (v: boolean) => void;
+      rawMuted: boolean;
+    }) {
+      this._s = { muted: false };
+      this.rawMuted = false;
+      this.getPlayerState = () => this._s;
+      this.getMuted = () => this.rawMuted;
+      this.setMuted = (v: boolean) => {
+        this.rawMuted = v;
+      };
+    }
+    installTwitchPlayerGuard(window, () => true);
+    (window as TwitchWin).Twitch = { Player: FakeCtor };
+    const Twitch = (window as TwitchWin).Twitch as {
+      Player: new (...a: unknown[]) => {
+        _s: object;
+        getMuted: () => boolean;
+        setMuted: (v: boolean) => void;
+      };
+    };
+    const inst = new Twitch.Player("el", { channel: "c" });
+    const comp = createFakePlayerComponent("twitch", inst as never);
+    comp.player = inst as never;
+    const cell = fakeCellFor(comp, "twitch", { readyBeforeInstall: false });
+    const port = portFor(comp, "twitch", cell);
+    fireReady(comp);
+    expect(await port!.readMuted()).toEqual({
+      kind: "unavailable",
+      reason: "not-ready",
+    });
+    (inst as { _s: object })._s = { muted: false };
+    expect(await port!.readMuted()).toEqual({ kind: "known", muted: false });
+    port!.dispose();
+    try {
+      delete (window as TwitchWin).Twitch;
+    } catch {
+      /* ignore */
+    }
+    if (saved) Object.defineProperty(window, "Twitch", saved);
   });
 });

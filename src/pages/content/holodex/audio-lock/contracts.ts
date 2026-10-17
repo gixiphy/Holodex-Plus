@@ -13,7 +13,10 @@ export type CellIdentity = {
 
 export type ReadMuted =
   | { kind: "known"; muted: boolean }
-  | { kind: "unavailable"; reason: "not-ready" | "timeout" | "access-error" };
+  | {
+      kind: "unavailable";
+      reason: "not-ready" | "timeout" | "access-error" | "untrusted";
+    };
 
 export type SelectionGrant = {
   identity: CellIdentity;

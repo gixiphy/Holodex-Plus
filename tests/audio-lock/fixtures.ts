@@ -22,6 +22,7 @@
  */
 
 import { vi } from "vitest";
+import { installTwitchStateListener } from "../../src/pages/content/holodex/audio-lock/twitch-embed";
 
 export type FakeContent = {
   id: string;
@@ -173,6 +174,7 @@ export function createTwitchSdk(opts?: {
   dangerousGetter?: boolean;
   settleDelayMs?: number;
   ignoreMute?: boolean;
+  brokenByVue?: boolean;
 }): FakeSdk {
   const sdk: FakeSdk = {
     rawMuted: opts?.muted ?? true,
@@ -187,7 +189,15 @@ export function createTwitchSdk(opts?: {
       configurable: true,
     });
   }
+  if (opts?.brokenByVue) {
+    Object.defineProperty(sdk, "__ob__", {
+      value: {},
+      enumerable: false,
+      configurable: true,
+    });
+  }
   sdk.getMuted = () => {
+    if (opts?.brokenByVue) return false;
     if (opts?.throwRead) throw new Error("boom");
     if (opts?.hangRead) return new Promise(() => undefined);
     return sdk.rawMuted;
@@ -195,6 +205,9 @@ export function createTwitchSdk(opts?: {
   sdk.setMuted = (v: boolean) => {
     if (v) {
       sdk.muteCalls += 1;
+      if (opts?.brokenByVue) {
+        throw new DOMException("Blocked a frame with origin", "SecurityError");
+      }
       if (opts?.ignoreMute) return;
       if (opts?.settleDelayMs) {
         setTimeout(() => {
@@ -204,6 +217,10 @@ export function createTwitchSdk(opts?: {
       }
       sdk.rawMuted = true;
     } else {
+      if (opts?.brokenByVue) {
+        sdk.unmuteCalls += 1;
+        throw new DOMException("Blocked a frame with origin", "SecurityError");
+      }
       if (opts?.hangUnmute) return new Promise(() => undefined) as unknown as void;
       sdk.unmuteCalls += 1;
       if (opts?.ignoreMute) return;
@@ -217,6 +234,27 @@ export function createTwitchSdk(opts?: {
     }
   };
   return sdk;
+}
+
+/** Simulate a Twitch iframe UPDATE_STATE postMessage (test-only string constants). */
+export function postTwitchUpdateState(
+  iframe: HTMLIFrameElement,
+  params: Record<string, unknown>,
+): void {
+  installTwitchStateListener(window, () => Date.now());
+  const event = new MessageEvent("message", {
+    origin: "https://player.twitch.tv",
+    data: {
+      namespace: "twitch-embed-player-proxy",
+      eventName: "UPDATE_STATE",
+      params,
+    },
+  });
+  Object.defineProperty(event, "source", {
+    value: iframe.contentWindow,
+    configurable: true,
+  });
+  window.dispatchEvent(event);
 }
 
 export function createYoutubeSdk(opts?: {
@@ -527,7 +565,11 @@ export function createFakeVideoCell(opts: {
     applyMuteProp(prop: boolean) {
       cell.lastMuteProp = prop;
       if (cell.$refs.player) {
-        void cell.$refs.player.setMute(prop);
+        try {
+          void cell.$refs.player.setMute(prop);
+        } catch {
+          /* Vue watcher errorHandler swallows */
+        }
       }
     },
     lastMuteProp: false,
