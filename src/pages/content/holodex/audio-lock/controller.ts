@@ -427,6 +427,13 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     }
   };
 
+  const hasNonTwitchBinding = (): boolean => {
+    for (const binding of lastBindings.values()) {
+      if (binding.identity.provider !== "twitch") return true;
+    }
+    return false;
+  };
+
   const armBootstrapFallback = () => {
     if (!session) return;
     if (state.selection !== "bootstrap" || state.active) {
@@ -450,6 +457,12 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
         if (cell.assignment === true) continue;
         const binding = lastBindings.get(cell.identity.key);
         if (!binding) continue;
+        if (
+          cell.identity.provider === "twitch" &&
+          hasNonTwitchBinding()
+        ) {
+          continue;
+        }
         const vm = binding.cell as {
           editMode?: boolean;
           firstPlay?: boolean;
@@ -697,6 +710,9 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
           state.selection === "bootstrap" &&
           !state.active
         ) {
+          if (identity.provider === "twitch" && hasNonTwitchBinding()) {
+            return;
+          }
           const result = transition(state, {
             type: "NATIVE_FIRST_PLAY",
             now: now(),
@@ -711,6 +727,9 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
           return;
         }
         if (state.selection === "bootstrap" && !state.active) {
+          if (identity.provider === "twitch" && hasNonTwitchBinding()) {
+            return;
+          }
           const result = transition(state, {
             type: "NATIVE_FIRST_PLAY",
             now: now(),

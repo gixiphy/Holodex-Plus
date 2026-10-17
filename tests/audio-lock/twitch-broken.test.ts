@@ -523,6 +523,140 @@ describe("twitch broken SDK / no-degrade", () => {
     expect(env.sdks.get("b")!.rawMuted).toBe(true);
   });
 
+  it("twitch_first_play_does_not_claim_bootstrap_when_youtube_present", async () => {
+    const store = createFakeStore({
+      muteOthers: true,
+      cells: [
+        { key: "0", provider: "twitch", muted: "omit" },
+        { key: "1", provider: "youtube", muted: "omit" },
+      ],
+    });
+    const twSdk = createTwitchSdk({ muted: false });
+    const ytSdk = createYoutubeSdk({ muted: false });
+    const cell0 = createFakeVideoCell({
+      store,
+      key: "0",
+      provider: "twitch",
+      player: createFakePlayerComponent("twitch", twSdk),
+    });
+    const cell1 = createFakeVideoCell({
+      store,
+      key: "1",
+      provider: "youtube",
+      player: createFakePlayerComponent("youtube", ytSdk),
+    });
+    createFakeMultiviewRoot(store, [cell0, cell1]);
+    window.history.pushState({}, "", "/multiview");
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    handle.__setState({
+      ...handle.__getState(),
+      mode: "waiting-for-choice",
+      selection: "bootstrap",
+      active: null,
+      epoch: 0,
+    });
+    cell0.editMode = true;
+    cell1.editMode = true;
+    const mappedCalls = cell0.muteOthersCalls.length;
+    cell0.updatePausedState(false);
+    await flushMicrotasks();
+    expect(handle.__getState().active).toBe(null);
+    expect(cell0.muteOthersCalls.length).toBe(mappedCalls);
+    expect(cell0.firstPlay).toBe(false);
+    cell1.updatePausedState(false);
+    await flushMicrotasks();
+    expect(handle.__getState().active?.key).toBe("1");
+  });
+
+  it("bootstrap_fallback_prefers_non_twitch_cell", async () => {
+    const store = createFakeStore({
+      muteOthers: true,
+      cells: [
+        { key: "0", provider: "twitch", muted: "omit" },
+        { key: "1", provider: "youtube", muted: "omit" },
+      ],
+    });
+    const cell0 = createFakeVideoCell({
+      store,
+      key: "0",
+      provider: "twitch",
+      player: createFakePlayerComponent("twitch", createTwitchSdk({ muted: false })),
+    });
+    const cell1 = createFakeVideoCell({
+      store,
+      key: "1",
+      provider: "youtube",
+      player: createFakePlayerComponent("youtube", createYoutubeSdk({ muted: false })),
+    });
+    cell0.editMode = false;
+    cell0.firstPlay = false; // already played / playing
+    cell1.editMode = true; // paused
+    cell1.firstPlay = true;
+    createFakeMultiviewRoot(store, [cell0, cell1]);
+    window.history.pushState({}, "", "/multiview");
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    handle.__setState({
+      ...handle.__getState(),
+      mode: "waiting-for-choice",
+      selection: "bootstrap",
+      active: null,
+      epoch: 0,
+    });
+    // Mark twitch as playing via pausedByKey path
+    cell0.updatePausedState(false);
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(handle.__getState().active).toBe(null);
+    cell1.editMode = false;
+    cell1.updatePausedState(false);
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(handle.__getState().active?.key).toBe("1");
+  });
+
+  it("twitch_only_layout_bootstrap_unchanged", async () => {
+    const store = createFakeStore({
+      muteOthers: true,
+      cells: [
+        { key: "0", provider: "twitch", muted: "omit" },
+        { key: "1", provider: "twitch", muted: "omit" },
+      ],
+    });
+    const cell0 = createFakeVideoCell({
+      store,
+      key: "0",
+      provider: "twitch",
+      player: createFakePlayerComponent("twitch", createTwitchSdk({ muted: false })),
+    });
+    const cell1 = createFakeVideoCell({
+      store,
+      key: "1",
+      provider: "twitch",
+      player: createFakePlayerComponent("twitch", createTwitchSdk({ muted: false })),
+    });
+    createFakeMultiviewRoot(store, [cell0, cell1]);
+    window.history.pushState({}, "", "/multiview");
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    handle.__setState({
+      ...handle.__getState(),
+      mode: "waiting-for-choice",
+      selection: "bootstrap",
+      active: null,
+      epoch: 0,
+    });
+    cell0.editMode = true;
+    cell0.updatePausedState(false);
+    await flushMicrotasks();
+    expect(handle.__getState().active?.key).toBe("0");
+  });
+
   it("healthy_twitch_ignoring_mute_does_not_degrade", async () => {
     const env = setupBrokenEnv({
       healthyTwitch: true,
