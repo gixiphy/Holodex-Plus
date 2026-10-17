@@ -1,0 +1,6473 @@
+{
+ "label": "coord-normal-1",
+ "mode": "normal",
+ "extDir": "/Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/dist_chrome",
+ "versions": {
+  "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "vue": "2.7.8"
+ },
+ "picks": {
+  "twitch": "eslcs",
+  "youtube": "1-LpQekNa9g",
+  "method": "default-env-or-plan"
+ },
+ "calibration": {
+  "youtube": {
+   "before": {
+    "muted": false,
+    "volume": 1,
+    "paused": false,
+    "readyState": 4,
+    "currentTime": 46795.640113,
+    "currentSrcEmpty": false
+   },
+   "after": {
+    "muted": true,
+    "volume": 1,
+    "paused": false,
+    "readyState": 4,
+    "currentTime": 46795.979709,
+    "currentSrcEmpty": false
+   },
+   "method": "trusted-button",
+   "t": 1792262537144,
+   "ok": true
+  },
+  "twitch": {
+   "before": {
+    "muted": true,
+    "volume": 0,
+    "paused": false,
+    "readyState": 4,
+    "currentTime": 2.658942,
+    "currentSrcEmpty": true
+   },
+   "after": {
+    "muted": false,
+    "volume": 0.5,
+    "paused": false,
+    "readyState": 4,
+    "currentTime": 3.009348,
+    "currentSrcEmpty": true
+   },
+   "method": "trusted-button",
+   "t": 1792262537788,
+   "ok": true
+  }
+ },
+ "scenarios": {
+  "a": {
+   "pass": true,
+   "ytMutedSamples": 0,
+   "storeATrueSamples": 0,
+   "twAudibleSamples": 0,
+   "twitchPlayed": true,
+   "last": {
+    "t": 1792262587150,
+    "yt": {
+     "muted": false,
+     "volume": 1,
+     "paused": false,
+     "readyState": 4,
+     "currentTime": 46845.967107,
+     "currentSrcEmpty": false
+    },
+    "tw": {
+     "muted": true,
+     "volume": 0,
+     "paused": false,
+     "readyState": 4,
+     "currentTime": 43.445382,
+     "currentSrcEmpty": true
+    },
+    "store": {
+     "a": false,
+     "b": true,
+     "muteOthers": true
+    },
+    "ytAudible": true,
+    "twAudible": false,
+    "ytMutedVideo": false
+   },
+   "samples": [
+    {
+     "t": 1792262542153,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46800.992005,
+      "currentSrcEmpty": false
+     },
+     "tw": null,
+     "store": {
+      "a": false,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262542406,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46801.244836,
+      "currentSrcEmpty": false
+     },
+     "tw": null,
+     "store": {
+      "a": false,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262542658,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46801.49626,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": false,
+      "volume": 1,
+      "paused": true,
+      "readyState": 0,
+      "currentTime": 0,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262542910,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46801.748605,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": true,
+      "readyState": 0,
+      "currentTime": 0,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262543162,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46802.001118,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": true,
+      "readyState": 0,
+      "currentTime": 0,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262543415,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46802.254243,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": true,
+      "readyState": 4,
+      "currentTime": 0,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262543676,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46802.506971,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 0.019259,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262543929,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46802.76742,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 0.227199,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262544180,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46803.019012,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 0.473988,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262544432,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46803.270804,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 0.727351,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262544685,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46803.523935,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 0.979109,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262544937,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46803.77543,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 1.23649,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262545190,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46804.028398,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 1.485765,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262545443,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46804.281888,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 1.734194,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262545696,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46804.53516,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 1.995873,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262545950,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46804.788186,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 2.246964,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262546202,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46805.040557,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 2.501743,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262546454,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46805.292012,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 2.754391,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262546705,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46805.543805,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 3.005734,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262546955,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46805.794139,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 3.255421,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262547208,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46806.047212,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 3.505871,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262547461,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46806.299943,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 3.760372,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262547713,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46806.551488,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 4.011183,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262547966,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46806.804631,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 4.265135,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262548219,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46807.057431,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 4.514164,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262548472,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46807.310176,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 4.771365,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262548723,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46807.56216,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 5.021707,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262548976,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46807.815,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 5.27548,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262549230,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46808.067861,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 5.525233,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262549484,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46808.321969,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 5.784611,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262549736,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46808.575003,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 6.032948,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262549987,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46808.804225,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 6.283184,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262550240,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46809.056899,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 6.539008,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262550493,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46809.309766,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 6.78858,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262550746,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46809.563121,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 7.044375,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262550997,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46809.814385,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 7.296108,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262551250,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46810.067128,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 7.54931,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262551503,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46810.320068,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 7.802001,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262551756,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46810.573242,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 8.05573,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262552009,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46810.826086,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 8.306059,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262552262,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46811.079044,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 8.561117,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262552515,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46811.332147,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 8.815105,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262552768,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46811.585385,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 9.066606,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262553021,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46811.837959,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 9.317192,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262553272,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46812.089215,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 9.570446,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262553525,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46812.342597,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 9.824597,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262553778,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46812.595704,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 10.075936,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262554030,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46812.847653,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 10.330347,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262554282,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46813.099512,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 10.583047,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262554535,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46813.351822,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 10.834721,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262554788,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46813.604954,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 11.08577,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262555040,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46813.857879,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 11.341359,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262555295,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46814.111528,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 11.591483,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262555548,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46814.365529,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 11.846913,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262555802,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46814.618921,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 12.100777,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262556055,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46814.872244,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 12.354684,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262556308,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46815.125328,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 12.602932,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262556562,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46815.378743,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 12.861953,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262556815,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46815.63224,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 13.111529,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262557066,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46815.883495,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 13.36204,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262557319,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46816.13627,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 13.619163,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262557572,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46816.38913,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 13.87143,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262557825,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46816.642232,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 14.120315,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262558077,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46816.894764,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 14.376002,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262558328,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46817.145691,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 14.626191,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262558581,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46817.397616,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 14.876525,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262558833,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46817.650391,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 15.132781,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262559086,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46817.903607,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 15.385825,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262559339,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46818.156515,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 15.635861,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262559592,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46818.409342,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 15.892029,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262559845,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46818.662024,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 16.144785,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262560099,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46818.915467,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 16.393856,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262560351,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46819.16869,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 16.649058,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262560604,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46819.420936,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 16.90266,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262560857,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46819.674283,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 17.156379,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262561110,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46819.927132,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 17.404365,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262561364,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46820.180363,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 17.663476,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262561616,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46820.433446,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 17.914295,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262561869,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46820.686256,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 18.16479,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262562120,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46820.937353,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 18.420134,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262562372,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46821.189962,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 18.670788,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262562625,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46821.442727,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 18.922006,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262562877,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46821.694829,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 19.175919,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262563130,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46821.947143,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 19.429658,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262563383,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46822.200454,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 19.68044,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262563636,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46822.453711,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 19.935568,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262563890,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46822.706781,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 20.187177,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262564143,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46822.959942,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 20.442969,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262564396,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46823.213198,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 20.691884,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262564649,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46823.466603,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 20.948781,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262564901,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46823.71866,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 21.198541,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262565154,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46823.971567,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 21.452677,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262565408,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46824.224668,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 21.706513,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262565660,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46824.47777,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 21.961132,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262565914,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46824.730731,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 22.213202,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262566166,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46824.983837,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 22.467018,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262566419,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46825.236132,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 22.718695,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262566671,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46825.487646,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 22.967695,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262566924,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46825.741134,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 23.223613,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262567177,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46825.994178,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 23.474917,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262567430,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46826.246995,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 23.727301,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262567683,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46826.500006,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 23.981547,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262567936,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46826.753852,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 24.233965,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262568190,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46827.007149,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 24.487523,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262568443,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46827.260426,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 24.742823,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262568696,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46827.512789,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 24.995517,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262568950,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46827.766647,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 25.244291,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262569203,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46828.020106,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 25.502368,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262569455,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46828.272341,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 25.755077,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262569707,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46828.524593,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 26.003617,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262569960,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46828.777422,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 26.259852,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262570213,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46829.03063,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 26.512477,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262570465,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46829.282432,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 26.761256,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262570719,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46829.53576,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 27.017465,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262570971,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46829.788827,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 27.269826,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262571224,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46830.041745,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 27.524126,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262571480,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46830.295858,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 27.774324,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262571733,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46830.550125,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 28.033059,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262571986,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46830.803056,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 28.284733,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262572239,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46831.055923,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 28.535689,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262572492,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46831.309066,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 28.791348,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262572745,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46831.562436,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 29.040569,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262572997,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46831.815088,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 29.296272,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262573251,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46832.067991,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 29.550098,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262573504,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46832.320887,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 29.803153,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262573756,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46832.573909,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 30.051821,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262574009,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46832.826468,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 30.309193,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262574261,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46833.078913,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 30.558148,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262574515,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46833.332016,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 30.811159,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262574768,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46833.58509,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 31.068101,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262575020,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46833.837595,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 31.318654,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262575272,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46834.08955,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 31.568415,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262575525,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46834.342768,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 31.824157,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262575778,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46834.595557,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 32.077517,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262576031,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46834.848605,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 32.325962,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262576283,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46835.100792,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 32.583103,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262576537,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46835.353916,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 32.836374,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262576790,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46835.607278,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 33.089454,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262577043,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46835.860351,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 33.340262,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262577296,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46836.113208,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 33.59636,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262577548,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46836.366022,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 33.847142,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262577799,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46836.616693,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 34.099384,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262578052,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46836.869374,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 34.350981,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262578303,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46837.120851,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 34.600992,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262578556,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46837.373681,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 34.852133,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262578809,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46837.626749,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 35.108966,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262579062,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46837.879842,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 35.361166,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262579315,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46838.132795,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 35.612054,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262579567,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46838.384417,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 35.867088,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262579820,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46838.637326,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 36.118879,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262580074,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46838.890778,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 36.368896,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262580327,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46839.144018,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 36.625767,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262580579,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46839.396533,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 36.878781,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262580831,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46839.648693,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 37.128149,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262581084,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46839.901106,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 37.38428,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262581337,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46840.154291,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 37.636936,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262581590,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46840.406945,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 37.888566,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262581843,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46840.660379,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 38.140269,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262582095,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46840.912151,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 38.393419,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262582348,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46841.165244,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 38.644061,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262582600,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46841.416876,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 38.897733,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262582853,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46841.669964,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 39.150726,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262583106,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46841.922747,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 39.404824,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262583358,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46842.175233,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 39.653303,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262583611,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46842.428151,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 39.910666,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262583863,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46842.680276,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 40.159814,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262584115,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46842.932915,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 40.411828,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262584367,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46843.183963,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 40.66631,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262584619,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46843.436762,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 40.918784,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262584872,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46843.689469,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 41.168377,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262585125,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46843.942717,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 41.424523,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262585379,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46844.195899,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 41.678053,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262585633,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46844.449804,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 41.927815,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262585887,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46844.703112,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 42.186213,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262586137,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46844.954808,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 42.437601,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262586390,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46845.207682,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 42.688454,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262586644,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46845.46086,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 42.940723,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262586897,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46845.713948,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 43.195242,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262587150,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46845.967107,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 43.445382,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    }
+   ]
+  },
+  "c": [],
+  "b": {
+   "pass": false,
+   "samples": [
+    {
+     "t": 1792262587742,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46846.520412,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": false,
+      "volume": 0.5,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 44.053198,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": true,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262587994,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46846.785268,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 44.30635,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262588247,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46847.038044,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 44.558656,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262588500,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46847.29097,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 44.810311,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262588753,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46847.543956,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 45.062741,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262589006,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46847.79702,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 45.31809,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262589258,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46848.048612,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 45.56939,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262589511,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46848.301418,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 45.821503,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262589763,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46848.554234,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46.071836,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262590016,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46848.807003,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46.328493,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262590269,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46849.059978,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46.577488,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262590522,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46849.312208,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46.831725,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    }
+   ],
+   "hold": [
+    {
+     "t": 1792262590772,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46849.563369,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 47.083787,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262591025,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46849.815906,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 47.336757,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262591278,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46850.068752,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 47.585665,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262591530,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46850.321381,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 47.843012,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262591783,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46850.573926,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 48.091986,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262592036,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46850.826983,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 48.34776,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262592288,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46851.078632,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 48.598463,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262592541,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46851.33145,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 48.850945,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262592795,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46851.585164,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 49.104292,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262593045,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46851.836174,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 49.355919,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262593296,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46852.086877,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 49.606528,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    },
+    {
+     "t": 1792262593549,
+     "yt": {
+      "muted": false,
+      "volume": 1,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 46852.33968,
+      "currentSrcEmpty": false
+     },
+     "tw": {
+      "muted": true,
+      "volume": 0,
+      "paused": false,
+      "readyState": 4,
+      "currentTime": 49.858855,
+      "currentSrcEmpty": true
+     },
+     "store": {
+      "a": false,
+      "b": true,
+      "muteOthers": true
+     },
+     "ytAudible": true,
+     "twAudible": false,
+     "ytMutedVideo": false
+    }
+   ]
+  }
+ },
+ "twitchObserved": false,
+ "vIsRefErrors": 0,
+ "updateStateMessages": 134,
+ "twitchCommandsReceived": {
+  "mute": 2,
+  "unmute": 1
+ },
+ "audioLockWarnings": [
+  {
+   "t": 1792262528769,
+   "type": "log",
+   "text": "[Holodex+] Activated"
+  },
+  {
+   "t": 1792262529314,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.login.twitterMsg.0' with 'en' locale."
+  },
+  {
+   "t": 1792262529315,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.home' with 'en' locale."
+  },
+  {
+   "t": 1792262529315,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.favorites' with 'en' locale."
+  },
+  {
+   "t": 1792262529315,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.channels' with 'en' locale."
+  },
+  {
+   "t": 1792262529315,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.playlist' with 'en' locale."
+  },
+  {
+   "t": 1792262529316,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.multiview' with 'en' locale."
+  },
+  {
+   "t": 1792262529316,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.about' with 'en' locale."
+  },
+  {
+   "t": 1792262529316,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.settings' with 'en' locale."
+  },
+  {
+   "t": 1792262529317,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.favorites' with 'en' locale."
+  },
+  {
+   "t": 1792262529317,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.favorites.manageFavorites' with 'en' locale."
+  },
+  {
+   "t": 1792262529324,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.favorites.showall' with 'en' locale."
+  },
+  {
+   "t": 1792262529324,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.channels.sortOptions.org' with 'en' locale."
+  },
+  {
+   "t": 1792262529325,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.search.searchLabel' with 'en' locale."
+  },
+  {
+   "t": 1792262529325,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  },
+  {
+   "t": 1792262529325,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.nowSupportsMultiOrg' with 'en' locale."
+  },
+  {
+   "t": 1792262529325,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.loginCallToAction' with 'en' locale."
+  },
+  {
+   "t": 1792262529327,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.search.searchLabel' with 'en' locale."
+  },
+  {
+   "t": 1792262529329,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath '$vuetify.noDataText' with 'en' locale."
+  },
+  {
+   "t": 1792262529331,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.reportDialog.success' with 'en' locale."
+  },
+  {
+   "t": 1792262529331,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  },
+  {
+   "t": 1792262529332,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.login.linkAcc' with 'en' locale."
+  },
+  {
+   "t": 1792262529332,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  },
+  {
+   "t": 1792262529651,
+   "type": "warning",
+   "text": "[vue-i18n] Value of key '$vuetify.noDataText' is not a string or function !"
+  },
+  {
+   "t": 1792262529651,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath '$vuetify.noDataText' with 'en' locale."
+  },
+  {
+   "t": 1792262529855,
+   "type": "error",
+   "text": "[Vue warn]: The computed property \"hidePlaceholder\" is already defined as a prop.\n\nfound in\n\n---> <VideoSelector> at src/components/multiview/VideoSelector.vue\n       <VToolbar>\n         <MultiviewToolbar> at src/components/multiview/MultiviewToolbar.vue\n           <MultiView> at src/views/MultiView.vue\n             <VMain>\n               <VApp>\n                 <App> at src/App.vue\n              "
+  },
+  {
+   "t": 1792262530089,
+   "type": "log",
+   "text": "[Holodex+] yt-watch script loaded"
+  },
+  {
+   "t": 1792262530286,
+   "type": "log",
+   "text": "[Holodex+] yt-watch script loaded"
+  },
+  {
+   "t": 1792262533471,
+   "type": "warning",
+   "text": "MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 Playing listeners added. Use emitter.setMaxListeners() to increase limit\n    at c (https://assets.twitch.tv/assets/68199-885570d89ba43d2af314.js:1:38883)\n    at o.addListener (https://assets.twitch.tv/assets/68199-885570d89ba43d2af314.js:1:41435)\n    at t.on (https://assets.twitch.tv/assets/player-core-variant-a-5dc10d8b49"
+  },
+  {
+   "t": 1792262533471,
+   "type": "warning",
+   "text": "MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 Playing listeners added. Use emitter.setMaxListeners() to increase limit\n    at c (https://assets.twitch.tv/assets/68199-885570d89ba43d2af314.js:1:38883)\n    at o.addListener (https://assets.twitch.tv/assets/68199-885570d89ba43d2af314.js:1:41435)\n    at t.on (https://assets.twitch.tv/assets/player-core-variant-a-5dc10d8b49"
+  },
+  {
+   "t": 1792262534758,
+   "type": "warning",
+   "text": "02:42:14 - (playback-monitor) Play - moving to buffered region 0.004 0"
+  },
+  {
+   "t": 1792262534758,
+   "type": "warning",
+   "text": "02:42:14 - (playback-monitor) Play - moving to buffered region 0.004 0"
+  },
+  {
+   "t": 1792262542418,
+   "type": "warning",
+   "text": "MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 Playing listeners added. Use emitter.setMaxListeners() to increase limit\n    at c (https://assets.twitch.tv/assets/68199-885570d89ba43d2af314.js:1:38883)\n    at o.addListener (https://assets.twitch.tv/assets/68199-885570d89ba43d2af314.js:1:41435)\n    at t.on (https://assets.twitch.tv/assets/player-core-variant-a-5dc10d8b49"
+  },
+  {
+   "t": 1792262542429,
+   "type": "warning",
+   "text": "MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 Playing listeners added. Use emitter.setMaxListeners() to increase limit\n    at c (https://assets.twitch.tv/assets/68199-885570d89ba43d2af314.js:1:38883)\n    at o.addListener (https://assets.twitch.tv/assets/68199-885570d89ba43d2af314.js:1:41435)\n    at t.on (https://assets.twitch.tv/assets/player-core-variant-a-5dc10d8b49"
+  },
+  {
+   "t": 1792262543659,
+   "type": "warning",
+   "text": "02:42:23 - (playback-monitor) Play - moving to buffered region 0.004 0"
+  },
+  {
+   "t": 1792262543659,
+   "type": "warning",
+   "text": "02:42:23 - (playback-monitor) Play - moving to buffered region 0.004 0"
+  }
+ ],
+ "verdict": "FAIL",
+ "errors": [
+  [
+   "exception",
+   "{\"exceptionId\":1,\"text\":\"Uncaught (in promise)\",\"lineNumber\":14,\"columnNumber\":32229,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"lineNumber\":14,\"columnNumber\":32229},{\"functionName\":\"fetchVideoData\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"lineNumber\":14,\"columnNumber\":32167}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"TypeError\",\"description\":\"TypeError: Cannot read properties of null (reading 'length')\\n    at https://holodex.net/assets/main.fbfbbe9c.js:15:32230\\n    at Array.map (<anonymous>)\\n    at t.fetchVideoData (https://holodex.net/assets/main.fbfbbe9c.js:15:32168)\",\"objectId\":\"-2671367201254329012.2.3\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"TypeError: Cannot read properties of null (reading 'length')\\n    at https://holodex.net/assets/main.fbfbbe9c.js:15:32230\\n    at Array.map (<anonymous>)\\n    at t.fetchVideoData (https://holodex.net/assets/main.fbfbbe9c.js:15:32168)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"TypeError: Cannot read properties of null (reading…s://holodex.net/assets/main.fbfbbe9c.js:15:32168)\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Cannot read properties of null (reading 'length')\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":2,\"text\":\"Uncaught (in promise)\",\"lineNumber\":0,\"columnNumber\":1567,\"scriptId\":\"33\",\"url\":\"https://holodex.net/assets/TwitchPlayer.56c23ec6.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"getCurrentTime\",\"scriptId\":\"33\",\"url\":\"https://holodex.net/assets/TwitchPlayer.56c23ec6.js\",\"lineNumber\":0,\"columnNumber\":1567},{\"functionName\":\"\",\"scriptId\":\"23\",\"url\":\"https://holodex.net/assets/MultiView.8cbb4dab.js\",\"lineNumber\":6,\"columnNumber\":31364}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"TypeError\",\"description\":\"TypeError: this.player.getCurrentTime is not a function\\n    at o.getCurrentTime (https://holodex.net/assets/TwitchPlayer.56c23ec6.js:1:1568)\\n    at https://holodex.net/assets/MultiView.8cbb4dab.js:7:31365\",\"objectId\":\"-2671367201254329012.2.4\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"TypeError: this.player.getCurrentTime is not a function\\n    at o.getCurrentTime (https://holodex.net/assets/TwitchPlayer.56c23ec6.js:1:1568)\\n    at https://holodex.net/assets/MultiView.8cbb4dab.js:7:31365\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"TypeError: this.player.getCurrentTime is not a fun…/holodex.net/assets/MultiView.8cbb4dab.js:7:31365\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"this.player.getCurrentTime is not a function\"}]}},\"executionContextId\":2}"
+  ],
+  "Error: eval: {\"exceptionId\":3,\"text\":\"Uncaught\",\"lineNumber\":0,\"columnNumber\":266,\"scriptId\":\"30\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"\",\"scriptId\":\"30\",\"url\":\"\",\"lineNumber\":0,\"columnNumber\":272},{\"functionName\":\"\",\"scriptId\":\"30\",\"url\":\"\",\"lineNumber\":0,\"columnNumber\":307}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"Error\",\"description\":\"Error: no verified blank region\\n    at <anonymous>:1:273\\n    at <anonymous>:1:308\",\"objectId\":\"-2671367201254329012.2.6\"}}\n    at E (file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:204:35)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async blank (file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:256:14)\n    at async close (file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:467:245)\n    at async file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:478:5"
+ ],
+ "clickPoints": {
+  "blank": {
+   "x": 1472,
+   "y": 789,
+   "tag": "DIV",
+   "cls": "mv-background"
+  },
+  "youtubePlay": {
+   "x": 756,
+   "y": 422,
+   "localX": 734,
+   "localY": 336,
+   "selector": ".ytmCuedOverlayPlayButton",
+   "sid": "6A27EE423FC02589BE37EDB262CF7F69"
+  },
+  "twitchPlay": {
+   "x": 1134.5,
+   "y": 297.5,
+   "localX": 356.5,
+   "localY": 211.5,
+   "selector": "button[data-a-target=\"player-overlay-play-button\"]",
+   "sid": "BD131A45E553462915C3DE6854CBAF41"
+  },
+  "youtubeMute": {
+   "x": 611,
+   "y": 90,
+   "localX": 609,
+   "localY": 24,
+   "selector": ".ytdVolumeControlsMuteIconButton",
+   "sid": "6A27EE423FC02589BE37EDB262CF7F69"
+  },
+  "twitchMute": {
+   "x": 814,
+   "y": 533,
+   "localX": 56,
+   "localY": 467,
+   "selector": "button[data-a-target=\"player-mute-unmute-button\"]",
+   "sid": "BD131A45E553462915C3DE6854CBAF41"
+  },
+  "panelOpen": {
+   "x": 1182,
+   "y": 32
+  },
+  "panelYoutube": {
+   "x": 779,
+   "y": 400.25,
+   "text": " YT "
+  }
+ },
+ "extensionId": "oomfamdacecpbodnlfojpkfhjcigldpc",
+ "step": "b/c",
+ "frameDiagnostics": {
+  "targets": [
+   {
+    "type": "service_worker",
+    "url": "chrome-extension://fignfifoniblkonapihmkfakmlgkbkcf/service_worker.js"
+   },
+   {
+    "type": "service_worker",
+    "url": "chrome-extension://oomfamdacecpbodnlfojpkfhjcigldpc/service-worker-loader.js"
+   },
+   {
+    "type": "service_worker",
+    "url": "chrome-extension://ghbmnnjooekpmoecnnnilnnbdlolhkhi/service_worker_bin_prod.js"
+   },
+   {
+    "type": "browser_ui",
+    "url": "chrome://omnibox-popup.top-chrome/omnibox_popup_aim.html"
+   },
+   {
+    "type": "page",
+    "url": "about:blank"
+   },
+   {
+    "type": "browser_ui",
+    "url": "chrome://omnibox-popup.top-chrome/"
+   },
+   {
+    "type": "background_page",
+    "url": "chrome-extension://nkeimhogjdpnpccoofpliimaahmaaome/background.html"
+   },
+   {
+    "type": "background_page",
+    "url": "chrome-extension://nmmhkkegccagdldgiimedpiccmgmieda/_generated_background_page.html"
+   },
+   {
+    "type": "page",
+    "url": "https://holodex.net/multiview"
+   },
+   {
+    "type": "iframe",
+    "url": "https://www.youtube.com/embed/1-LpQekNa9g?playsinline=1&cc_lang_pref=zh-Hant&hl=zh-Hant&enablejsapi=1&origin=https%3A%2F%2Fholodex.net&widgetid=1&forigin=https%3A%2F%2Fholodex.net%2Fmultiview&aoriginsup=1&vf=6"
+   }
+  ],
+  "frames": [
+   {
+    "id": "EEC6742DCAE601066F42D618DE4D4D0A",
+    "loaderId": "8EC1AF0426F6F8DDCB812A7D6E5E63B8",
+    "url": "https://holodex.net/multiview",
+    "domainAndRegistry": "holodex.net",
+    "securityOrigin": "https://holodex.net",
+    "securityOriginDetails": {
+     "isLocalhost": false
+    },
+    "mimeType": "text/html",
+    "adFrameStatus": {
+     "adFrameType": "none"
+    },
+    "secureContextType": "Secure",
+    "crossOriginIsolatedContextType": "NotIsolated",
+    "gatedAPIFeatures": []
+   },
+   {
+    "id": "857E51E5FD66DFF242D335151E0ADDED",
+    "parentId": "EEC6742DCAE601066F42D618DE4D4D0A",
+    "loaderId": "42DAB061187C6688F5EFD074E91AA8F6",
+    "name": "",
+    "url": "",
+    "domainAndRegistry": "",
+    "securityOrigin": "://",
+    "securityOriginDetails": {
+     "isLocalhost": false
+    },
+    "mimeType": "text/html",
+    "adFrameStatus": {
+     "adFrameType": "none",
+     "explanations": []
+    },
+    "secureContextType": "Secure",
+    "crossOriginIsolatedContextType": "NotIsolated",
+    "gatedAPIFeatures": []
+   }
+  ]
+ },
+ "mountDiagnostics": {
+  "body": "HOLOLIVE\n81h\n11h\n10h\n6h\n3h\n2h\n41m\n12 x 16\n提示：你可以在這裡切換團體！\n登入以自訂您的收藏",
+  "iframe": "<iframe src=\"https://player.twitch.tv?autoplay=false&amp;channel=eslcs&amp;height=720&amp;muted=true&amp;parent=holodex.net&amp;playsinline=true&amp;referrer=https%3A%2F%2Fholodex.net%2Fmultiview&amp;width=1280\" allowfullscreen=\"\" scrolling=\"no\" frameborder=\"0\" allow=\"autoplay; fullscreen\" title=\"Twitch\" sandbox=\"allow-modals allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-storage-access-by-user-activation\" width=\"1280\" height=\"720\" data-gtm-yt-inspected-9=\"true\"></iframe>",
+  "box": {
+   "x": 778,
+   "y": 86,
+   "width": 713,
+   "height": 423,
+   "top": 86,
+   "right": 1491,
+   "bottom": 509,
+   "left": 778
+  }
+ },
+ "lastToggleDiagnostics": {
+  "which": "twitch",
+  "before": {
+   "muted": true,
+   "volume": 0,
+   "paused": false,
+   "readyState": 4,
+   "currentTime": 43.708159,
+   "currentSrcEmpty": true
+  },
+  "point": {
+   "x": 814,
+   "y": 533,
+   "localX": 56,
+   "localY": 467,
+   "selector": "button[data-a-target=\"player-mute-unmute-button\"]",
+   "sid": "BD131A45E553462915C3DE6854CBAF41"
+  },
+  "location": "https://player.twitch.tv/?autoplay=false&channel=eslcs&height=720&muted=true&parent=holodex.net&playsinline=true&referrer=https%3A%2F%2Fholodex.net%2Fmultiview&width=1280"
+ },
+ "updateStates": [
+  {
+   "t": 1792262533358
+  },
+  {
+   "t": 1792262533362
+  },
+  {
+   "t": 1792262533364
+  },
+  {
+   "t": 1792262533479,
+   "muted": false
+  },
+  {
+   "t": 1792262533479,
+   "muted": false
+  },
+  {
+   "t": 1792262533785,
+   "muted": false
+  },
+  {
+   "t": 1792262533792,
+   "muted": true
+  },
+  {
+   "t": 1792262533800,
+   "muted": true
+  },
+  {
+   "t": 1792262533941,
+   "muted": true
+  },
+  {
+   "t": 1792262533941,
+   "muted": true
+  },
+  {
+   "t": 1792262533941,
+   "muted": true
+  },
+  {
+   "t": 1792262534150,
+   "muted": true
+  },
+  {
+   "t": 1792262534348,
+   "muted": true
+  },
+  {
+   "t": 1792262534471,
+   "muted": true
+  },
+  {
+   "t": 1792262534586,
+   "muted": true
+  },
+  {
+   "t": 1792262534794,
+   "muted": true
+  },
+  {
+   "t": 1792262534794,
+   "muted": true
+  },
+  {
+   "t": 1792262534807,
+   "muted": true
+  },
+  {
+   "t": 1792262535476,
+   "muted": true
+  },
+  {
+   "t": 1792262535828,
+   "muted": true
+  },
+  {
+   "t": 1792262536480,
+   "muted": true
+  },
+  {
+   "t": 1792262536828,
+   "muted": true
+  },
+  {
+   "t": 1792262537474,
+   "muted": true
+  },
+  {
+   "t": 1792262537688,
+   "muted": false
+  },
+  {
+   "t": 1792262537889,
+   "muted": false
+  },
+  {
+   "t": 1792262538029,
+   "muted": true
+  },
+  {
+   "t": 1792262542389
+  },
+  {
+   "t": 1792262542427,
+   "muted": false
+  },
+  {
+   "t": 1792262542427,
+   "muted": false
+  },
+  {
+   "t": 1792262542439,
+   "muted": false
+  },
+  {
+   "t": 1792262542725,
+   "muted": false
+  },
+  {
+   "t": 1792262542732,
+   "muted": true
+  },
+  {
+   "t": 1792262542737,
+   "muted": true
+  },
+  {
+   "t": 1792262542802,
+   "muted": true
+  },
+  {
+   "t": 1792262542860,
+   "muted": true
+  },
+  {
+   "t": 1792262542860,
+   "muted": true
+  },
+  {
+   "t": 1792262542860,
+   "muted": true
+  },
+  {
+   "t": 1792262543383,
+   "muted": true
+  },
+  {
+   "t": 1792262543384,
+   "muted": true
+  },
+  {
+   "t": 1792262543420,
+   "muted": true
+  },
+  {
+   "t": 1792262543695,
+   "muted": true
+  },
+  {
+   "t": 1792262543706,
+   "muted": true
+  },
+  {
+   "t": 1792262543733,
+   "muted": true
+  },
+  {
+   "t": 1792262544422,
+   "muted": true
+  },
+  {
+   "t": 1792262544919,
+   "muted": true
+  },
+  {
+   "t": 1792262545421,
+   "muted": true
+  },
+  {
+   "t": 1792262545990,
+   "muted": true
+  },
+  {
+   "t": 1792262546420,
+   "muted": true
+  },
+  {
+   "t": 1792262547055,
+   "muted": true
+  },
+  {
+   "t": 1792262547422,
+   "muted": true
+  },
+  {
+   "t": 1792262548115,
+   "muted": true
+  },
+  {
+   "t": 1792262548427,
+   "muted": true
+  },
+  {
+   "t": 1792262549181,
+   "muted": true
+  },
+  {
+   "t": 1792262549431,
+   "muted": true
+  },
+  {
+   "t": 1792262550233,
+   "muted": true
+  },
+  {
+   "t": 1792262550425,
+   "muted": true
+  },
+  {
+   "t": 1792262551300,
+   "muted": true
+  },
+  {
+   "t": 1792262551425,
+   "muted": true
+  },
+  {
+   "t": 1792262552367,
+   "muted": true
+  },
+  {
+   "t": 1792262552427,
+   "muted": true
+  },
+  {
+   "t": 1792262553429,
+   "muted": true
+  },
+  {
+   "t": 1792262554430,
+   "muted": true
+  },
+  {
+   "t": 1792262554487,
+   "muted": true
+  },
+  {
+   "t": 1792262555429,
+   "muted": true
+  },
+  {
+   "t": 1792262555549,
+   "muted": true
+  },
+  {
+   "t": 1792262556434,
+   "muted": true
+  },
+  {
+   "t": 1792262556617,
+   "muted": true
+  },
+  {
+   "t": 1792262557679,
+   "muted": true
+  },
+  {
+   "t": 1792262558420,
+   "muted": true
+  },
+  {
+   "t": 1792262558749,
+   "muted": true
+  },
+  {
+   "t": 1792262559420,
+   "muted": true
+  },
+  {
+   "t": 1792262559802,
+   "muted": true
+  },
+  {
+   "t": 1792262560421,
+   "muted": true
+  },
+  {
+   "t": 1792262560861,
+   "muted": true
+  },
+  {
+   "t": 1792262561421,
+   "muted": true
+  },
+  {
+   "t": 1792262561925,
+   "muted": true
+  },
+  {
+   "t": 1792262562427,
+   "muted": true
+  },
+  {
+   "t": 1792262562990,
+   "muted": true
+  },
+  {
+   "t": 1792262563430,
+   "muted": true
+  },
+  {
+   "t": 1792262564054,
+   "muted": true
+  },
+  {
+   "t": 1792262564429,
+   "muted": true
+  },
+  {
+   "t": 1792262565120,
+   "muted": true
+  },
+  {
+   "t": 1792262565432,
+   "muted": true
+  },
+  {
+   "t": 1792262566175,
+   "muted": true
+  },
+  {
+   "t": 1792262567244,
+   "muted": true
+  },
+  {
+   "t": 1792262567420,
+   "muted": true
+  },
+  {
+   "t": 1792262568314,
+   "muted": true
+  },
+  {
+   "t": 1792262568422,
+   "muted": true
+  },
+  {
+   "t": 1792262569356,
+   "muted": true
+  },
+  {
+   "t": 1792262569422,
+   "muted": true
+  },
+  {
+   "t": 1792262570429,
+   "muted": true
+  },
+  {
+   "t": 1792262571432,
+   "muted": true
+  },
+  {
+   "t": 1792262571492,
+   "muted": true
+  },
+  {
+   "t": 1792262572554,
+   "muted": true
+  },
+  {
+   "t": 1792262573421,
+   "muted": true
+  },
+  {
+   "t": 1792262573610,
+   "muted": true
+  },
+  {
+   "t": 1792262574424,
+   "muted": true
+  },
+  {
+   "t": 1792262574672,
+   "muted": true
+  },
+  {
+   "t": 1792262575422,
+   "muted": true
+  },
+  {
+   "t": 1792262575746,
+   "muted": true
+  },
+  {
+   "t": 1792262576424,
+   "muted": true
+  },
+  {
+   "t": 1792262576797,
+   "muted": true
+  },
+  {
+   "t": 1792262577424,
+   "muted": true
+  },
+  {
+   "t": 1792262577864,
+   "muted": true
+  },
+  {
+   "t": 1792262578422,
+   "muted": true
+  },
+  {
+   "t": 1792262578924,
+   "muted": true
+  },
+  {
+   "t": 1792262579425,
+   "muted": true
+  },
+  {
+   "t": 1792262579998,
+   "muted": true
+  },
+  {
+   "t": 1792262580428,
+   "muted": true
+  },
+  {
+   "t": 1792262581055,
+   "muted": true
+  },
+  {
+   "t": 1792262581421,
+   "muted": true
+  },
+  {
+   "t": 1792262582120,
+   "muted": true
+  },
+  {
+   "t": 1792262582422,
+   "muted": true
+  },
+  {
+   "t": 1792262583179,
+   "muted": true
+  },
+  {
+   "t": 1792262583429,
+   "muted": true
+  },
+  {
+   "t": 1792262584237,
+   "muted": true
+  },
+  {
+   "t": 1792262584431,
+   "muted": true
+  },
+  {
+   "t": 1792262585304,
+   "muted": true
+  },
+  {
+   "t": 1792262586375,
+   "muted": true
+  },
+  {
+   "t": 1792262586421,
+   "muted": true
+  },
+  {
+   "t": 1792262587431,
+   "muted": true
+  },
+  {
+   "t": 1792262587625,
+   "muted": false
+  },
+  {
+   "t": 1792262587885,
+   "muted": true
+  },
+  {
+   "t": 1792262588434,
+   "muted": true
+  },
+  {
+   "t": 1792262588485,
+   "muted": true
+  },
+  {
+   "t": 1792262589430,
+   "muted": true
+  },
+  {
+   "t": 1792262589546,
+   "muted": true
+  },
+  {
+   "t": 1792262590432,
+   "muted": true
+  },
+  {
+   "t": 1792262590620,
+   "muted": true
+  },
+  {
+   "t": 1792262591670,
+   "muted": true
+  },
+  {
+   "t": 1792262592426,
+   "muted": true
+  },
+  {
+   "t": 1792262592737,
+   "muted": true
+  },
+  {
+   "t": 1792262593431,
+   "muted": true
+  },
+  {
+   "t": 1792262593806,
+   "muted": true
+  }
+ ],
+ "stderr": "B (460.383GiB)\n[124:21139778:1018/024227.073405:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/yj/9w2b892s44g0mq19rqnrrv_40000gn/T/): 86463496192B (80.525GiB) / 494332366848B (460.383GiB)\n[124:21139778:1018/024227.073448:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log\n[126:21139782:1018/024227.079263:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, ARM_64, command line: /Users/wuxianyou/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/wuxianyou/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=157.0.8089.0 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2\n[126:21139782:1018/024227.079543:VERBOSE1:chrome/updater/updater.cc:378] OS version: 27.0.1, arch: arm64, System uptime (seconds): 301423, parent pid: 1\n[126:21139782:1018/024227.081060:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/wuxianyou/Library/Application Support/Google/GoogleUpdater): 86463496192B (80.525GiB) / 494332366848B (460.383GiB)\n[126:21139782:1018/024227.081082:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/yj/9w2b892s44g0mq19rqnrrv_40000gn/T/): 86463496192B (80.525GiB) / 494332366848B (460.383GiB)\n[126:21139782:1018/024227.081133:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log\n[124:21139778:1018/024227.081512:VERBOSE1:chrome/updater/crash_reporter.cc:123] Crash handler launched and ready.\n[124:21139778:1018/024227.081966:VERBOSE1:chrome/updater/crash_client.cc:109] Found 0 completed crash reports\n[124:21139778:1018/024227.082009:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports\n[124:21139778:1018/024227.082062:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/wuxianyou/Library/Application Support/Google/RLZ/Crashpad/settings.dat: No such file or directory (2)\n[124:21139778:1018/024227.082207:VERBOSE1:chrome/updater/updater.cc:107] Crash reporting initialized.\n[124:21139778:1018/024227.082354:VERBOSE1:chrome/updater/ipc/update_service_internal_proxy_mojo.cc:61] Run\n[99751:21138009:1018/024237.899834:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\n[124:21139778:1018/024242.870654:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0\n[124:21139778:1018/024242.870972:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log\n[124:21139778:1018/024242.870996:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--wake) returned 0.\n[121:21139772:1018/024243.025275:VERBOSE1:chrome/updater/app/app_wakeall.cc:68] `/Users/wuxianyou/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake` exited 0\n[121:21139760:1018/024243.027031:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0\n[121:21139760:1018/024243.027803:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log\n[121:21139760:1018/024243.027861:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--wake-all) returned 0.\n[126:21139782:1018/024252.966662:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log\n[126:21139782:1018/024252.966681:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--crash-handler) returned 0.\n[123:21139764:1018/024252.967484:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log\n[123:21139764:1018/024252.967513:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--crash-handler) returned 0.\n",
+ "failReason": "exception"
+}
