@@ -18,7 +18,10 @@ export type PlayerBinding = {
   };
   provider: "youtube" | "twitch";
   isReady: () => boolean;
+  onReady?: () => void;
 };
+
+export type BoundPlayerPort = PlayerPort & { isBound(): boolean };
 
 type BoundMethods = {
   read: () => unknown;
@@ -108,16 +111,31 @@ function interpretMuted(value: unknown): ReadMuted {
   return { kind: "known", muted: value };
 }
 
-export function createPlayerPort(binding: PlayerBinding): PlayerPort | null {
+export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null {
   const cellKey = binding.playerComponent;
   const existing = portsByCell.get(cellKey as object);
-  if (existing) return existing;
+  if (existing) return existing as BoundPlayerPort;
 
   let disposed = false;
   let methods: BoundMethods | null = null;
   let boundInstance: object | null = null;
   let readyListener: (() => void) | null = null;
+  let onReadyFired = false;
   const usedGrants = new Set<string>();
+
+  const fireOnReadyOnce = () => {
+    if (onReadyFired || disposed) return;
+    onReadyFired = true;
+    if (!binding.onReady) return;
+    queueMicrotask(() => {
+      if (disposed) return;
+      try {
+        binding.onReady?.();
+      } catch {
+        /* ignore */
+      }
+    });
+  };
 
   const tryBind = (): boolean => {
     if (disposed) return false;
@@ -137,6 +155,7 @@ export function createPlayerPort(binding: PlayerBinding): PlayerPort | null {
     }
     if (!methods) return false;
     boundInstance = instance as object;
+    fireOnReadyOnce();
     return true;
   };
 
@@ -154,7 +173,11 @@ export function createPlayerPort(binding: PlayerBinding): PlayerPort | null {
     }
   }
 
-  const port: PlayerPort = {
+  const port: BoundPlayerPort = {
+    isBound(): boolean {
+      return methods !== null && !disposed;
+    },
+
     async readMuted(): Promise<ReadMuted> {
       if (disposed) return { kind: "unavailable", reason: "access-error" };
       if (!tryBind() || !methods) {

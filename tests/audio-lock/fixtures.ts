@@ -3,6 +3,8 @@
  * Does not read or copy Holodex source.
  */
 
+import { vi } from "vitest";
+
 export type FakeContent = {
   id: string;
   type: "video" | "text";
@@ -85,6 +87,26 @@ export function createFakeStore(opts?: {
       if (type === "multiview/setMuteOthers") {
         store.state.multiview.muteOthers = !!payload;
       }
+      if (type === "multiview/setLayout") {
+        store.state.multiview.layout = payload as FakeLayoutItem[];
+      }
+      if (type === "multiview/setLayoutContent") {
+        store.state.multiview.layoutContent = payload as Record<string, FakeContent>;
+      }
+      if (type === "multiview/removeLayoutItem") {
+        const key = String(payload);
+        store.state.multiview.layout = store.state.multiview.layout.filter(
+          (l) => String(l.i) !== key,
+        );
+        delete store.state.multiview.layoutContent[key];
+      }
+      if (type === "multiview/setLayoutContentById") {
+        const p = payload as { id: string; content: FakeContent };
+        store.state.multiview.layoutContent[p.id] = p.content;
+        if (!store.state.multiview.layout.some((l) => String(l.i) === p.id)) {
+          store.state.multiview.layout.push({ i: p.id });
+        }
+      }
       for (const sub of [...store._subscribers]) sub({ type });
       for (const w of [...store._watchers]) w();
     },
@@ -130,6 +152,8 @@ export function createTwitchSdk(opts?: {
   hangRead?: boolean;
   throwRead?: boolean;
   dangerousGetter?: boolean;
+  settleDelayMs?: number;
+  ignoreMute?: boolean;
 }): FakeSdk {
   const sdk: FakeSdk = {
     rawMuted: opts?.muted ?? true,
@@ -152,9 +176,23 @@ export function createTwitchSdk(opts?: {
   sdk.setMuted = (v: boolean) => {
     if (v) {
       sdk.muteCalls += 1;
+      if (opts?.ignoreMute) return;
+      if (opts?.settleDelayMs) {
+        setTimeout(() => {
+          sdk.rawMuted = true;
+        }, opts.settleDelayMs);
+        return;
+      }
       sdk.rawMuted = true;
     } else {
       sdk.unmuteCalls += 1;
+      if (opts?.ignoreMute) return;
+      if (opts?.settleDelayMs) {
+        setTimeout(() => {
+          sdk.rawMuted = false;
+        }, opts.settleDelayMs);
+        return;
+      }
       sdk.rawMuted = false;
     }
   };
@@ -164,6 +202,8 @@ export function createTwitchSdk(opts?: {
 export function createYoutubeSdk(opts?: {
   muted?: boolean;
   hangRead?: boolean;
+  settleDelayMs?: number;
+  ignoreMute?: boolean;
 }): FakeSdk {
   const sdk: FakeSdk = {
     rawMuted: opts?.muted ?? true,
@@ -176,10 +216,24 @@ export function createYoutubeSdk(opts?: {
   };
   sdk.mute = () => {
     sdk.muteCalls += 1;
+    if (opts?.ignoreMute) return;
+    if (opts?.settleDelayMs) {
+      setTimeout(() => {
+        sdk.rawMuted = true;
+      }, opts.settleDelayMs);
+      return;
+    }
     sdk.rawMuted = true;
   };
   sdk.unMute = () => {
     sdk.unmuteCalls += 1;
+    if (opts?.ignoreMute) return;
+    if (opts?.settleDelayMs) {
+      setTimeout(() => {
+        sdk.rawMuted = false;
+      }, opts.settleDelayMs);
+      return;
+    }
     sdk.rawMuted = false;
   };
   return sdk;
@@ -277,12 +331,17 @@ export function createFakeVideoCell(opts: {
   player?: FakePlayerComponent | null;
   name?: string;
   el?: HTMLElement;
+  parentEl?: HTMLElement;
 }): FakeVideoCell {
   const content = opts.store.state.multiview.layoutContent[opts.key];
   if (!content) throw new Error(`missing content for ${opts.key}`);
   const el = opts.el ?? document.createElement("div");
   el.className = "mv-frame";
-  if (!el.isConnected) document.body.appendChild(el);
+  if (opts.parentEl) {
+    if (!el.isConnected) opts.parentEl.appendChild(el);
+  } else if (!el.isConnected) {
+    document.body.appendChild(el);
+  }
 
   const cell: FakeVideoCell = {
     item: { i: opts.key },
@@ -388,20 +447,40 @@ export type FakeVueRoot = {
   __vue__?: FakeVueRoot;
 };
 
+export type FakeEnv = {
+  store: FakeStore;
+  root: FakeVueRoot;
+  appEl: HTMLElement;
+  multiview: FakeVueRoot;
+  cells: Map<string, FakeVideoCell>;
+  sdks: Map<string, FakeSdk>;
+};
+
 export function createFakeMultiviewRoot(
   store: FakeStore,
   cells: FakeVideoCell[],
-): { root: FakeVueRoot; appEl: HTMLElement } {
-  const appEl = document.createElement("div");
-  appEl.id = "app";
-  document.body.appendChild(appEl);
+): { root: FakeVueRoot; appEl: HTMLElement; multiview: FakeVueRoot } {
+  let appEl = document.getElementById("app") as HTMLElement | null;
+  if (!appEl) {
+    appEl = document.createElement("div");
+    appEl.id = "app";
+    document.body.appendChild(appEl);
+  }
+
+  const mvEl = document.createElement("div");
+  mvEl.className = "multiview";
+  appEl.appendChild(mvEl);
+
+  for (const cell of cells) {
+    if (cell.$el.parentElement !== mvEl) mvEl.appendChild(cell.$el);
+  }
 
   const multiview: FakeVueRoot = {
     $root: null as unknown as FakeVueRoot,
     $store: store,
     $children: cells,
     $refs: { videoCell: cells, videoRefs: cells },
-    $el: document.createElement("div"),
+    $el: mvEl,
     $options: { name: "MultiView" },
   };
   multiview.$root = multiview;
@@ -416,7 +495,147 @@ export function createFakeMultiviewRoot(
   };
   root.$root = root;
   (appEl as unknown as { __vue__: FakeVueRoot }).__vue__ = root;
-  return { root, appEl };
+  return { root, appEl, multiview };
+}
+
+export function addFakeCell(
+  env: FakeEnv,
+  opts: {
+    key: string;
+    provider: "youtube" | "twitch";
+    muted?: boolean | "omit";
+    ready?: boolean;
+    contentId?: string;
+  },
+): FakeVideoCell {
+  const content: FakeContent = {
+    id: opts.contentId ?? `id-${opts.key}`,
+    type: "video",
+    video: opts.provider === "twitch" ? `twitch/${opts.key}` : `yt-${opts.key}`,
+  };
+  if (opts.muted !== "omit" && opts.muted !== undefined) {
+    content.muted = opts.muted;
+  }
+  env.store.state.multiview.layoutContent[opts.key] = content;
+  if (!env.store.state.multiview.layout.some((l) => String(l.i) === opts.key)) {
+    env.store.state.multiview.layout.push({ i: opts.key });
+  }
+  const sdk =
+    opts.provider === "twitch"
+      ? createTwitchSdk({ muted: opts.muted === true })
+      : createYoutubeSdk({ muted: opts.muted === true });
+  const player = createFakePlayerComponent(
+    opts.provider,
+    sdk,
+    opts.ready !== false,
+  );
+  const cell = createFakeVideoCell({
+    store: env.store,
+    key: opts.key,
+    provider: opts.provider,
+    player,
+    parentEl: env.multiview.$el,
+  });
+  env.multiview.$children.push(cell);
+  (env.multiview.$refs.videoCell as FakeVideoCell[]).push(cell);
+  env.cells.set(opts.key, cell);
+  env.sdks.set(opts.key, sdk);
+  env.store.commit("multiview/setLayoutContentById", {
+    id: opts.key,
+    content,
+  });
+  return cell;
+}
+
+export function removeFakeCell(env: FakeEnv, key: string): void {
+  const cell = env.cells.get(key);
+  if (cell?.$el.parentElement) cell.$el.remove();
+  env.multiview.$children = env.multiview.$children.filter(
+    (c) => (c as FakeVideoCell).item?.i !== key && c !== cell,
+  );
+  const refs = env.multiview.$refs.videoCell as FakeVideoCell[];
+  env.multiview.$refs.videoCell = refs.filter((c) => String(c.item.i) !== key);
+  env.cells.delete(key);
+  env.sdks.delete(key);
+  env.store.commit("multiview/removeLayoutItem", key);
+}
+
+export function replaceCellContent(
+  env: FakeEnv,
+  key: string,
+  opts: { provider: "youtube" | "twitch"; contentId: string },
+): void {
+  const cell = env.cells.get(key);
+  if (!cell) throw new Error(`no cell ${key}`);
+  const content: FakeContent = {
+    id: opts.contentId,
+    type: "video",
+    video:
+      opts.provider === "twitch" ? `twitch/${opts.contentId}` : `yt-${opts.contentId}`,
+    muted: env.store.state.multiview.layoutContent[key]?.muted,
+  };
+  env.store.state.multiview.layoutContent[key] = content;
+  cell.cellContent = content;
+  cell.isTwitchVideo = opts.provider === "twitch";
+  const sdk =
+    opts.provider === "twitch"
+      ? createTwitchSdk({ muted: false })
+      : createYoutubeSdk({ muted: false });
+  const player = createFakePlayerComponent(opts.provider, sdk, true);
+  cell.$refs.player = player;
+  env.sdks.set(key, sdk);
+  env.store.commit("multiview/setLayoutContentById", { id: key, content });
+}
+
+export function replacePlayer(env: FakeEnv, key: string): FakePlayerComponent {
+  const cell = env.cells.get(key);
+  if (!cell) throw new Error(`no cell ${key}`);
+  const provider = cell.isTwitchVideo ? "twitch" : "youtube";
+  const sdk =
+    provider === "twitch"
+      ? createTwitchSdk({ muted: cell.$refs.player ? false : true })
+      : createYoutubeSdk({ muted: false });
+  const player = createFakePlayerComponent(provider, sdk, true);
+  cell.$refs.player = player;
+  env.sdks.set(key, sdk);
+  return player;
+}
+
+export function applyPreset(
+  env: FakeEnv,
+  cells: Array<{
+    key: string;
+    provider: "youtube" | "twitch";
+    muted?: boolean | "omit";
+    contentId?: string;
+  }>,
+  opts: { merge: boolean },
+): void {
+  void opts;
+  const layout: FakeLayoutItem[] = cells.map((c) => ({ i: c.key }));
+  const layoutContent: Record<string, FakeContent> = {};
+  for (const c of cells) {
+    layoutContent[c.key] = {
+      id: c.contentId ?? `id-${c.key}`,
+      type: "video",
+      video: c.provider === "twitch" ? `twitch/${c.key}` : `yt-${c.key}`,
+      ...(c.muted !== "omit" && c.muted !== undefined ? { muted: c.muted } : {}),
+    };
+  }
+  env.store.commit("multiview/setLayoutContent", layoutContent);
+  env.store.commit("multiview/setLayout", layout);
+}
+
+export function countSessionResources(store: FakeStore): {
+  watchers: number;
+  subscribers: number;
+  timers: number;
+} {
+  return {
+    watchers: store._watchers.length,
+    subscribers: store._subscribers.length,
+    timers: typeof vi !== "undefined" ? vi.getTimerCount() : 0,
+  };
 }
 
 export function flushMicrotasks(): Promise<void> {

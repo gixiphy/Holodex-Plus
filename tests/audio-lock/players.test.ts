@@ -188,4 +188,48 @@ describe("createPlayerPort", () => {
     // createPlayerPort still returns a port object for late bind.
     expect(port).not.toBeNull();
   });
+
+  it("onReady_fires_once_on_first_bind", async () => {
+    const sdk = createTwitchSdk({ muted: true });
+    const comp = createFakePlayerComponent("twitch", sdk, false);
+    let readyCount = 0;
+    const port = createPlayerPort({
+      identity: identity(),
+      playerComponent: comp,
+      provider: "twitch",
+      isReady: () => comp.ready,
+      onReady: () => {
+        readyCount += 1;
+      },
+    });
+    expect(readyCount).toBe(0);
+    fireReady(comp);
+    await Promise.resolve();
+    expect(readyCount).toBe(1);
+    fireReady(comp);
+    await port!.readMuted();
+    await Promise.resolve();
+    expect(readyCount).toBe(1);
+    port!.dispose();
+    fireReady(comp);
+    await Promise.resolve();
+    expect(readyCount).toBe(1);
+  });
+
+  it("isBound_reflects_late_bind_and_dispose", async () => {
+    const sdk = createTwitchSdk({ muted: true });
+    const comp = createFakePlayerComponent("twitch", sdk, false);
+    const port = createPlayerPort({
+      identity: identity(),
+      playerComponent: comp,
+      provider: "twitch",
+      isReady: () => comp.ready,
+    });
+    expect(port!.isBound()).toBe(false);
+    fireReady(comp);
+    await port!.readMuted();
+    expect(port!.isBound()).toBe(true);
+    port!.dispose();
+    expect(port!.isBound()).toBe(false);
+  });
 });

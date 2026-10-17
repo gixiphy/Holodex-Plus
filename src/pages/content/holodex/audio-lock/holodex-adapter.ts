@@ -49,6 +49,14 @@ type StoreLike = {
   };
 };
 
+type RegistryEntry = {
+  contentId: string;
+  provider: Provider;
+  cell: object;
+  player: object | null;
+  generation: number;
+};
+
 function isFunction(v: unknown): v is (...args: never[]) => unknown {
   return typeof v === "function";
 }
@@ -94,15 +102,24 @@ function mutedAssignment(value: unknown): MutedAssignment | "invalid" {
   return "invalid";
 }
 
+export type DiscoverOk = {
+  ok: true;
+  bindings: CellBinding[];
+  store: StoreLike;
+  root: VueLike;
+  observeTarget: Element;
+};
+
 export type HolodexAdapter = {
-  discover(): {
-    ok: true;
-    bindings: CellBinding[];
-    store: StoreLike;
-    root: VueLike;
-  } | { ok: false; code: string };
+  discover(): DiscoverOk | { ok: false; code: string };
   patchCell(binding: CellBinding, handlers: CellHandlers): () => void;
-  watchSnapshot(cb: (snapshot: StoreSnapshot) => void): () => void;
+  watchSnapshot(
+    store: StoreLike,
+    onSnapshot: (snapshot: StoreSnapshot) => void,
+    onMutation: (type: string) => void,
+  ): () => void;
+  buildSnapshot(): StoreSnapshot;
+  observe(target: Element, onChange: () => void): () => void;
   setStoreMuted(identity: CellIdentity, value: true): void;
   getMuteOthers(): boolean;
   dispose(): void;
@@ -127,7 +144,8 @@ export function createHolodexAdapter(
   };
 
   let generationCounter = 1;
-  const generationByKey = new Map<string, number>();
+  const registry = new Map<string, RegistryEntry>();
+  let cachedStore: StoreLike | null = null;
   const installed = new Map<
     string,
     {
@@ -135,6 +153,59 @@ export function createHolodexAdapter(
       originals: Record<string, unknown>;
     }
   >();
+
+  const identityFor = (
+    key: string,
+    cell: object,
+    content: { id?: string; video?: string },
+    player: object | null,
+    provider: Provider,
+  ): CellIdentity => {
+    const contentId = String(content.id ?? content.video ?? key);
+    const prev = registry.get(key);
+    if (!prev) {
+      const generation = generationCounter++;
+      registry.set(key, {
+        contentId,
+        provider,
+        cell,
+        player,
+        generation,
+      });
+      return { key, contentId, provider, generation };
+    }
+
+    const playerChanged =
+      prev.player !== null && player !== null && prev.player !== player;
+    const bumped =
+      prev.contentId !== contentId ||
+      prev.provider !== provider ||
+      prev.cell !== cell ||
+      playerChanged;
+
+    if (bumped) {
+      const generation = generationCounter++;
+      registry.set(key, {
+        contentId,
+        provider,
+        cell,
+        player,
+        generation,
+      });
+      return { key, contentId, provider, generation };
+    }
+
+    // null → object does not bump; update player ref
+    if (prev.player === null && player !== null) {
+      registry.set(key, { ...prev, player });
+    }
+    return {
+      key,
+      contentId: prev.contentId,
+      provider: prev.provider,
+      generation: prev.generation,
+    };
+  };
 
   const findVueRoots = (): VueLike[] => {
     const candidates: Element[] = [];
@@ -246,7 +317,9 @@ export function createHolodexAdapter(
         ? "twitch"
         : providerFromContent(content) ?? "youtube";
 
-    const player = (cell.$refs as { player?: unknown } | undefined)?.player;
+    const playerRaw = (cell.$refs as { player?: unknown } | undefined)?.player;
+    const player =
+      playerRaw && typeof playerRaw === "object" ? (playerRaw as object) : null;
     if (player) {
       const p = player as Record<string, unknown>;
       if (!isFunction(p.isMuted) || !isFunction(p.setMute)) return { ok: false };
@@ -258,25 +331,41 @@ export function createHolodexAdapter(
       }
     }
 
-    let gen = generationByKey.get(key);
-    if (!gen) {
-      gen = generationCounter++;
-      generationByKey.set(key, gen);
-    }
+    const identity = identityFor(key, vm as object, content, player, provider);
+    return { ok: true, provider: identity.provider, identity };
+  };
 
+  const buildSnapshotFromStore = (store: StoreLike): StoreSnapshot => {
+    const cells = [];
+    for (const item of store.state.multiview.layout) {
+      const key = String(item.i);
+      const content = store.state.multiview.layoutContent[key];
+      if (!content || content.type !== "video") continue;
+      const muted = mutedAssignment(content.muted);
+      if (muted === "invalid") continue;
+      const contentId = String(content.id ?? content.video ?? key);
+      const reg = registry.get(key);
+      let provider: Provider;
+      let generation: number;
+      if (reg && reg.contentId === contentId) {
+        provider = reg.provider;
+        generation = reg.generation;
+      } else {
+        provider = providerFromContent(content) ?? "youtube";
+        generation = reg?.generation ?? 1;
+      }
+      cells.push({
+        identity: { key, contentId, provider, generation },
+        assignment: muted,
+      });
+    }
     return {
-      ok: true,
-      provider,
-      identity: {
-        key,
-        contentId: String(content.id ?? content.video ?? key),
-        provider,
-        generation: gen,
-      },
+      muteOthers: store.state.multiview.muteOthers,
+      cells,
     };
   };
 
-  const discover = () => {
+  const discover = (): DiscoverOk | { ok: false; code: string } => {
     if (disposed) return { ok: false as const, code: "root-timeout" };
     if (!isTopFrame(win)) return { ok: false as const, code: "root-timeout" };
     if (!isMultiviewPath(win.location.pathname)) {
@@ -318,7 +407,6 @@ export function createHolodexAdapter(
 
         const checked = isVideoCell(vm, store);
         if (!checked.ok) {
-          // Fake name alone is not enough — only fail if it claimed video shape badly
           if (
             isFunction(cell.manualCheckMuted) &&
             cell.item &&
@@ -351,8 +439,22 @@ export function createHolodexAdapter(
         return { ok: false as const, code: failCode };
       }
 
-      // empty layout is waiting, not error
-      return { ok: true as const, bindings, store, root };
+      const mvEl = (multiview as VueLike | null)?.$el;
+      const observeTarget =
+        mvEl instanceof Element
+          ? mvEl
+          : root.$el instanceof Element
+            ? root.$el
+            : doc.documentElement;
+
+      cachedStore = store;
+      return {
+        ok: true as const,
+        bindings,
+        store,
+        root,
+        observeTarget,
+      };
     }
 
     warn("store-shape-changed");
@@ -405,37 +507,19 @@ export function createHolodexAdapter(
     };
   };
 
-  const watchSnapshot = (cb: (snapshot: StoreSnapshot) => void): (() => void) => {
-    const found = discover();
-    if (!found.ok) return () => undefined;
-    const { store } = found;
+  const buildSnapshot = (): StoreSnapshot => {
+    if (!cachedStore) {
+      return { muteOthers: false, cells: [] };
+    }
+    return buildSnapshotFromStore(cachedStore);
+  };
 
-    const build = (): StoreSnapshot => {
-      const cells = [];
-      for (const item of store.state.multiview.layout) {
-        const key = String(item.i);
-        const content = store.state.multiview.layoutContent[key];
-        if (!content || content.type !== "video") continue;
-        const muted = mutedAssignment(content.muted);
-        if (muted === "invalid") continue;
-        const provider = providerFromContent(content) ?? "youtube";
-        const gen = generationByKey.get(key) ?? 1;
-        cells.push({
-          identity: {
-            key,
-            contentId: String(content.id ?? content.video ?? key),
-            provider,
-            generation: gen,
-          },
-          assignment: muted,
-        });
-      }
-      return {
-        muteOthers: store.state.multiview.muteOthers,
-        cells,
-      };
-    };
-
+  const watchSnapshot = (
+    store: StoreLike,
+    onSnapshot: (snapshot: StoreSnapshot) => void,
+    onMutation: (type: string) => void,
+  ): (() => void) => {
+    cachedStore = store;
     const unwatch = store.watch(
       () => {
         const parts = [String(store.state.multiview.muteOthers)];
@@ -444,26 +528,58 @@ export function createHolodexAdapter(
           const c = store.state.multiview.layoutContent[key];
           if (!c || c.type !== "video") continue;
           const m = mutedAssignment(c.muted);
+          const contentId = String(c.id ?? c.video ?? key);
+          const reg = registry.get(key);
+          const provider =
+            reg && reg.contentId === contentId
+              ? reg.provider
+              : providerFromContent(c) ?? "youtube";
+          const generation = reg?.generation ?? 1;
           parts.push(
-            `${key}:${c.id ?? ""}:${m === undefined ? "U" : m === true ? "M" : "A"}`,
+            `${key}:${contentId}:${provider}:${generation}:${m === undefined ? "U" : m === true ? "M" : "A"}`,
           );
         }
         return parts.join("|");
       },
       () => {
-        cb(build());
+        onSnapshot(buildSnapshotFromStore(store));
       },
     );
 
-    const unsub = store.subscribe(() => {
-      // macrotask coalesce left to controller
-      cb(build());
+    const unsub = store.subscribe((mutation) => {
+      onMutation(mutation.type);
     });
 
-    cb(build());
+    onSnapshot(buildSnapshotFromStore(store));
     return () => {
       unwatch();
       unsub();
+    };
+  };
+
+  const observe = (target: Element, onChange: () => void): (() => void) => {
+    const MO = (win as unknown as { MutationObserver?: typeof MutationObserver })
+      .MutationObserver;
+    if (typeof MO !== "function") {
+      return () => undefined;
+    }
+    let observer: MutationObserver | null = new MO(() => onChange());
+    try {
+      observer.observe(target, { childList: true, subtree: true });
+    } catch {
+      observer = null;
+      return () => undefined;
+    }
+    let stopped = false;
+    return () => {
+      if (stopped) return;
+      stopped = true;
+      try {
+        observer?.disconnect();
+      } catch {
+        /* ignore */
+      }
+      observer = null;
     };
   };
 
@@ -471,36 +587,29 @@ export function createHolodexAdapter(
     discover,
     patchCell,
     watchSnapshot,
+    buildSnapshot,
+    observe,
     setStoreMuted(identity, value) {
-      const found = discover();
-      if (!found.ok) return;
-      found.store.commit("multiview/setLayoutContentWithKey", {
-        id: identity.key,
-        key: "muted",
-        value,
-      });
+      if (!cachedStore) return;
+      try {
+        cachedStore.commit("multiview/setLayoutContentWithKey", {
+          id: identity.key,
+          key: "muted",
+          value,
+        });
+      } catch {
+        warn("store-shape-changed");
+      }
     },
     getMuteOthers() {
-      const found = discover();
-      if (!found.ok) return false;
-      return found.store.state.multiview.muteOthers;
+      if (!cachedStore) return false;
+      return cachedStore.state.multiview.muteOthers;
     },
     dispose() {
       disposed = true;
-      for (const [key, entry] of [...installed.entries()]) {
-        for (const name of Object.keys(entry.originals)) {
-          // only restore if still our wrapper — callers should unpatch via disposer
-          void name;
-        }
-        installed.delete(key);
-      }
-      generationByKey.clear();
+      installed.clear();
+      registry.clear();
+      cachedStore = null;
     },
   };
-}
-
-export function bumpGeneration(adapterKey: string, map: Map<string, number>): number {
-  const next = (map.get(adapterKey) ?? 0) + 1;
-  map.set(adapterKey, next);
-  return next;
 }

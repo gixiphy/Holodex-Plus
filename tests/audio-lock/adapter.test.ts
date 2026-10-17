@@ -251,8 +251,16 @@ describe("createHolodexAdapter", () => {
     createFakeMultiviewRoot(store, [cell]);
     window.history.pushState({}, "", "/multiview");
     const adapter = createHolodexAdapter(window, document, () => undefined);
+    const found = adapter.discover();
+    expect(found.ok).toBe(true);
+    if (!found.ok) return;
     const snaps: unknown[] = [];
-    const stop = adapter.watchSnapshot((s) => snaps.push(s));
+    const mutations: string[] = [];
+    const stop = adapter.watchSnapshot(
+      found.store,
+      (s) => snaps.push(s),
+      (t) => mutations.push(t),
+    );
     expect((snaps[0] as { cells: { assignment: unknown }[] }).cells[0].assignment).toBe(
       undefined,
     );
@@ -264,7 +272,147 @@ describe("createHolodexAdapter", () => {
     expect(
       (snaps.at(-1) as { cells: { assignment: unknown }[] }).cells[0].assignment,
     ).toBe(true);
+    expect(mutations).toContain("multiview/setLayoutContentWithKey");
     stop();
+    adapter.dispose();
+  });
+
+  it("generation_bumps_on_content_provider_vm_or_player_change", () => {
+    const store = createFakeStore({
+      cells: [{ key: "a", provider: "twitch", muted: true }],
+    });
+    const sdk1 = createTwitchSdk();
+    const cell = createFakeVideoCell({
+      store,
+      key: "a",
+      provider: "twitch",
+      player: createFakePlayerComponent("twitch", sdk1),
+    });
+    createFakeMultiviewRoot(store, [cell]);
+    window.history.pushState({}, "", "/multiview");
+    const adapter = createHolodexAdapter(window, document, () => undefined);
+    const d1 = adapter.discover();
+    expect(d1.ok).toBe(true);
+    if (!d1.ok) return;
+    const g1 = d1.bindings[0].identity.generation;
+
+    const d1b = adapter.discover();
+    expect(d1b.ok && d1b.bindings[0].identity.generation).toBe(g1);
+
+    store.state.multiview.layoutContent.a.id = "new-id";
+    cell.cellContent = store.state.multiview.layoutContent.a;
+    const d2 = adapter.discover();
+    expect(d2.ok && d2.bindings[0].identity.generation).not.toBe(g1);
+    const g2 = d2.ok ? d2.bindings[0].identity.generation : 0;
+
+    cell.isTwitchVideo = false;
+    store.state.multiview.layoutContent.a.video = "yt-a";
+    const d3 = adapter.discover();
+    expect(d3.ok && d3.bindings[0].identity.generation).not.toBe(g2);
+
+    adapter.dispose();
+  });
+
+  it("snapshot_identity_matches_binding_identity", () => {
+    const store = createFakeStore({
+      cells: [{ key: "a", provider: "twitch", muted: false }],
+    });
+    const cell = createFakeVideoCell({
+      store,
+      key: "a",
+      provider: "twitch",
+      player: createFakePlayerComponent("twitch", createTwitchSdk({ muted: false })),
+    });
+    createFakeMultiviewRoot(store, [cell]);
+    window.history.pushState({}, "", "/multiview");
+    const adapter = createHolodexAdapter(window, document, () => undefined);
+    const found = adapter.discover();
+    expect(found.ok).toBe(true);
+    if (!found.ok) return;
+    adapter.watchSnapshot(found.store, () => undefined, () => undefined);
+    const snap = adapter.buildSnapshot();
+    expect(snap.cells[0].identity).toEqual(found.bindings[0].identity);
+    adapter.dispose();
+  });
+
+  it("observe_disconnects_on_dispose", async () => {
+    const store = createFakeStore({
+      cells: [{ key: "a", provider: "twitch", muted: true }],
+    });
+    const cell = createFakeVideoCell({
+      store,
+      key: "a",
+      provider: "twitch",
+      player: createFakePlayerComponent("twitch", createTwitchSdk()),
+    });
+    const { multiview } = createFakeMultiviewRoot(store, [cell]);
+    window.history.pushState({}, "", "/multiview");
+    const adapter = createHolodexAdapter(window, document, () => undefined);
+    let calls = 0;
+    const stop = adapter.observe(multiview.$el, () => {
+      calls += 1;
+    });
+    multiview.$el.appendChild(document.createElement("div"));
+    await Promise.resolve();
+    const before = calls;
+    stop();
+    stop();
+    multiview.$el.appendChild(document.createElement("div"));
+    await Promise.resolve();
+    expect(calls).toBe(before);
+    adapter.dispose();
+  });
+
+  it("subscribe_does_not_build_snapshot_synchronously", () => {
+    const store = createFakeStore({
+      cells: [{ key: "a", provider: "twitch", muted: true }],
+    });
+    const cell = createFakeVideoCell({
+      store,
+      key: "a",
+      provider: "twitch",
+      player: createFakePlayerComponent("twitch", createTwitchSdk()),
+    });
+    createFakeMultiviewRoot(store, [cell]);
+    window.history.pushState({}, "", "/multiview");
+    const adapter = createHolodexAdapter(window, document, () => undefined);
+    const found = adapter.discover();
+    expect(found.ok).toBe(true);
+    if (!found.ok) return;
+
+    let building = false;
+    let snapFromSubscribe = false;
+    const shimStore = {
+      state: found.store.state,
+      commit: found.store.commit.bind(found.store),
+      watch: () => () => undefined,
+      subscribe: (cb: (m: { type: string }) => void) => {
+        const wrap = (m: { type: string }) => {
+          building = true;
+          cb(m);
+          building = false;
+        };
+        found.store._subscribers.push(wrap);
+        return () => {
+          found.store._subscribers = found.store._subscribers.filter(
+            (s) => s !== wrap,
+          );
+        };
+      },
+    };
+    adapter.watchSnapshot(
+      shimStore,
+      () => {
+        if (building) snapFromSubscribe = true;
+      },
+      () => {
+        /* onMutation only — must not invoke onSnapshot */
+      },
+    );
+    for (const sub of [...found.store._subscribers]) {
+      sub({ type: "multiview/setLayoutContentWithKey" });
+    }
+    expect(snapFromSubscribe).toBe(false);
     adapter.dispose();
   });
 });

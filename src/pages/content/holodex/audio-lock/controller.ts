@@ -3,8 +3,6 @@ import type {
   CellIdentity,
   LockEffect,
   LockState,
-  PlayerPort,
-  SelectionGrant,
   StoreSnapshot,
 } from "./contracts";
 import { TIMING, sameIdentity } from "./contracts";
@@ -13,11 +11,17 @@ import {
   type CellBinding,
   type HolodexAdapter,
 } from "./holodex-adapter";
-import { createPlayerPort, type PlayerBinding } from "./players";
 import {
+  createPlayerPort,
+  type BoundPlayerPort,
+  type PlayerBinding,
+} from "./players";
+import {
+  classifyLayout,
   createInitialState,
   emptyCellRuntime,
   pollObservation,
+  storeConverged,
   transition,
 } from "./state";
 
@@ -28,6 +32,7 @@ export type ControllerDeps = {
   setTimeout?: typeof setTimeout;
   clearTimeout?: typeof clearTimeout;
   requestAnimationFrame?: typeof requestAnimationFrame;
+  isTrusted?: (event: Event) => boolean;
 };
 
 type PanelGate = {
@@ -67,29 +72,71 @@ function clearPanelIfSameScope(scopeEvent: Event): void {
   }
 }
 
+type Session = {
+  stopObserver: () => void;
+  stopStore: () => void;
+  heartbeatTimer: ReturnType<typeof setTimeout> | null;
+  pathnameTimer: ReturnType<typeof setTimeout> | null;
+  rafHandle: number | null;
+  coalesceTimer: ReturnType<typeof setTimeout> | null;
+  settleTimers: Map<string, ReturnType<typeof setTimeout>>;
+  storeSettleTimer: ReturnType<typeof setTimeout> | null;
+  fallbackTimer: ReturnType<typeof setTimeout> | null;
+  store: unknown;
+  observeTarget: Element;
+};
+
 export function createAudioLockController(deps: ControllerDeps): AudioLockHandle {
   const win = deps.window;
   const doc = deps.document;
   const now = deps.now ?? (() => Date.now());
   const schedule = deps.setTimeout ?? setTimeout.bind(win);
   const cancel = deps.clearTimeout ?? clearTimeout.bind(win);
+  const raf =
+    deps.requestAnimationFrame ??
+    ((fn: FrameRequestCallback) => {
+      if (typeof win.requestAnimationFrame === "function") {
+        return win.requestAnimationFrame(fn);
+      }
+      return schedule(() => fn(now()), 16) as unknown as number;
+    });
+  const cancelRaf =
+    typeof win.cancelAnimationFrame === "function"
+      ? win.cancelAnimationFrame.bind(win)
+      : (h: number) => cancel(h as unknown as ReturnType<typeof setTimeout>);
+  const eventTrusted = deps.isTrusted ?? ((e: Event) => e.isTrusted);
 
   let state: LockState = createInitialState();
   let disposed = false;
   let enabled = false;
   let adapter: HolodexAdapter | null = null;
-  const ports = new Map<string, PlayerPort>();
-  const unpatches = new Map<string, () => void>();
+  const ports = new Map<string, { identity: CellIdentity; port: BoundPlayerPort }>();
+  const unpatches = new Map<string, { cell: object; unpatch: () => void }>();
+  const lastBindings = new Map<string, CellBinding>();
   const disposers: Array<() => void> = [];
   const inFlightReads = new Map<string, Promise<void>>();
+  const pausedByKey = new Map<string, boolean>();
   const firstPlayDepth = { value: 0 };
   const authDepth = { value: 0 };
+  const authScope = { muteOthersCalls: 0 };
   let discoveryTimer: ReturnType<typeof setTimeout> | null = null;
   let discoveryStarted = 0;
-  let stopSnapshot: (() => void) | null = null;
-  let bootstrapFallbackTimer: ReturnType<typeof setTimeout> | null = null;
+  let session: Session | null = null;
+  let prevSnapshot: StoreSnapshot | null = null;
+  const pendingMutationTypes = new Set<string>();
+  let layoutCoalesceQueued = false;
+  let leftMultiview = false;
+  let storeSettleTarget: CellIdentity | null = null;
+  let storeSettleEpoch = 0;
+  let bootstrapFallbackStarted = 0;
+  let pathnameWatching = false;
 
-  const report = (code: string) => {
+  const currentAssignment = (key: string) => {
+    const binding = lastBindings.get(key);
+    return (binding?.cell as { muted?: boolean | undefined } | undefined)?.muted;
+  };
+
+  const failSession = (code: string) => {
     const result = transition(state, {
       type: "CONTRACT_FAILED",
       now: now(),
@@ -97,9 +144,89 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     });
     state = result.state;
     void applyEffects(result.effects);
+    teardownSession();
+    if (discoveryTimer) {
+      cancel(discoveryTimer);
+      discoveryTimer = null;
+    }
+  };
+
+  const report = (code: string) => {
+    failSession(code);
+  };
+
+  const cancelStoreSettle = () => {
+    if (session?.storeSettleTimer) {
+      cancel(session.storeSettleTimer);
+      session.storeSettleTimer = null;
+    }
+    storeSettleTarget = null;
+  };
+
+  const armStoreSettle = (active: CellIdentity | null) => {
+    if (!session || !active) return;
+    cancelStoreSettle();
+    storeSettleTarget = active;
+    storeSettleEpoch = state.epoch;
+    session.storeSettleTimer = schedule(() => {
+      if (!session) return;
+      session.storeSettleTimer = null;
+      if (
+        state.active &&
+        sameIdentity(state.active, storeSettleTarget) &&
+        state.epoch === storeSettleEpoch
+      ) {
+        const result = transition(state, {
+          type: "STORE_DID_NOT_SETTLE",
+          now: now(),
+        });
+        state = result.state;
+        void applyEffects(result.effects);
+      }
+    }, TIMING.STORE_SETTLE_MS);
+  };
+
+  const armSelectionSettle = (identity: CellIdentity) => {
+    if (!session) return;
+    const prev = session.settleTimers.get(identity.key);
+    if (prev) cancel(prev);
+    const epoch = state.epoch;
+    const timer = schedule(async () => {
+      session?.settleTimers.delete(identity.key);
+      if (!sameIdentity(state.active, identity) || state.epoch !== epoch) return;
+      const entry = ports.get(identity.key);
+      if (!entry || !sameIdentity(entry.identity, identity)) return;
+      const read = await entry.port.readMuted();
+      if (read.kind !== "known") return;
+      if (!sameIdentity(state.active, identity) || state.epoch !== epoch) return;
+      const result = transition(state, {
+        type: "SETTLE_EXPIRED",
+        now: now(),
+        identity,
+        stillMuted: read.muted,
+      });
+      state = result.state;
+      await applyEffects(result.effects);
+    }, TIMING.SETTLE_MS);
+    session.settleTimers.set(identity.key, timer);
+  };
+
+  const onActiveChanged = (prevActive: CellIdentity | null) => {
+    if (
+      state.selection === "selected" &&
+      state.active &&
+      !sameIdentity(prevActive, state.active)
+    ) {
+      armStoreSettle(state.active);
+      armSelectionSettle(state.active);
+    }
+    if (state.selection === "silence" || state.mode === "disabled") {
+      cancelStoreSettle();
+    }
   };
 
   const applyEffects = async (effects: LockEffect[]): Promise<void> => {
+    const prevActive = state.active;
     for (const effect of effects) {
       if (disposed || !enabled) return;
       if (state.mode === "disabled" || state.mode === "degraded") {
@@ -118,25 +245,58 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
           break;
         case "MUTE_PLAYER": {
           if (effect.epoch !== state.epoch) break;
-          const port = ports.get(effect.identity.key);
-          if (!port) break;
-          const runtime = state.cells[effect.identity.key];
+          const entry = ports.get(effect.identity.key);
+          if (!entry || !sameIdentity(entry.identity, effect.identity)) break;
+          const runtime = state.cells[effect.identity.key] ?? emptyCellRuntime();
           const t = now();
-          if (runtime && t - runtime.lastMuteAt < TIMING.MUTE_COOLDOWN_MS) break;
-          await port.mute();
+          if (runtime.muteInFlight) break;
+          if (t < runtime.lastMuteAt + TIMING.MUTE_COOLDOWN_MS) break;
+          if (t < runtime.settleUntil) break;
           state = {
             ...state,
             cells: {
               ...state.cells,
-              [effect.identity.key]: {
-                ...(state.cells[effect.identity.key] ?? emptyCellRuntime()),
-                lastMuteAt: t,
-                lastGuardMuteAt: t,
-                settleUntil: t + TIMING.SETTLE_MS,
-                ownMuteGeneration: effect.identity.generation,
-              },
+              [effect.identity.key]: { ...runtime, muteInFlight: true },
             },
           };
+          try {
+            const ok = await entry.port.mute();
+            const sent = transition(state, {
+              type: "MUTE_SENT",
+              now: now(),
+              identity: effect.identity,
+            });
+            state = sent.state;
+            if (!ok) {
+              const key = effect.identity.key;
+              const prev = state.cells[key]?.consecutiveFailures ?? 0;
+              const failures = prev + 1;
+              state = {
+                ...state,
+                cells: {
+                  ...state.cells,
+                  [key]: {
+                    ...(state.cells[key] ?? emptyCellRuntime()),
+                    consecutiveFailures: failures,
+                  },
+                },
+              };
+              if (failures >= TIMING.MAX_CONSECUTIVE_FAILURES) {
+                failSession("player-unavailable");
+              }
+            }
+          } finally {
+            const rt = state.cells[effect.identity.key];
+            if (rt) {
+              state = {
+                ...state,
+                cells: {
+                  ...state.cells,
+                  [effect.identity.key]: { ...rt, muteInFlight: false },
+                },
+              };
+            }
+          }
           break;
         }
         case "SET_STORE_MUTED": {
@@ -154,7 +314,6 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
               muteOthers: (id: string | number) => void;
               item: { i: string | number };
             };
-            // call through current (possibly wrapped) method with auth
             cell.muteOthers(cell.item.i);
           } finally {
             authDepth.value -= 1;
@@ -167,32 +326,17 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
           const binding = lastBindings.get(effect.identity.key);
           if (!binding) break;
           authDepth.value += 1;
-          let muteOthersCalled = false;
+          const before = authScope.muteOthersCalls;
           try {
             const cell = binding.cell as {
               setMuted: (v: boolean) => void;
               muteOthers: (id: string | number) => void;
               item: { i: string | number };
-              muted: boolean | undefined;
             };
-            const beforeCalls = (
-              cell as unknown as { muteOthersCalls?: unknown[] }
-            ).muteOthersCalls?.length;
             cell.setMuted(effect.muted);
-            const afterCalls = (
-              cell as unknown as { muteOthersCalls?: unknown[] }
-            ).muteOthersCalls?.length;
-            if (
-              typeof beforeCalls === "number" &&
-              typeof afterCalls === "number" &&
-              afterCalls > beforeCalls
-            ) {
-              muteOthersCalled = true;
-            }
-            // U/false early return: supplement muteOthers once when selecting
             if (
               effect.muted === false &&
-              !muteOthersCalled &&
+              authScope.muteOthersCalls === before &&
               state.active &&
               sameIdentity(state.active, effect.identity)
             ) {
@@ -201,129 +345,185 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
           } finally {
             authDepth.value -= 1;
           }
-          if (effect.muted === false) {
-            void maybeRestoreGrant(effect.identity);
-          }
+          void maybeRestoreGrant(effect.identity);
           break;
         }
         case "RESTORE_SELECTED_AUDIO": {
-          await restoreGrant(effect.grant);
+          void restoreGrant(effect.grant);
           break;
         }
         default:
           break;
       }
     }
+    onActiveChanged(prevActive);
+    if (state.mode === "degraded") {
+      teardownSession();
+      if (discoveryTimer) {
+        cancel(discoveryTimer);
+        discoveryTimer = null;
+      }
+    }
   };
 
-  const lastBindings = new Map<string, CellBinding>();
-
-  const maybeRestoreGrant = async (identity: CellIdentity): Promise<void> => {
-    const grantState = state.selectionGrant;
-    if (!grantState || grantState.consumed) return;
-    if (!sameIdentity(grantState.grant.identity, identity)) return;
-    if (grantState.grant.epoch !== state.epoch) return;
-
-    // wait trailing debounce + ready
-    await new Promise<void>((r) => schedule(() => r(), 0));
-    if (disposed || !enabled) return;
+  const restoreGrant = async (
+    grant: { identity: CellIdentity; epoch: number; source: "bootstrap" | "explicit" },
+  ) => {
+    const entry = ports.get(grant.identity.key);
+    if (!entry || !sameIdentity(entry.identity, grant.identity)) return;
     if (!state.selectionGrant || state.selectionGrant.consumed) return;
-    if (state.selectionGrant.grant.epoch !== state.epoch) return;
-
-    const port = ports.get(identity.key);
-    if (!port) return;
-    const read = await port.readMuted();
-    if (disposed || !enabled) return;
-    if (!state.selectionGrant || state.selectionGrant.consumed) return;
-    if (state.selectionGrant.grant.epoch !== state.epoch) return;
-
-    const ownMuted =
-      state.cells[identity.key]?.ownMuteGeneration === identity.generation;
-
-    if (read.kind === "unavailable" && !ownMuted) {
-      state = { ...state, selectionGrant: null };
-      return;
-    }
-
-    if (read.kind === "known" && read.muted === false && !ownMuted) {
-      state = {
-        ...state,
-        selectionGrant: { ...state.selectionGrant, consumed: true },
-      };
-      return;
-    }
-
+    if (state.selectionGrant.grant.epoch !== grant.epoch) return;
+    await entry.port.restoreSelectedAudio(grant);
     if (
-      (read.kind === "known" && read.muted === true) ||
-      ownMuted
+      state.selectionGrant &&
+      state.selectionGrant.grant.epoch === grant.epoch &&
+      !state.selectionGrant.consumed
     ) {
-      const grant = state.selectionGrant.grant;
       state = {
         ...state,
         selectionGrant: { ...state.selectionGrant, consumed: true },
       };
-      await restoreGrant(grant);
     }
   };
 
-  const restoreGrant = async (grant: SelectionGrant): Promise<void> => {
-    if (!enabled || disposed) return;
-    if (state.epoch !== grant.epoch) return;
-    if (!state.active || !sameIdentity(state.active, grant.identity)) return;
-    const port = ports.get(grant.identity.key);
-    if (!port) return;
-    await port.restoreSelectedAudio(grant);
+  const maybeRestoreGrant = (identity: CellIdentity) => {
+    schedule(async () => {
+      if (!state.selectionGrant || state.selectionGrant.consumed) return;
+      if (!sameIdentity(state.selectionGrant.grant.identity, identity)) return;
+      if (!sameIdentity(state.active, identity)) return;
+      const entry = ports.get(identity.key);
+      if (!entry) return;
+      const read = await entry.port.readMuted();
+      if (read.kind !== "known") return;
+      if (!sameIdentity(state.active, identity)) return;
+      if (!state.selectionGrant || state.selectionGrant.consumed) return;
+      if (read.muted) {
+        await restoreGrant(state.selectionGrant.grant);
+      } else {
+        state = {
+          ...state,
+          selectionGrant: { ...state.selectionGrant, consumed: true },
+        };
+      }
+    }, 0);
   };
 
-  const ensurePort = (binding: CellBinding): PlayerPort | null => {
-    if (binding.pendingPort || !binding.playerComponent) return null;
-    const existing = ports.get(binding.identity.key);
-    if (existing) return existing;
-    const comp = binding.playerComponent as PlayerBinding["playerComponent"];
-    const port = createPlayerPort({
+  const cancelFallback = () => {
+    if (session?.fallbackTimer) {
+      cancel(session.fallbackTimer);
+      session.fallbackTimer = null;
+    }
+  };
+
+  const armBootstrapFallback = () => {
+    if (!session) return;
+    if (state.selection !== "bootstrap" || state.active) {
+      cancelFallback();
+      return;
+    }
+    if (session.fallbackTimer) return;
+    if (!bootstrapFallbackStarted) bootstrapFallbackStarted = now();
+    if (now() - bootstrapFallbackStarted > TIMING.BOOTSTRAP_WAIT_MS) return;
+    session.fallbackTimer = schedule(() => {
+      if (!session) return;
+      session.fallbackTimer = null;
+      if (state.selection !== "bootstrap" || state.active) return;
+      if (now() - bootstrapFallbackStarted > TIMING.BOOTSTRAP_WAIT_MS) return;
+      const snapshot = adapter?.buildSnapshot();
+      if (!snapshot) {
+        armBootstrapFallback();
+        return;
+      }
+      for (const cell of snapshot.cells) {
+        if (cell.assignment === true) continue;
+        const binding = lastBindings.get(cell.identity.key);
+        if (!binding) continue;
+        const vm = binding.cell as {
+          editMode?: boolean;
+          firstPlay?: boolean;
+        };
+        if (vm.editMode === true) continue;
+        const entry = ports.get(cell.identity.key);
+        if (!entry?.port.isBound()) continue;
+        const paused = pausedByKey.get(cell.identity.key);
+        const playing =
+          paused === false ||
+          (paused === undefined && vm.firstPlay === false);
+        if (!playing) continue;
+        const result = transition(state, {
+          type: "BOOTSTRAP_READY",
+          now: now(),
+          identity: cell.identity,
+        });
+        state = result.state;
+        void applyEffects(result.effects);
+        cancelFallback();
+        return;
+      }
+      armBootstrapFallback();
+    }, TIMING.BOOTSTRAP_FALLBACK_MS);
+  };
+
+  const ensurePort = (binding: CellBinding) => {
+    if (!binding.playerComponent) return;
+    const key = binding.identity.key;
+    const existing = ports.get(key);
+    if (existing && sameIdentity(existing.identity, binding.identity)) {
+      return;
+    }
+    if (existing) {
+      existing.port.dispose();
+      ports.delete(key);
+    }
+    const playerBinding: PlayerBinding = {
       identity: binding.identity,
-      playerComponent: comp,
+      playerComponent: binding.playerComponent as PlayerBinding["playerComponent"],
       provider: binding.provider,
       isReady: () => {
-        const c = comp as { ready?: boolean; twPlayer?: unknown; ytPlayer?: unknown };
-        if (typeof c.ready === "boolean") return c.ready;
-        if (binding.provider === "twitch") return c.twPlayer != null;
-        return c.ytPlayer != null;
+        const comp = binding.playerComponent as { ready?: boolean } | null;
+        return comp?.ready === true;
       },
-    });
-    if (port) ports.set(binding.identity.key, port);
-    return port;
+      onReady: () => {
+        const current = lastBindings.get(key);
+        if (!current || !sameIdentity(current.identity, binding.identity)) return;
+        const result = transition(state, {
+          type: "PLAYER_READY",
+          now: now(),
+          identity: binding.identity,
+          assignment: currentAssignment(key),
+        });
+        state = result.state;
+        void applyEffects(result.effects).then(() => {
+          void reconcileCell(binding.identity);
+          if (state.selection === "bootstrap" && !state.active) {
+            armBootstrapFallback();
+          }
+          if (
+            state.selectionGrant &&
+            !state.selectionGrant.consumed &&
+            sameIdentity(state.selectionGrant.grant.identity, binding.identity)
+          ) {
+            maybeRestoreGrant(binding.identity);
+          }
+        });
+      },
+    };
+    const port = createPlayerPort(playerBinding);
+    if (port) ports.set(key, { identity: binding.identity, port });
   };
 
   const reconcileCell = async (identity: CellIdentity): Promise<void> => {
-    if (!enabled || disposed) return;
-    if (!state.muteOthers || state.mode === "degraded" || state.mode === "disabled") {
-      return;
-    }
     const key = identity.key;
-    if (inFlightReads.has(key)) return inFlightReads.get(key);
-
+    if (inFlightReads.has(key)) return;
     const run = (async () => {
-      const port = ports.get(key);
-      if (!port) return;
       const t = now();
-      const runtime = state.cells[key];
-      if (
-        runtime &&
-        runtime.consecutiveFailures > 0 &&
-        t - runtime.lastMuteAt < TIMING.FAILURE_COOLDOWN_MS
-      ) {
-        return;
-      }
-      const epoch = state.epoch;
-      const read = await port.readMuted();
-      if (disposed || !enabled || state.epoch !== epoch) return;
-      if (!state.active && state.selection !== "silence" && state.selection !== "bootstrap") {
-        return;
-      }
-      if (!sameIdentity(state.active, identity) && state.selection === "selected") {
-        // ok — observing non-active
-      }
+      const entry = ports.get(key);
+      if (!entry || !sameIdentity(entry.identity, identity)) return;
+      if (state.mode === "degraded" || !enabled) return;
+      const read = await entry.port.readMuted();
+      if (!sameIdentity(lastBindings.get(key)?.identity ?? null, identity)) return;
+      if (!enabled || state.mode === ("degraded" as LockState["mode"])) return;
+
       if (read.kind === "unavailable") {
         if (read.reason === "not-ready") return;
         const prev = state.cells[key]?.consecutiveFailures ?? 0;
@@ -335,19 +535,11 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
             [key]: {
               ...(state.cells[key] ?? emptyCellRuntime()),
               consecutiveFailures: failures,
-              lastMuteAt: t,
             },
           },
         };
         if (failures >= TIMING.MAX_CONSECUTIVE_FAILURES) {
-          const result = transition(state, {
-            type: "CONTRACT_FAILED",
-            now: t,
-            code: "player-unavailable",
-          });
-          state = result.state;
-          await applyEffects(result.effects);
-          teardownSession();
+          failSession("player-unavailable");
         }
         return;
       }
@@ -363,14 +555,10 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
         },
       };
 
-      const binding = lastBindings.get(key);
-      const assignment =
-        (binding?.cell as { muted?: boolean | undefined } | undefined)?.muted;
-
       const result = pollObservation(
         state,
         identity,
-        assignment,
+        currentAssignment(key),
         read.muted,
         t,
       );
@@ -386,210 +574,474 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     }
   };
 
-  const installBindings = (bindings: CellBinding[]) => {
-    for (const binding of bindings) {
-      lastBindings.set(binding.identity.key, binding);
-      ensurePort(binding);
-      if (unpatches.has(binding.identity.key)) continue;
+  const installBinding = (binding: CellBinding) => {
+    const key = binding.identity.key;
+    lastBindings.set(key, binding);
+    ensurePort(binding);
 
-      const cell = binding.cell as Record<string, unknown>;
-      const identity = binding.identity;
+    const existing = unpatches.get(key);
+    if (existing && existing.cell === binding.cell) {
+      return;
+    }
+    if (existing) {
+      existing.unpatch();
+      unpatches.delete(key);
+    }
 
-      const originalCheck = cell.manualCheckMuted as () => unknown;
-      const originalSetMuted = cell.setMuted as (v: boolean) => unknown;
-      const originalMuteOthers = cell.muteOthers as (id: string | number) => unknown;
-      const originalUpdate = cell.updatePausedState as (p?: boolean) => unknown;
+    const cell = binding.cell as Record<string, unknown>;
+    const originalCheck = cell.manualCheckMuted as () => unknown;
+    const originalSetMuted = cell.setMuted as (v: boolean) => unknown;
+    const originalMuteOthers = cell.muteOthers as (id: string | number) => unknown;
+    const originalUpdate = cell.updatePausedState as (p?: boolean) => unknown;
 
-      const unpatch = adapter!.patchCell(binding, {
-        manualCheckMuted() {
-          if (!enabled || !state.muteOthers || state.mode === "degraded") {
-            return originalCheck.call(cell);
-          }
-          return reconcileCell(identity);
-        },
-        setMuted(value: boolean) {
-          if (authDepth.value > 0) {
-            return originalSetMuted.call(cell, value);
-          }
-          if (!enabled || !state.muteOthers || state.mode === "degraded") {
-            return originalSetMuted.call(cell, value);
-          }
-          if (hasPanelDispatch()) {
-            const result = transition(state, {
-              type: "EXPLICIT_SET_MUTED",
-              now: now(),
-              identity,
-              muted: value,
-            });
-            state = result.state;
-            void applyEffects(result.effects);
-            return;
-          }
-          // Temporary until controller lifecycle rewrite: refresh → OBSERVED_MUTED
-          const assignment =
-            (cell as { muted?: boolean | undefined }).muted;
+    const unpatch = adapter!.patchCell(binding, {
+      manualCheckMuted() {
+        const identity = lastBindings.get(key)?.identity;
+        if (!identity) return originalCheck.call(cell);
+        if (!enabled || !state.muteOthers || state.mode === "degraded") {
+          return originalCheck.call(cell);
+        }
+        return reconcileCell(identity);
+      },
+      setMuted(value: boolean) {
+        const identity = lastBindings.get(key)?.identity;
+        if (!identity) return originalSetMuted.call(cell, value);
+        if (authDepth.value > 0) {
+          return originalSetMuted.call(cell, value);
+        }
+        if (!enabled || !state.muteOthers || state.mode === "degraded") {
+          return originalSetMuted.call(cell, value);
+        }
+        if (hasPanelDispatch()) {
           const result = transition(state, {
-            type: "OBSERVED_MUTED",
+            type: "EXPLICIT_SET_MUTED",
             now: now(),
             identity,
             muted: value,
-            assignment,
-            origin: "refresh",
           });
           state = result.state;
           void applyEffects(result.effects);
-        },
-        muteOthers(id: string | number) {
-          if (authDepth.value > 0) {
-            return originalMuteOthers.call(cell, id);
-          }
-          if (!enabled || !state.muteOthers || state.mode === "degraded") {
-            return originalMuteOthers.call(cell, id);
-          }
-          if (String(id) !== identity.key) return;
-          if (firstPlayDepth.value > 0 && state.selection === "bootstrap" && !state.active) {
-            const result = transition(state, {
-              type: "NATIVE_FIRST_PLAY",
-              now: now(),
-              identity,
-            });
-            state = result.state;
-            void applyEffects(result.effects);
-            return;
-          }
-          if (state.selection === "selected" || state.selection === "silence") {
-            return; // block
-          }
-          if (state.selection === "bootstrap" && !state.active) {
-            const result = transition(state, {
-              type: "NATIVE_FIRST_PLAY",
-              now: now(),
-              identity,
-            });
-            state = result.state;
-            void applyEffects(result.effects);
-            return;
-          }
+          if (!value) cancelFallback();
+          return;
+        }
+        const result = transition(state, {
+          type: "OBSERVED_MUTED",
+          now: now(),
+          identity,
+          muted: value,
+          assignment: currentAssignment(key),
+          origin: "refresh",
+        });
+        state = result.state;
+        void applyEffects(result.effects);
+      },
+      muteOthers(id: string | number) {
+        const identity = lastBindings.get(key)?.identity;
+        if (!identity) return originalMuteOthers.call(cell, id);
+        if (authDepth.value > 0) {
+          authScope.muteOthersCalls += 1;
           return originalMuteOthers.call(cell, id);
-        },
-        updatePausedState(paused = false) {
-          const entering =
-            (cell.firstPlay === true || cell.firstPlay === undefined) &&
-            !paused &&
-            cell.editMode !== paused;
-          if (entering) firstPlayDepth.value += 1;
-          try {
-            return originalUpdate.call(cell, paused);
-          } finally {
-            if (entering) firstPlayDepth.value -= 1;
+        }
+        if (!enabled || !state.muteOthers || state.mode === "degraded") {
+          return originalMuteOthers.call(cell, id);
+        }
+        if (String(id) !== identity.key) return;
+        if (
+          firstPlayDepth.value > 0 &&
+          state.selection === "bootstrap" &&
+          !state.active
+        ) {
+          const result = transition(state, {
+            type: "NATIVE_FIRST_PLAY",
+            now: now(),
+            identity,
+          });
+          state = result.state;
+          void applyEffects(result.effects);
+          cancelFallback();
+          return;
+        }
+        if (state.selection === "selected" || state.selection === "silence") {
+          return;
+        }
+        if (state.selection === "bootstrap" && !state.active) {
+          const result = transition(state, {
+            type: "NATIVE_FIRST_PLAY",
+            now: now(),
+            identity,
+          });
+          state = result.state;
+          void applyEffects(result.effects);
+          cancelFallback();
+          return;
+        }
+        return originalMuteOthers.call(cell, id);
+      },
+      updatePausedState(paused = false) {
+        const identity = lastBindings.get(key)?.identity;
+        if (!identity) return originalUpdate.call(cell, paused);
+        pausedByKey.set(key, paused);
+        const entering =
+          (cell.firstPlay === true || cell.firstPlay === undefined) &&
+          !paused &&
+          cell.editMode !== paused;
+        if (entering) firstPlayDepth.value += 1;
+        try {
+          return originalUpdate.call(cell, paused);
+        } finally {
+          if (entering) firstPlayDepth.value -= 1;
+          if (
+            paused === false &&
+            state.selection === "bootstrap" &&
+            !state.active
+          ) {
+            armBootstrapFallback();
           }
-        },
+        }
+      },
+    });
+    unpatches.set(key, { cell: binding.cell as object, unpatch });
+  };
+
+  const syncBindings = (next: CellBinding[]) => {
+    const nextMap = new Map(next.map((b) => [b.identity.key, b]));
+    for (const [key, old] of [...lastBindings.entries()]) {
+      const neu = nextMap.get(key);
+      if (!neu) {
+        const up = unpatches.get(key);
+        up?.unpatch();
+        unpatches.delete(key);
+        ports.get(key)?.port.dispose();
+        ports.delete(key);
+        inFlightReads.delete(key);
+        if (session?.settleTimers.has(key)) {
+          cancel(session.settleTimers.get(key)!);
+          session.settleTimers.delete(key);
+        }
+        const result = transition(state, {
+          type: "CELL_REMOVED",
+          now: now(),
+          identity: old.identity,
+        });
+        state = result.state;
+        void applyEffects(result.effects);
+        lastBindings.delete(key);
+        pausedByKey.delete(key);
+        continue;
+      }
+      if (sameIdentity(old.identity, neu.identity)) {
+        lastBindings.set(key, neu);
+        if (!ports.has(key) && neu.playerComponent) ensurePort(neu);
+        continue;
+      }
+      // identity changed
+      ports.get(key)?.port.dispose();
+      ports.delete(key);
+      inFlightReads.delete(key);
+      if (session?.settleTimers.has(key)) {
+        cancel(session.settleTimers.get(key)!);
+        session.settleTimers.delete(key);
+      }
+      if (old.cell !== neu.cell) {
+        unpatches.get(key)?.unpatch();
+        unpatches.delete(key);
+      }
+      const removed = transition(state, {
+        type: "CELL_REMOVED",
+        now: now(),
+        identity: old.identity,
       });
-      unpatches.set(identity.key, unpatch);
+      state = removed.state;
+      void applyEffects(removed.effects);
+      installBinding(neu);
+    }
+    for (const [key, neu] of nextMap) {
+      if (!lastBindings.has(key)) installBinding(neu);
     }
   };
 
-  const teardownSession = () => {
-    for (const [, unpatch] of unpatches) unpatch();
-    unpatches.clear();
-    for (const [, port] of ports) port.dispose();
-    ports.clear();
-    lastBindings.clear();
-    if (stopSnapshot) {
-      stopSnapshot();
-      stopSnapshot = null;
+  const checkStoreSettle = (snapshot: StoreSnapshot) => {
+    if (!storeSettleTarget || !session?.storeSettleTimer) return;
+    const pendingKeys = new Set<string>();
+    for (const [key, b] of lastBindings) {
+      if (!ports.get(key)?.port.isBound() || b.pendingPort) pendingKeys.add(key);
     }
-    if (bootstrapFallbackTimer) {
-      cancel(bootstrapFallbackTimer);
-      bootstrapFallbackTimer = null;
+    if (storeConverged(snapshot, storeSettleTarget, pendingKeys)) {
+      cancelStoreSettle();
     }
   };
 
-  const onSnapshot = (snapshot: StoreSnapshot) => {
-    if (!enabled || disposed) return;
-    const result = transition(state, {
+  const processLayout = () => {
+    layoutCoalesceQueued = false;
+    if (!adapter || !session || state.mode === "degraded") {
+      pendingMutationTypes.clear();
+      return;
+    }
+    const snapshot = adapter.buildSnapshot();
+    const mutations = new Set(pendingMutationTypes);
+    pendingMutationTypes.clear();
+    const cls = classifyLayout(
+      prevSnapshot,
+      snapshot,
+      mutations,
+      state.active,
+    );
+    if (cls.kind !== "none") {
+      const layout = transition(state, {
+        type: "LAYOUT_CHANGED",
+        now: now(),
+        kind: cls.kind,
+        snapshot,
+        preservedActive: cls.preservedActive,
+      });
+      state = layout.state;
+      void applyEffects(layout.effects);
+      for (const rem of cls.removed) {
+        if (state.active && sameIdentity(state.active, rem)) continue;
+        const r = transition(state, {
+          type: "CELL_REMOVED",
+          now: now(),
+          identity: rem,
+        });
+        state = r.state;
+        void applyEffects(r.effects);
+      }
+    }
+    const snap = transition(state, {
       type: "STORE_SNAPSHOT",
       now: now(),
       snapshot,
     });
-    state = result.state;
-    void applyEffects(result.effects);
+    state = snap.state;
+    void applyEffects(snap.effects);
+    checkStoreSettle(snapshot);
+    prevSnapshot = snapshot;
+  };
 
-    if (
-      state.selection === "bootstrap" &&
-      !state.active &&
-      snapshot.cells.length > 0 &&
-      !bootstrapFallbackTimer
-    ) {
-      bootstrapFallbackTimer = schedule(() => {
-        bootstrapFallbackTimer = null;
-        if (!enabled || disposed) return;
-        if (state.selection !== "bootstrap" || state.active) return;
-        // pick first ready playing candidate — simplified: first U/false with ready player
-        for (const cell of snapshot.cells) {
-          if (cell.assignment === true) continue;
-          const binding = lastBindings.get(cell.identity.key);
-          if (!binding) continue;
-          const vm = binding.cell as {
-            editMode?: boolean;
-            firstPlay?: boolean;
-            $refs?: { player?: { ready?: boolean } };
-          };
-          if (vm.editMode) continue;
-          const ready =
-            vm.$refs?.player?.ready === true || !binding.pendingPort;
-          if (!ready) continue;
-          const result2 = transition(state, {
-            type: "BOOTSTRAP_READY",
-            now: now(),
-            identity: cell.identity,
-          });
-          state = result2.state;
-          void applyEffects(result2.effects);
-          break;
+  const scheduleProcessLayout = () => {
+    if (!session || layoutCoalesceQueued) return;
+    layoutCoalesceQueued = true;
+    session.coalesceTimer = schedule(() => {
+      if (session) session.coalesceTimer = null;
+      processLayout();
+    }, 0);
+  };
+
+  const rescan = () => {
+    if (!enabled || disposed || state.mode === "degraded" || !session) return;
+    if (!adapter) return;
+    const found = adapter.discover();
+    if (!found.ok) {
+      if (found.code !== "root-timeout") failSession(found.code);
+      return;
+    }
+    if (found.store !== session.store || found.observeTarget !== session.observeTarget) {
+      teardownSession();
+      startDiscoveryLoop();
+      return;
+    }
+    syncBindings(found.bindings);
+  };
+
+  const scheduleRescan = () => {
+    if (!session) return;
+    if (session.rafHandle != null) return;
+    session.rafHandle = raf(() => {
+      if (session) session.rafHandle = null;
+      rescan();
+    }) as unknown as number;
+  };
+
+  const teardownSession = () => {
+    if (!session) {
+      for (const [, up] of unpatches) up.unpatch();
+      unpatches.clear();
+      for (const [, entry] of ports) entry.port.dispose();
+      ports.clear();
+      lastBindings.clear();
+      inFlightReads.clear();
+      pausedByKey.clear();
+      prevSnapshot = null;
+      return;
+    }
+    const s = session;
+    session = null;
+    try {
+      s.stopObserver();
+    } catch {
+      /* ignore */
+    }
+    if (s.rafHandle != null) cancelRaf(s.rafHandle);
+    if (s.coalesceTimer) cancel(s.coalesceTimer);
+    if (s.heartbeatTimer) cancel(s.heartbeatTimer);
+    if (s.pathnameTimer) cancel(s.pathnameTimer);
+    if (s.storeSettleTimer) cancel(s.storeSettleTimer);
+    if (s.fallbackTimer) cancel(s.fallbackTimer);
+    for (const t of s.settleTimers.values()) cancel(t);
+    s.settleTimers.clear();
+    try {
+      s.stopStore();
+    } catch {
+      /* ignore */
+    }
+    for (const [, up] of unpatches) up.unpatch();
+    unpatches.clear();
+    for (const [, entry] of ports) entry.port.dispose();
+    ports.clear();
+    lastBindings.clear();
+    inFlightReads.clear();
+    pausedByKey.clear();
+    prevSnapshot = null;
+    cancelStoreSettle();
+    bootstrapFallbackStarted = 0;
+  };
+
+  const startPathnameWatch = () => {
+    if (pathnameWatching || !session) return;
+    pathnameWatching = true;
+    const tick = () => {
+      if (!enabled || disposed) {
+        pathnameWatching = false;
+        return;
+      }
+      const onMv = /^\/multiview(?:\/|$)/.test(win.location.pathname);
+      if (!onMv) {
+        if (session) {
+          teardownSession();
+          leftMultiview = true;
         }
-      }, TIMING.BOOTSTRAP_FALLBACK_MS);
+      } else if (leftMultiview) {
+        leftMultiview = false;
+        if (state.mode === "degraded") {
+          const r = transition(state, { type: "RESET_DEGRADED", now: now() });
+          state = r.state;
+        }
+        if (enabled) startDiscoveryLoop();
+      }
+      if (session) {
+        session.pathnameTimer = schedule(tick, TIMING.PATHNAME_CHECK_MS);
+      } else if (enabled && !disposed) {
+        // keep watching for re-entry even without session
+        schedule(tick, TIMING.PATHNAME_CHECK_MS);
+      } else {
+        pathnameWatching = false;
+      }
+    };
+    if (session) {
+      session.pathnameTimer = schedule(tick, TIMING.PATHNAME_CHECK_MS);
+    } else {
+      schedule(tick, TIMING.PATHNAME_CHECK_MS);
     }
   };
 
+  const beginSession = (
+    store: unknown,
+    observeTarget: Element,
+  ) => {
+    if (!adapter) return;
+    // Tear down prior session listeners/timers only — keep bindings already synced.
+    if (session) {
+      const prev = session;
+      session = null;
+      try {
+        prev.stopObserver();
+      } catch {
+        /* ignore */
+      }
+      if (prev.rafHandle != null) cancelRaf(prev.rafHandle);
+      if (prev.coalesceTimer) cancel(prev.coalesceTimer);
+      if (prev.heartbeatTimer) cancel(prev.heartbeatTimer);
+      if (prev.pathnameTimer) cancel(prev.pathnameTimer);
+      if (prev.storeSettleTimer) cancel(prev.storeSettleTimer);
+      if (prev.fallbackTimer) cancel(prev.fallbackTimer);
+      for (const t of prev.settleTimers.values()) cancel(t);
+      try {
+        prev.stopStore();
+      } catch {
+        /* ignore */
+      }
+    }
+    const stopObserver = adapter.observe(observeTarget, scheduleRescan);
+    const stopStore = adapter.watchSnapshot(
+      store as Parameters<HolodexAdapter["watchSnapshot"]>[0],
+      () => {
+        scheduleProcessLayout();
+      },
+      (type) => {
+        pendingMutationTypes.add(type);
+        scheduleProcessLayout();
+      },
+    );
+    session = {
+      stopObserver,
+      stopStore,
+      heartbeatTimer: null,
+      pathnameTimer: null,
+      rafHandle: null,
+      coalesceTimer: null,
+      settleTimers: new Map(),
+      storeSettleTimer: null,
+      fallbackTimer: null,
+      store,
+      observeTarget,
+    };
+    const beat = () => {
+      if (!session) return;
+      rescan();
+      session.heartbeatTimer = schedule(beat, TIMING.HEARTBEAT_MS);
+    };
+    session.heartbeatTimer = schedule(beat, TIMING.HEARTBEAT_MS);
+    startPathnameWatch();
+    processLayout();
+  };
+
   const tryDiscover = () => {
-    if (!enabled || disposed) return;
+    if (!enabled || disposed || state.mode === "degraded") return;
     if (!adapter) {
-      adapter = createHolodexAdapter(win, doc, report);
+      adapter = createHolodexAdapter(win, doc, (code) => {
+        if (code === "root-timeout") return;
+        failSession(code);
+      });
     }
     const found = adapter.discover();
     if (!found.ok) {
-      if (found.code !== "root-timeout") {
-        // permanent mismatch
-        return;
-      }
       return;
     }
-    state = transition(state, {
+    const result = transition(state, {
       type: "DISCOVERED",
       now: now(),
       muteOthers: found.store.state.multiview.muteOthers,
-    }).state;
+    });
+    state = result.state;
 
     if (!found.store.state.multiview.muteOthers) {
       teardownSession();
       return;
     }
 
-    installBindings(found.bindings);
-    if (!stopSnapshot) {
-      stopSnapshot = adapter.watchSnapshot(onSnapshot);
+    if (discoveryTimer) {
+      cancel(discoveryTimer);
+      discoveryTimer = null;
     }
+    syncBindings(found.bindings);
+    beginSession(found.store, found.observeTarget);
   };
 
   const startDiscoveryLoop = () => {
+    if (discoveryTimer) {
+      cancel(discoveryTimer);
+      discoveryTimer = null;
+    }
+    if (state.mode === "degraded") return;
     discoveryStarted = now();
     const tick = () => {
-      if (!enabled || disposed) return;
+      if (!enabled || disposed || state.mode === "degraded") return;
+      if (session) return;
       tryDiscover();
+      if (session) return;
       const elapsed = now() - discoveryStarted;
       if (elapsed >= TIMING.DISCOVERY_TOTAL_MS) {
-        if (!lastBindings.size) report("root-timeout");
+        failSession("root-timeout");
         return;
       }
       const delay =
@@ -605,7 +1057,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     if (!enabled) return;
     const target = event.target as Element | null;
     if (!target?.closest?.(".media-controls-list")) return;
-    beginPanelDispatch(event, event.isTrusted);
+    beginPanelDispatch(event, eventTrusted(event));
     if (panelClearTimer) cancel(panelClearTimer);
     panelClearTimer = schedule(() => {
       clearPanelIfSameScope(event);
@@ -619,13 +1071,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
 
   const onPointerDown = (event: Event) => {
     if (!enabled || !state.muteOthers) return;
-    if (!(event as PointerEvent).isTrusted && (event as { __trusted?: boolean }).__trusted !== true) {
-      // production: isTrusted; tests may inject
-      if (!(event as { __trusted?: boolean }).__trusted) {
-        // still check isTrusted
-        if (!event.isTrusted) return;
-      }
-    }
+    if (!eventTrusted(event)) return;
     const target = event.target as Element | null;
     if (!target) return;
     const frame = target.closest?.(".mv-frame");
@@ -635,7 +1081,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     ) {
       return;
     }
-    for (const [key, binding] of lastBindings) {
+    for (const [, binding] of lastBindings) {
       const el = (binding.cell as { $el?: Element }).$el;
       if (el && (el === frame || el.contains(frame))) {
         const result = transition(state, {
@@ -645,7 +1091,6 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
           source: "pointer",
         });
         state = result.state;
-        void key;
         break;
       }
     }
@@ -687,9 +1132,17 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     }, 0);
   };
 
-  const onPageShow = () => {
+  const onPageShow = (event: PageTransitionEvent) => {
     if (!enabled || disposed) return;
-    tryDiscover();
+    if (event.persisted) {
+      if (state.mode === "degraded") {
+        state = transition(state, { type: "RESET_DEGRADED", now: now() }).state;
+      }
+      teardownSession();
+      startDiscoveryLoop();
+      return;
+    }
+    if (!session) startDiscoveryLoop();
   };
 
   const onPageHide = () => {
@@ -704,7 +1157,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     win.addEventListener("pointerdown", onPointerDown, true);
     win.addEventListener("blur", onBlur);
     win.addEventListener("focusin", onFocusIn);
-    win.addEventListener("pageshow", onPageShow);
+    win.addEventListener("pageshow", onPageShow as EventListener);
     win.addEventListener("pagehide", onPageHide);
     disposers.push(() => {
       win.removeEventListener("click", onPanelCapture, true);
@@ -712,7 +1165,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       win.removeEventListener("pointerdown", onPointerDown, true);
       win.removeEventListener("blur", onBlur);
       win.removeEventListener("focusin", onFocusIn);
-      win.removeEventListener("pageshow", onPageShow);
+      win.removeEventListener("pageshow", onPageShow as EventListener);
       win.removeEventListener("pagehide", onPageHide);
     });
   };
@@ -733,6 +1186,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
         if (discoveryTimer) cancel(discoveryTimer);
         discoveryTimer = null;
         teardownSession();
+        pathnameWatching = false;
       }
     },
     dispose() {
@@ -740,7 +1194,9 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       disposed = true;
       enabled = false;
       if (discoveryTimer) cancel(discoveryTimer);
+      discoveryTimer = null;
       teardownSession();
+      pathnameWatching = false;
       for (const d of disposers) d();
       disposers.length = 0;
       adapter?.dispose();
@@ -752,26 +1208,30 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     },
   };
 
-  // expose for tests
-  (handle as unknown as { __reconcile: typeof reconcileCell }).__reconcile =
-    reconcileCell;
-  (handle as unknown as { __getState: () => LockState }).__getState = () => state;
-  (handle as unknown as { __setState: (s: LockState) => void }).__setState = (
-    s,
-  ) => {
+  const testPorts = new Map<string, BoundPlayerPort>();
+  const syncTestPorts = () => {
+    testPorts.clear();
+    for (const [k, v] of ports) testPorts.set(k, v.port);
+  };
+
+  (handle as unknown as TestableHandle).__reconcile = reconcileCell;
+  (handle as unknown as TestableHandle).__getState = () => state;
+  (handle as unknown as TestableHandle).__setState = (s) => {
     state = s;
   };
-  (handle as unknown as { __applyEffects: typeof applyEffects }).__applyEffects =
-    applyEffects;
-  (handle as unknown as { __installBindings: typeof installBindings }).__installBindings =
-    installBindings;
-  (handle as unknown as { __tryDiscover: typeof tryDiscover }).__tryDiscover =
-    tryDiscover;
-  (handle as unknown as { __ports: typeof ports }).__ports = ports;
-  (handle as unknown as { __lastBindings: typeof lastBindings }).__lastBindings =
-    lastBindings;
-  (handle as unknown as { __adapter: () => HolodexAdapter | null }).__adapter = () =>
-    adapter;
+  (handle as unknown as TestableHandle).__applyEffects = applyEffects;
+  (handle as unknown as TestableHandle).__installBindings = (bindings) => {
+    syncBindings(bindings);
+  };
+  (handle as unknown as TestableHandle).__tryDiscover = tryDiscover;
+  Object.defineProperty(handle, "__ports", {
+    get() {
+      syncTestPorts();
+      return testPorts;
+    },
+  });
+  (handle as unknown as TestableHandle).__lastBindings = lastBindings;
+  (handle as unknown as TestableHandle).__adapter = () => adapter;
 
   return handle;
 }
@@ -783,7 +1243,7 @@ export type TestableHandle = AudioLockHandle & {
   __applyEffects: (effects: LockEffect[]) => Promise<void>;
   __installBindings: (bindings: CellBinding[]) => void;
   __tryDiscover: () => void;
-  __ports: Map<string, PlayerPort>;
+  __ports: Map<string, BoundPlayerPort>;
   __lastBindings: Map<string, CellBinding>;
   __adapter: () => HolodexAdapter | null;
 };
