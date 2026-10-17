@@ -1019,11 +1019,8 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     });
     state = result.state;
 
-    if (!found.store.state.multiview.muteOthers) {
-      teardownSession();
-      return;
-    }
-
+    // Mute Others off is a normal idle wait — keep store watch; wrappers already
+    // delegate when !muteOthers. root-timeout only for missing root/store.
     if (discoveryTimer) {
       cancel(discoveryTimer);
       discoveryTimer = null;

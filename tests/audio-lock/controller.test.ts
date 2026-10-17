@@ -1282,6 +1282,39 @@ describe("controller", () => {
     page.dispose();
   });
 
+  it("initial_mute_others_off_has_no_discovery_timeout", async () => {
+    const env = setupEnv([
+      { key: "a", provider: "twitch", muted: false },
+      { key: "b", provider: "twitch", muted: true },
+    ]);
+    env.store.state.multiview.muteOthers = false;
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const cellB = env.cells.get("b")!;
+    const muteOthersBefore = cellB.muteOthersCalls.length;
+    handle.setEnabled(true);
+    await vi.advanceTimersByTimeAsync(122_000);
+    expect(handle.__getState().mode).not.toBe("degraded");
+    expect(warn).not.toHaveBeenCalled();
+    // Wrapper fully delegates while Mute Others is off
+    cellB.setMuted(false);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(cellB.muteOthersCalls.length).toBeGreaterThan(muteOthersBefore);
+    // Restore snapshot and turn Mute Others on → lock engages
+    env.store.state.multiview.layoutContent.a.muted = false;
+    env.store.state.multiview.layoutContent.b.muted = true;
+    env.sdks.get("b")!.rawMuted = true;
+    env.store.commit("multiview/setMuteOthers", true);
+    await vi.advanceTimersByTimeAsync(4000);
+    expect(handle.__getState().mode).toBe("locked");
+    expect(handle.__getState().active?.key).toBe("a");
+    expect(handle.__lastBindings.size).toBe(2);
+    env.sdks.get("b")!.rawMuted = false;
+    await cellB.manualCheckMuted();
+    expect(env.sdks.get("b")!.rawMuted).toBe(true);
+    warn.mockRestore();
+  });
+
   it("duplicate_enable_keeps_guard_active", async () => {
     const env = setupEnv([
       { key: "a", provider: "twitch", muted: false },
@@ -1335,15 +1368,15 @@ describe("controller", () => {
       { key: "a", provider: "twitch", muted: false },
       { key: "b", provider: "twitch", muted: true },
     ]);
-    const cellB = env.cells.get("b")!;
+    const cell = env.cells.get("b")!;
     const empty = {} as ReturnType<typeof createTwitchSdk>;
-    cellB.$refs.player!.player = empty;
-    cellB.twPlayer = empty;
+    cell.$refs.player!.player = empty;
+    cell.twPlayer = empty;
     env.sdks.set("b", empty);
     handle = createAudioLockController({ window, document }) as TestableHandle;
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const origA = env.cells.get("a")!.setMuted;
-    const origB = cellB.setMuted;
+    const origB = cell.setMuted;
     handle.setEnabled(true);
     await vi.advanceTimersByTimeAsync(0);
     expect(handle.__getState().mode).toBe("degraded");
@@ -1353,7 +1386,7 @@ describe("controller", () => {
     });
     // wrappers restored to pre-patch functions
     expect(env.cells.get("a")!.setMuted).toBe(origA);
-    expect(cellB.setMuted).toBe(origB);
+    expect(cell.setMuted).toBe(origB);
     warn.mockRestore();
   });
 
