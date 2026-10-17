@@ -383,14 +383,73 @@ describe("createPlayerPort", () => {
     port!.dispose();
   });
 
-  it("missing public methods returns null port", () => {
-    const sdk = createTwitchSdk();
-    delete sdk.getMuted;
-    const comp = createFakePlayerComponent("twitch", sdk);
-    const cell = fakeCellFor(comp, "twitch", { readyBeforeInstall: true });
-    const port = portFor(comp, "twitch", cell);
-    // bind fails → port still created but reads unavailable; plan Task 3 replaces this
-    expect(port).not.toBeNull();
+  it("ready_instance_missing_methods_reports_mismatch", async () => {
+    // Twitch: SDK loaded but missing getMuted
+    {
+      const sdk = createTwitchSdk({ muted: true });
+      delete sdk.getMuted;
+      const comp = createFakePlayerComponent("twitch", sdk);
+      const cell = fakeCellFor(comp, "twitch", { readyBeforeInstall: false });
+      let mismatch = 0;
+      const port = portFor(comp, "twitch", cell, {
+        onContractMismatch: () => {
+          mismatch += 1;
+        },
+      });
+      fireReady(comp);
+      await flushMicrotasks();
+      expect(mismatch).toBe(1);
+      expect(await port!.readMuted()).toEqual({
+        kind: "unavailable",
+        reason: "access-error",
+      });
+      fireReady(comp);
+      await port!.readMuted();
+      await flushMicrotasks();
+      expect(mismatch).toBe(1);
+      port!.dispose();
+    }
+    // YouTube: wrapper missing unMute
+    {
+      const sdk = createYoutubeSdk({ muted: true });
+      delete sdk.unMute;
+      const comp = createFakePlayerComponent("youtube", sdk);
+      const cell = fakeCellFor(comp, "youtube", { readyBeforeInstall: false });
+      let mismatch = 0;
+      const port = portFor(comp, "youtube", cell, {
+        onContractMismatch: () => {
+          mismatch += 1;
+        },
+      });
+      fireReady(comp);
+      await flushMicrotasks();
+      expect(mismatch).toBe(1);
+      expect(await port!.readMuted()).toEqual({
+        kind: "unavailable",
+        reason: "access-error",
+      });
+      port!.dispose();
+    }
+    // Negative: Twitch script not loaded (player {}) and no READY → not-ready, no mismatch
+    {
+      const sdk = createTwitchSdk({ muted: true });
+      const comp = createFakePlayerComponent("twitch", sdk, {
+        sdkLoaded: false,
+      });
+      const cell = fakeCellFor(comp, "twitch", { readyBeforeInstall: false });
+      let mismatch = 0;
+      const port = portFor(comp, "twitch", cell, {
+        onContractMismatch: () => {
+          mismatch += 1;
+        },
+      });
+      expect(await port!.readMuted()).toEqual({
+        kind: "unavailable",
+        reason: "not-ready",
+      });
+      expect(mismatch).toBe(0);
+      port!.dispose();
+    }
   });
 
   it("onReady_fires_once_on_first_bind", async () => {

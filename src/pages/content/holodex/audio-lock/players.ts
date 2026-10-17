@@ -150,6 +150,8 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
   let methods: BoundMethods | null = null;
   let boundInstance: object | null = null;
   let readySignal = false;
+  let mismatched = false;
+  let mismatchReported = false;
   let readyListener: ((...args: unknown[]) => void) | null = null;
   let onReadyFired = false;
   const usedGrants = new Set<string>();
@@ -168,8 +170,22 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
     });
   };
 
+  const reportMismatchOnce = () => {
+    if (mismatchReported || disposed) return;
+    mismatchReported = true;
+    if (!binding.onContractMismatch) return;
+    queueMicrotask(() => {
+      if (disposed) return;
+      try {
+        binding.onContractMismatch?.();
+      } catch {
+        /* ignore */
+      }
+    });
+  };
+
   const tryBind = (): boolean => {
-    if (disposed) return false;
+    if (disposed || mismatched) return false;
     if (methods) return true;
     if (!(readySignal || lateBindReady(binding))) return false;
     const instance = binding.playerComponent.player;
@@ -180,7 +196,12 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
     } else {
       methods = bindYoutube(instance as object);
     }
-    if (!methods) return false;
+    if (!methods) {
+      // Ready + instance object but required public methods missing → contract mismatch
+      mismatched = true;
+      reportMismatchOnce();
+      return false;
+    }
     boundInstance = instance as object;
     fireOnReadyOnce();
     return true;
@@ -205,6 +226,9 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
 
     async readMuted(): Promise<ReadMuted> {
       if (disposed) return { kind: "unavailable", reason: "access-error" };
+      if (mismatched) {
+        return { kind: "unavailable", reason: "access-error" };
+      }
       if (!tryBind() || !methods) {
         return { kind: "unavailable", reason: "not-ready" };
       }

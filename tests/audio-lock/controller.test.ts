@@ -1166,6 +1166,33 @@ describe("controller", () => {
     page.dispose();
   });
 
+  it("ready_sdk_missing_methods_degrades", async () => {
+    const env = setupEnv([
+      { key: "a", provider: "twitch", muted: false },
+      { key: "b", provider: "twitch", muted: true },
+    ]);
+    const cellB = env.cells.get("b")!;
+    const empty = {} as ReturnType<typeof createTwitchSdk>;
+    cellB.$refs.player!.player = empty;
+    cellB.twPlayer = empty;
+    env.sdks.set("b", empty);
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const origA = env.cells.get("a")!.setMuted;
+    const origB = cellB.setMuted;
+    handle.setEnabled(true);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(handle.__getState().mode).toBe("degraded");
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0]?.[1]).toMatchObject({
+      code: "cell-contract-changed",
+    });
+    // wrappers restored to pre-patch functions
+    expect(env.cells.get("a")!.setMuted).toBe(origA);
+    expect(cellB.setMuted).toBe(origB);
+    warn.mockRestore();
+  });
+
   it("upstream_shape_ready_event_binds_and_guards", async () => {
     for (const provider of ["twitch", "youtube"] as const) {
       document.body.innerHTML = "";

@@ -512,6 +512,12 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
           }
         });
       },
+      onContractMismatch: () => {
+        const current = lastBindings.get(key);
+        if (current && sameIdentity(current.identity, binding.identity)) {
+          failSession("cell-contract-changed");
+        }
+      },
     };
     const port = createPlayerPort(playerBinding);
     if (port) ports.set(key, { identity: binding.identity, port });
