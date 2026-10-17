@@ -821,8 +821,33 @@ describe("transition table", () => {
     expect(reset.state.mode).toBe("discovering");
     expect(reset.state.reportedCodes["player-unavailable"]).toBe(true);
 
-    const enable = transition(degraded, { type: "ENABLE", now: 2 });
+    // degraded clears only after disable then re-enable (not duplicate ENABLE)
+    const disabled = transition(degraded, { type: "DISABLE", now: 2 });
+    const enable = transition(disabled.state, { type: "ENABLE", now: 3 });
     expect(enable.state.mode).toBe("discovering");
+  });
+
+  it("enable_is_idempotent_when_already_enabled", () => {
+    const a = id("a");
+    const cases: LockState[] = [
+      enabledLocked(a),
+      enabledBootstrap(),
+      {
+        ...createInitialState(),
+        extensionEnabled: true,
+        muteOthers: true,
+        mode: "degraded",
+        reportedCodes: { "player-unavailable": true },
+        epoch: 3,
+        active: a,
+        selection: "selected",
+      },
+    ];
+    for (const state of cases) {
+      const result = transition(state, { type: "ENABLE", now: 99 });
+      expect(result.state).toEqual(state);
+      expect(result.effects).toEqual([]);
+    }
   });
 
   it("classifyLayout_add_reorder_remove_replace", () => {

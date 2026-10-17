@@ -1186,6 +1186,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
   const handle: AudioLockHandle = {
     setEnabled(value: boolean) {
       if (disposed) return;
+      if (value === enabled) return;
       enabled = value;
       if (value) {
         const result = transition(state, { type: "ENABLE", now: now() });

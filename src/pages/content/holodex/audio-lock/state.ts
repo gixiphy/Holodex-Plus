@@ -389,6 +389,10 @@ export function transition(
 
   switch (event.type) {
     case "ENABLE": {
+      // Idempotent when already enabled — do not bounce live sessions into discovering.
+      if (state.extensionEnabled === true) {
+        return { state, effects: [] };
+      }
       let next = {
         ...state,
         extensionEnabled: true,

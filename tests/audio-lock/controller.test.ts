@@ -1166,6 +1166,54 @@ describe("controller", () => {
     page.dispose();
   });
 
+  it("duplicate_enable_keeps_guard_active", async () => {
+    const env = setupEnv([
+      { key: "a", provider: "twitch", muted: false },
+      { key: "b", provider: "twitch", muted: true },
+    ]);
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    handle.setEnabled(true);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(handle.__getState().mode).toBe("locked");
+    const epoch = handle.__getState().epoch;
+    handle.setEnabled(true);
+    handle.setEnabled(true);
+    const sdkB = env.sdks.get("b")!;
+    sdkB.rawMuted = false;
+    await env.cells.get("b")!.manualCheckMuted();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(sdkB.rawMuted).toBe(true);
+    expect(handle.__getState().mode).toBe("locked");
+    expect(handle.__getState().active?.key).toBe("a");
+    expect(handle.__getState().epoch).toBe(epoch);
+  });
+
+  it("duplicate_enable_keeps_degraded_latch", async () => {
+    const env = setupEnv([
+      { key: "a", provider: "twitch", muted: false },
+      { key: "b", provider: "twitch", muted: true },
+    ]);
+    const hang = createTwitchSdk({ hangRead: true });
+    {
+      const __p = createFakePlayerComponent("twitch", hang);
+      mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
+    }
+    env.sdks.set("b", hang);
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    handle.setEnabled(true);
+    const idB = handle.__lastBindings.get("b")!.identity;
+    for (let i = 0; i < 3; i++) {
+      const p = handle.__reconcile(idB);
+      await vi.advanceTimersByTimeAsync(750);
+      await p;
+    }
+    expect(handle.__getState().mode).toBe("degraded");
+    const setMutedAfterDegrade = env.cells.get("b")!.setMuted;
+    handle.setEnabled(true);
+    expect(handle.__getState().mode).toBe("degraded");
+    expect(env.cells.get("b")!.setMuted).toBe(setMutedAfterDegrade);
+  });
+
   it("ready_sdk_missing_methods_degrades", async () => {
     const env = setupEnv([
       { key: "a", provider: "twitch", muted: false },
