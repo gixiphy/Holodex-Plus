@@ -15,6 +15,7 @@ import {
   createYoutubeSdk,
   flushMicrotasks,
   focusIframeAndBlurWindow,
+  moveFocusToIframeWithoutBlur,
   postTwitchUpdateState,
   returnFocusToPageWithoutFocusIn,
   type FakeEnv,
@@ -819,5 +820,202 @@ describe("twitch broken SDK / no-degrade", () => {
       spy.mock.calls.filter((c) => c[0]?.params === true).length;
     const remuteViaSdk = env.sdks.get("b")!.muteCalls - muteCallsBefore;
     expect(remuteViaPost + remuteViaSdk).toBeGreaterThanOrEqual(1);
+  });
+
+  function lockOnTwitch(handle: TestableHandle): void {
+    handle.__setState({
+      ...handle.__getState(),
+      mode: "locked",
+      selection: "selected",
+      active: handle.__lastBindings.get("b")!.identity,
+      epoch: 1,
+      intent: null,
+    });
+  }
+
+  it("iframe_to_iframe_focus_reverse_switch_healthy_twitch", async () => {
+    const env = setupBrokenEnv({
+      healthyTwitch: true,
+      twitchBroken: false,
+      twitchMuted: false,
+    });
+    env.store.state.multiview.layoutContent.a.muted = true;
+    env.store.state.multiview.layoutContent.b.muted = false;
+    env.sdks.get("a")!.rawMuted = true;
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    lockOnTwitch(handle);
+    await env.cells.get("a")!.manualCheckMuted();
+    await flushMicrotasks();
+    await vi.advanceTimersByTimeAsync(1600);
+
+    const twIframe = env.cells.get("b")!.$el.querySelector("iframe") as HTMLIFrameElement;
+    const ytIframe = env.cells.get("a")!.$el.querySelector("iframe") as HTMLIFrameElement;
+    focusIframeAndBlurWindow(twIframe);
+    await vi.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(3000);
+
+    let blurCount = 0;
+    let focusInCount = 0;
+    const onBlur = () => {
+      blurCount += 1;
+    };
+    const onFocusIn = () => {
+      focusInCount += 1;
+    };
+    window.addEventListener("blur", onBlur);
+    window.addEventListener("focusin", onFocusIn);
+    moveFocusToIframeWithoutBlur(ytIframe);
+    expect(blurCount).toBe(0);
+    expect(focusInCount).toBe(0);
+
+    const muteCallsBefore = env.sdks.get("a")!.muteCalls;
+    env.sdks.get("a")!.rawMuted = false;
+    await pollSeconds(env, handle, 2);
+
+    expect(handle.__getState().active?.key).toBe("a");
+    expect(env.sdks.get("b")!.rawMuted).toBe(true);
+    expect(env.sdks.get("a")!.rawMuted).toBe(false);
+    expect(env.sdks.get("a")!.muteCalls).toBe(muteCallsBefore);
+    expect(env.store.state.multiview.layoutContent.a.muted).toBe(false);
+    expect(env.store.state.multiview.layoutContent.b.muted).toBe(true);
+    expect(blurCount).toBe(0);
+    expect(focusInCount).toBe(0);
+    window.removeEventListener("blur", onBlur);
+    window.removeEventListener("focusin", onFocusIn);
+  });
+
+  it("iframe_to_iframe_focus_reverse_switch_broken_twitch", async () => {
+    const env = setupBrokenEnv();
+    env.store.state.multiview.layoutContent.a.muted = true;
+    env.store.state.multiview.layoutContent.b.muted = false;
+    env.sdks.get("a")!.rawMuted = true;
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    lockOnTwitch(handle);
+    await env.cells.get("a")!.manualCheckMuted();
+    await flushMicrotasks();
+    await vi.advanceTimersByTimeAsync(1600);
+
+    const twIframe = env.cells.get("b")!.$el.querySelector("iframe") as HTMLIFrameElement;
+    const ytIframe = env.cells.get("a")!.$el.querySelector("iframe") as HTMLIFrameElement;
+    postTwitchUpdateState(twIframe, { muted: false });
+    focusIframeAndBlurWindow(twIframe);
+    await vi.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(3000);
+
+    let blurCount = 0;
+    let focusInCount = 0;
+    const onBlur = () => {
+      blurCount += 1;
+    };
+    const onFocusIn = () => {
+      focusInCount += 1;
+    };
+    window.addEventListener("blur", onBlur);
+    window.addEventListener("focusin", onFocusIn);
+    moveFocusToIframeWithoutBlur(ytIframe);
+    expect(blurCount).toBe(0);
+    expect(focusInCount).toBe(0);
+
+    const spy = env.postSpies.get("b")!;
+    spy.mockClear();
+    spy.mockImplementation((payload: { params?: boolean }) => {
+      if (payload?.params === true) postTwitchUpdateState(twIframe, { muted: true });
+    });
+    const muteCallsBefore = env.sdks.get("a")!.muteCalls;
+    env.sdks.get("a")!.rawMuted = false;
+    await pollSeconds(env, handle, 2);
+
+    expect(handle.__getState().active?.key).toBe("a");
+    expect(spy.mock.calls.filter((c) => c[0]?.params === true).length).toBeGreaterThanOrEqual(1);
+    expect(env.sdks.get("a")!.rawMuted).toBe(false);
+    expect(env.sdks.get("a")!.muteCalls).toBe(muteCallsBefore);
+    expect(env.store.state.multiview.layoutContent.a.muted).toBe(false);
+    expect(env.store.state.multiview.layoutContent.b.muted).toBe(true);
+    window.removeEventListener("blur", onBlur);
+    window.removeEventListener("focusin", onFocusIn);
+  });
+
+  it("focused_iframe_poll_does_not_refresh_same_cell_intent", async () => {
+    const env = setupBrokenEnv({
+      healthyTwitch: true,
+      twitchBroken: false,
+      twitchMuted: false,
+    });
+    env.store.state.multiview.layoutContent.a.muted = true;
+    env.store.state.multiview.layoutContent.b.muted = false;
+    env.sdks.get("a")!.rawMuted = true;
+    env.sdks.get("b")!.rawMuted = false;
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    lockOnTwitch(handle);
+    await env.cells.get("a")!.manualCheckMuted();
+    await flushMicrotasks();
+    await vi.advanceTimersByTimeAsync(1600);
+
+    const ytIframe = env.cells.get("a")!.$el.querySelector("iframe") as HTMLIFrameElement;
+    moveFocusToIframeWithoutBlur(ytIframe);
+    await pollSeconds(env, handle, 3);
+    const muteCallsBefore = env.sdks.get("a")!.muteCalls;
+    const twitchMutedBefore = env.sdks.get("b")!.rawMuted;
+    env.sdks.get("a")!.rawMuted = false;
+    await pollSeconds(env, handle, 2);
+
+    expect(handle.__getState().active?.key).toBe("b");
+    expect(
+      env.sdks.get("a")!.muteCalls > muteCallsBefore || env.sdks.get("a")!.rawMuted === true,
+    ).toBe(true);
+    expect(env.sdks.get("b")!.rawMuted).toBe(twitchMutedBefore);
+  });
+
+  it("focused_iframe_poll_ignored_when_hidden_or_preexisting", async () => {
+    const hidden = setupBrokenEnv({
+      healthyTwitch: true,
+      twitchBroken: false,
+      twitchMuted: false,
+    });
+    hidden.sdks.get("a")!.rawMuted = true;
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    lockOnTwitch(handle);
+    await hidden.cells.get("a")!.manualCheckMuted();
+    await flushMicrotasks();
+    vi.spyOn(document, "visibilityState", "get").mockReturnValue("hidden");
+    const hiddenYt = hidden.cells.get("a")!.$el.querySelector("iframe") as HTMLIFrameElement;
+    moveFocusToIframeWithoutBlur(hiddenYt);
+    hidden.sdks.get("a")!.rawMuted = false;
+    await pollSeconds(hidden, handle, 2);
+    expect(handle.__getState().active?.key).toBe("b");
+    expect(hidden.sdks.get("a")!.rawMuted).toBe(true);
+    handle.dispose();
+
+    const preexisting = setupBrokenEnv({
+      healthyTwitch: true,
+      twitchBroken: false,
+      twitchMuted: false,
+    });
+    preexisting.sdks.get("a")!.rawMuted = true;
+    const preYt = preexisting.cells.get("a")!.$el.querySelector("iframe") as HTMLIFrameElement;
+    moveFocusToIframeWithoutBlur(preYt);
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    lockOnTwitch(handle);
+    await preexisting.cells.get("a")!.manualCheckMuted();
+    await flushMicrotasks();
+    preexisting.sdks.get("a")!.rawMuted = false;
+    await pollSeconds(preexisting, handle, 2);
+    expect(handle.__getState().active?.key).toBe("b");
+    expect(preexisting.sdks.get("a")!.rawMuted).toBe(true);
   });
 });

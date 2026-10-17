@@ -567,6 +567,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       const entry = ports.get(key);
       if (!entry || !sameIdentity(entry.identity, identity)) return;
       if (state.mode === "degraded" || !enabled) return;
+      syncFocusedIframeIntent();
       const read = await entry.port.readMuted();
       if (!sameIdentity(lastBindings.get(key)?.identity ?? null, identity)) return;
       if (!enabled || state.mode === ("degraded" as LockState["mode"])) return;
@@ -683,6 +684,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
           if (!value) cancelFallback();
           return;
         }
+        syncFocusedIframeIntent();
         const result = transition(state, {
           type: "OBSERVED_MUTED",
           now: now(),
@@ -971,6 +973,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       inFlightReads.clear();
       pausedByKey.clear();
       prevSnapshot = null;
+      lastFocusedFrame = null;
       return;
     }
     const s = session;
@@ -1000,6 +1003,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     inFlightReads.clear();
     pausedByKey.clear();
     prevSnapshot = null;
+    lastFocusedFrame = null;
     cancelStoreSettle();
     bootstrapFallbackStarted = 0;
   };
@@ -1090,6 +1094,8 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       store,
       observeTarget,
     };
+    lastFocusedFrame =
+      doc.activeElement?.tagName === "IFRAME" ? doc.activeElement : null;
     const beat = () => {
       if (!session) return;
       rescan();
@@ -1201,31 +1207,59 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     }
   };
 
+  let lastFocusedFrame: Element | null = null;
+
+  const findBindingForFrame = (active: Element): CellBinding | null => {
+    for (const [, binding] of lastBindings) {
+      const el = (binding.cell as { $el?: Element }).$el;
+      if (el && el.contains(active)) return binding;
+    }
+    return null;
+  };
+
+  const syncFocusedIframeIntent = () => {
+    if (!enabled || !state.muteOthers) return;
+    if (doc.visibilityState === "hidden") return;
+    const active = doc.activeElement;
+    if (!active || active.tagName !== "IFRAME") {
+      lastFocusedFrame = null;
+      return;
+    }
+    if (active === lastFocusedFrame) return;
+    lastFocusedFrame = active;
+    const binding = findBindingForFrame(active);
+    if (!binding) return;
+    state = transition(state, {
+      type: "IFRAME_INTENT",
+      now: now(),
+      identity: binding.identity,
+      source: "iframe",
+    }).state;
+  };
+
   const onBlur = () => {
     schedule(() => {
       if (!enabled) return;
       if (doc.visibilityState === "hidden") return;
       const active = doc.activeElement;
       if (!active || active.tagName !== "IFRAME") return;
-      for (const [, binding] of lastBindings) {
-        const el = (binding.cell as { $el?: Element }).$el;
-        if (el && el.contains(active)) {
-          const result = transition(state, {
-            type: "IFRAME_INTENT",
-            now: now(),
-            identity: binding.identity,
-            source: "iframe",
-          });
-          state = result.state;
-          break;
-        }
-      }
+      const binding = findBindingForFrame(active);
+      if (!binding) return;
+      lastFocusedFrame = active;
+      const result = transition(state, {
+        type: "IFRAME_INTENT",
+        now: now(),
+        identity: binding.identity,
+        source: "iframe",
+      });
+      state = result.state;
     }, 0);
   };
 
   const onFocusIn = () => {
     schedule(() => {
       if (doc.activeElement && doc.activeElement.tagName !== "IFRAME") {
+        lastFocusedFrame = null;
         if (state.intent?.source === "iframe") {
           state = { ...state, intent: null };
         }

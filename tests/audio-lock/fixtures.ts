@@ -854,6 +854,11 @@ export function focusIframeAndBlurWindow(iframe: HTMLIFrameElement): void {
   window.dispatchEvent(new Event("blur"));
 }
 
+/** Focus is already inside a child frame; the next click only moves activeElement. */
+export function moveFocusToIframeWithoutBlur(iframe: HTMLIFrameElement): void {
+  vi.spyOn(document, "activeElement", "get").mockReturnValue(iframe);
+}
+
 /**
  * Simulate clicking a non-focusable blank region: activeElement returns to body
  * and only window focus fires (no focusin). Avoid element.focus()/blur() because
