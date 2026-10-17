@@ -50,7 +50,8 @@ describe("createHolodexAdapter", () => {
       store: storeOk,
       key: "1",
       provider: "youtube",
-      player: createFakePlayerComponent("youtube", null, false),
+      player: createFakePlayerComponent("youtube", null),
+      readyBeforeInstall: false,
     });
     createFakeMultiviewRoot(storeOk, [cellOk]);
     window.history.pushState({}, "", "/multiview");
@@ -188,7 +189,8 @@ describe("createHolodexAdapter", () => {
       store,
       key: "a",
       provider: "youtube",
-      player: createFakePlayerComponent("youtube", null, false),
+      player: createFakePlayerComponent("youtube", null),
+      readyBeforeInstall: false,
     });
     const cellB = createFakeVideoCell({
       store,

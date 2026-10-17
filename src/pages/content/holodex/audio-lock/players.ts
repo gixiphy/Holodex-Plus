@@ -8,17 +8,18 @@ import { TIMING } from "./contracts";
 
 export type PlayerBinding = {
   identity: CellIdentity;
-  /** Verified player component with optional ready hooks and SDK instance. */
+  /** Parent VideoCell: holds twPlayer/ytPlayer (VideoCell.vue:79-80, :210-216). */
+  cell: { twPlayer?: unknown; ytPlayer?: unknown };
+  /** $refs.player: TwitchPlayer/YoutubePlayer (PlayerMixin). */
   playerComponent: {
     player?: unknown;
-    $on?: (event: string, cb: () => void) => void;
-    $off?: (event: string, cb: () => void) => void;
-    twPlayer?: unknown;
-    ytPlayer?: unknown;
+    $el?: Element;
+    $on?: (event: string, cb: (...args: unknown[]) => void) => void;
+    $off?: (event: string, cb: (...args: unknown[]) => void) => void;
   };
   provider: "youtube" | "twitch";
-  isReady: () => boolean;
   onReady?: () => void;
+  onContractMismatch?: () => void;
 };
 
 export type BoundPlayerPort = PlayerPort & { isBound(): boolean };
@@ -111,6 +112,35 @@ function interpretMuted(value: unknown): ReadMuted {
   return { kind: "known", muted: value };
 }
 
+/**
+ * Late-bind when READY fired before our $on (VideoCell.vue:79-80, :210-216).
+ * Twitch: cell.twPlayer === playerComponent.player (TwitchPlayer.vue:94).
+ * YouTube: cell.ytPlayer.getIframe() contained in current component $el
+ * (rejects stale ytPlayer after :key rebuild — VideoCell.vue:30, :134-139).
+ */
+function lateBindReady(binding: PlayerBinding): boolean {
+  const { cell, playerComponent, provider } = binding;
+  if (provider === "twitch") {
+    const tw = cell.twPlayer;
+    return (
+      typeof tw === "object" &&
+      tw !== null &&
+      tw === playerComponent.player
+    );
+  }
+  try {
+    const yt = cell.ytPlayer as { getIframe?: () => Element } | null | undefined;
+    if (!yt || typeof yt !== "object") return false;
+    if (typeof yt.getIframe !== "function") return false;
+    const iframe = yt.getIframe();
+    const el = playerComponent.$el;
+    if (!el || typeof el.contains !== "function") return false;
+    return el.contains(iframe);
+  } catch {
+    return false;
+  }
+}
+
 export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null {
   const cellKey = binding.playerComponent;
   const existing = portsByCell.get(cellKey as object);
@@ -119,7 +149,8 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
   let disposed = false;
   let methods: BoundMethods | null = null;
   let boundInstance: object | null = null;
-  let readyListener: (() => void) | null = null;
+  let readySignal = false;
+  let readyListener: ((...args: unknown[]) => void) | null = null;
   let onReadyFired = false;
   const usedGrants = new Set<string>();
 
@@ -140,17 +171,13 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
   const tryBind = (): boolean => {
     if (disposed) return false;
     if (methods) return true;
-    if (!binding.isReady()) return false;
+    if (!(readySignal || lateBindReady(binding))) return false;
     const instance = binding.playerComponent.player;
     if (!instance || typeof instance !== "object") return false;
 
     if (binding.provider === "twitch") {
-      const tw = binding.playerComponent.twPlayer;
-      if (tw !== undefined && tw !== instance) return false;
       methods = bindTwitch(instance as object);
     } else {
-      const yt = binding.playerComponent.ytPlayer;
-      if (yt === undefined && !binding.playerComponent.player) return false;
       methods = bindYoutube(instance as object);
     }
     if (!methods) return false;
@@ -159,11 +186,9 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
     return true;
   };
 
-  // Late-bind: if already ready, bind now; else wait for Vue ready once.
-  if (binding.isReady()) {
-    tryBind();
-  } else if (typeof binding.playerComponent.$on === "function") {
+  if (!tryBind() && typeof binding.playerComponent.$on === "function") {
     readyListener = () => {
+      readySignal = true;
       tryBind();
     };
     try {

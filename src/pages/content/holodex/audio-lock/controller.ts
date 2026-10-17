@@ -485,12 +485,9 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     }
     const playerBinding: PlayerBinding = {
       identity: binding.identity,
+      cell: binding.cell as PlayerBinding["cell"],
       playerComponent: binding.playerComponent as PlayerBinding["playerComponent"],
       provider: binding.provider,
-      isReady: () => {
-        const comp = binding.playerComponent as { ready?: boolean } | null;
-        return comp?.ready === true;
-      },
       onReady: () => {
         const current = lastBindings.get(key);
         if (!current || !sameIdentity(current.identity, binding.identity)) return;

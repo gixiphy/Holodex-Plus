@@ -1,6 +1,24 @@
 /**
  * Minimal fake Vue/store/player factories for audio-lock contract tests.
  * Does not read or copy Holodex source.
+ *
+ * Upstream shape (.ref/holodex @ 8c6d0da) — keep in sync:
+ * - PlayerMixin.ts:27-35 — data() only player/retryForMengen/updateTimer (no ready boolean)
+ * - PlayerMixin.ts:43-48 / :46 — READY via this.$emit("ready", player)
+ * - TwitchPlayer.vue:40-43, :86 — player starts {}; SDK instance assigned before READY
+ * - TwitchPlayer.vue:92-95 — SDK "ready" → playerReady(this.player); emit arg is component.player
+ * - TwitchPlayer.vue:116-122 — isMuted→getMuted, setMute→setMuted
+ * - YoutubePlayer.vue:53-67 — wrapper player assigned before READY
+ * - YoutubePlayer.vue:69 — READY arg is e.target (raw YT.Player), not component.player
+ * - YoutubePlayer.vue:104-107, :117-119 — setMute/mute/unMute, isMuted
+ * - YoutubePlayer.vue:1-3 / TwitchPlayer.vue:1-3 — embed iframe inside component $el
+ * - VideoCell.vue:11-25, :27-49 — ref="player", @ready="onReady"; YouTube :key rebuilds
+ * - VideoCell.vue:79-80 — ytPlayer/twPlayer on VideoCell, not player component
+ * - VideoCell.vue:210-216 — onReady assigns twPlayer/ytPlayer
+ * - VideoCell.vue:134-139 — cellContent change nulls the other provider's ref only
+ *
+ * This file's player component must NOT have ready, twPlayer, or ytPlayer fields;
+ * SDK refs live only on FakeVideoCell.
  */
 
 import { vi } from "vitest";
@@ -241,32 +259,63 @@ export function createYoutubeSdk(opts?: {
   return sdk;
 }
 
+export type FakeYtRaw = {
+  getIframe(): HTMLIFrameElement;
+};
+
+const youtubeRaws = new WeakMap<FakePlayerComponent, FakeYtRaw>();
+
+export function youtubeRawFor(comp: FakePlayerComponent): FakeYtRaw | null {
+  return youtubeRaws.get(comp) ?? null;
+}
+
 export type FakePlayerComponent = {
-  player: FakeSdk | null;
-  twPlayer?: FakeSdk | null;
-  ytPlayer?: FakeSdk | null;
-  ready: boolean;
-  listeners: Record<string, Array<() => void>>;
-  $on: (event: string, cb: () => void) => void;
-  $off: (event: string, cb: () => void) => void;
+  player: FakeSdk | Record<string, never> | null;
+  $el: HTMLElement;
+  listeners: Record<string, Array<(...args: unknown[]) => void>>;
+  $on: (event: string, cb: (...args: unknown[]) => void) => void;
+  $off: (event: string, cb: (...args: unknown[]) => void) => void;
   isMuted: () => Promise<boolean>;
   setMute: (v: boolean) => Promise<void>;
   updateListeners: () => void;
   muteWatcherCalls: number;
   lastMuteProp: boolean;
+  /** test-only: which provider this component fakes */
+  __provider: "youtube" | "twitch";
 };
 
 export function createFakePlayerComponent(
   provider: "youtube" | "twitch",
   sdk: FakeSdk | null,
-  ready = true,
+  opts?: { sdkLoaded?: boolean; elementId?: string },
 ): FakePlayerComponent {
+  const elementId = opts?.elementId ?? `player-${Math.random().toString(36).slice(2)}`;
+  const $el = document.createElement("div");
+  $el.id = elementId;
+  const iframe = document.createElement("iframe");
+  if (provider === "twitch") {
+    iframe.src = `https://player.twitch.tv/?channel=${elementId}&parent=localhost`;
+  } else {
+    iframe.src = `https://www.youtube.com/embed/${elementId}`;
+  }
+  $el.appendChild(iframe);
+
+  let player: FakeSdk | Record<string, never> | null;
+  if (provider === "twitch") {
+    // TwitchPlayer.vue:40-43 / :86 — {} until script loads; then SDK before READY
+    player = opts?.sdkLoaded === false ? {} : sdk;
+  } else {
+    // YoutubePlayer.vue:53-67 — wrapper exists before READY
+    player = sdk;
+  }
+
   const comp: FakePlayerComponent = {
-    player: sdk,
-    ready,
+    player,
+    $el,
     listeners: {},
     muteWatcherCalls: 0,
     lastMuteProp: false,
+    __provider: provider,
     $on(event, cb) {
       (comp.listeners[event] ??= []).push(cb);
     },
@@ -274,12 +323,16 @@ export function createFakePlayerComponent(
       comp.listeners[event] = (comp.listeners[event] ?? []).filter((x) => x !== cb);
     },
     async isMuted() {
-      if (!sdk) throw new Error("not ready");
+      if (!sdk || typeof sdk !== "object" || !("rawMuted" in sdk)) {
+        throw new Error("not ready");
+      }
       if (provider === "twitch") return !!(await sdk.getMuted?.());
       return !!(await sdk.isMuted?.());
     },
     async setMute(v: boolean) {
-      if (!sdk) throw new Error("not ready");
+      if (!sdk || typeof sdk !== "object" || !("rawMuted" in sdk)) {
+        throw new Error("not ready");
+      }
       if (provider === "twitch") await sdk.setMuted?.(v);
       else if (v) await sdk.mute?.();
       else await sdk.unMute?.();
@@ -288,14 +341,26 @@ export function createFakePlayerComponent(
       // emits @mute via cell — tests wire separately
     },
   };
-  if (provider === "twitch") comp.twPlayer = sdk;
-  else comp.ytPlayer = sdk;
+
+  if (provider === "youtube") {
+    const raw: FakeYtRaw = {
+      getIframe() {
+        return iframe;
+      },
+    };
+    youtubeRaws.set(comp, raw);
+  }
+
   return comp;
 }
 
+/** PlayerMixin.ts:46 — emit ready with Twitch=component.player / YouTube=raw e.target */
 export function fireReady(comp: FakePlayerComponent): void {
-  comp.ready = true;
-  for (const cb of comp.listeners.ready ?? []) cb();
+  const arg =
+    comp.__provider === "youtube" ? youtubeRawFor(comp) : comp.player;
+  for (const cb of [...(comp.listeners.ready ?? [])]) {
+    cb(arg);
+  }
 }
 
 export type FakeVideoCell = {
@@ -309,6 +374,10 @@ export type FakeVideoCell = {
   isTwitchVideo: boolean;
   firstPlay: boolean;
   editMode: boolean;
+  /** VideoCell.vue:79-80 */
+  twPlayer: unknown | null;
+  ytPlayer: unknown | null;
+  onReady: (player: unknown) => void;
   manualCheckMuted: (...args: unknown[]) => unknown;
   setMuted: (val: boolean) => void;
   muteOthers: (id: string | number) => void;
@@ -326,6 +395,28 @@ export type FakeVideoCell = {
   applyMuteProp: (prop: boolean) => void;
 };
 
+/** Wire player $on("ready") like VideoCell template @ready; optionally fire READY. */
+export function mountPlayerOnCell(
+  cell: FakeVideoCell,
+  player: FakePlayerComponent,
+  opts?: { readyBeforeInstall?: boolean },
+): void {
+  const prev = cell.$refs.player;
+  if (prev?.$el && prev.$el !== player.$el && prev.$el.parentElement === cell.$el) {
+    prev.$el.remove();
+  }
+  cell.$refs.player = player;
+  if (player.$el.parentElement !== cell.$el) {
+    cell.$el.appendChild(player.$el);
+  }
+  player.$on("ready", (p: unknown) => {
+    cell.onReady(p);
+  });
+  if (opts?.readyBeforeInstall !== false) {
+    fireReady(player);
+  }
+}
+
 export function createFakeVideoCell(opts: {
   store: FakeStore;
   key: string;
@@ -334,6 +425,7 @@ export function createFakeVideoCell(opts: {
   name?: string;
   el?: HTMLElement;
   parentEl?: HTMLElement;
+  readyBeforeInstall?: boolean;
 }): FakeVideoCell {
   const content = opts.store.state.multiview.layoutContent[opts.key];
   if (!content) throw new Error(`missing content for ${opts.key}`);
@@ -349,7 +441,7 @@ export function createFakeVideoCell(opts: {
     item: { i: opts.key },
     $store: opts.store,
     $el: el,
-    $refs: { player: opts.player ?? undefined },
+    $refs: {},
     $options: { name: opts.name ?? `Cell_${Math.random().toString(36).slice(2)}` },
     cellContent: content,
     get muted() {
@@ -362,6 +454,16 @@ export function createFakeVideoCell(opts: {
     isTwitchVideo: opts.provider === "twitch",
     firstPlay: true,
     editMode: false,
+    twPlayer: null,
+    ytPlayer: null,
+    onReady(player: unknown) {
+      // VideoCell.vue:210-216
+      if (player && cell.isTwitchVideo) {
+        cell.twPlayer = player;
+      } else if (player) {
+        cell.ytPlayer = player;
+      }
+    },
     muteOthersCalls: [],
     setMutedCalls: [],
     watcherCalls: 0,
@@ -430,6 +532,12 @@ export function createFakeVideoCell(opts: {
     },
     lastMuteProp: false,
   };
+
+  if (opts.player) {
+    mountPlayerOnCell(cell, opts.player, {
+      readyBeforeInstall: opts.readyBeforeInstall,
+    });
+  }
 
   cell.__orig = {
     manualCheckMuted: cell.manualCheckMuted.bind(cell),
@@ -508,7 +616,7 @@ export function addFakeCell(
     key: string;
     provider: "youtube" | "twitch";
     muted?: boolean | "omit";
-    ready?: boolean;
+    readyBeforeInstall?: boolean;
     contentId?: string;
   },
 ): FakeVideoCell {
@@ -528,17 +636,14 @@ export function addFakeCell(
     opts.provider === "twitch"
       ? createTwitchSdk({ muted: opts.muted === true })
       : createYoutubeSdk({ muted: opts.muted === true });
-  const player = createFakePlayerComponent(
-    opts.provider,
-    sdk,
-    opts.ready !== false,
-  );
+  const player = createFakePlayerComponent(opts.provider, sdk);
   const cell = createFakeVideoCell({
     store: env.store,
     key: opts.key,
     provider: opts.provider,
     player,
     parentEl: env.multiview.$el,
+    readyBeforeInstall: opts.readyBeforeInstall,
   });
   env.multiview.$children.push(cell);
   (env.multiview.$refs.videoCell as FakeVideoCell[]).push(cell);
@@ -571,6 +676,8 @@ export function replaceCellContent(
 ): void {
   const cell = env.cells.get(key);
   if (!cell) throw new Error(`no cell ${key}`);
+  const prevProvider = cell.isTwitchVideo ? "twitch" : "youtube";
+  const sameProvider = prevProvider === opts.provider;
   const content: FakeContent = {
     id: opts.contentId,
     type: "video",
@@ -581,12 +688,21 @@ export function replaceCellContent(
   env.store.state.multiview.layoutContent[key] = content;
   cell.cellContent = content;
   cell.isTwitchVideo = opts.provider === "twitch";
+  // VideoCell.vue:134-139 — only null the *other* provider's ref
+  if (!sameProvider) {
+    if (opts.provider === "youtube") cell.twPlayer = null;
+    else cell.ytPlayer = null;
+  }
   const sdk =
     opts.provider === "twitch"
       ? createTwitchSdk({ muted: false })
       : createYoutubeSdk({ muted: false });
-  const player = createFakePlayerComponent(opts.provider, sdk, true);
-  cell.$refs.player = player;
+  const player = createFakePlayerComponent(opts.provider, sdk, {
+    elementId: opts.contentId,
+  });
+  // YouTube same-provider (:key rebuild): new component, leave stale ytPlayer, no READY yet
+  const readyBeforeInstall = !(sameProvider && opts.provider === "youtube");
+  mountPlayerOnCell(cell, player, { readyBeforeInstall });
   env.sdks.set(key, sdk);
   env.store.commit("multiview/setLayoutContentById", { id: key, content });
 }
@@ -599,8 +715,9 @@ export function replacePlayer(env: FakeEnv, key: string): FakePlayerComponent {
     provider === "twitch"
       ? createTwitchSdk({ muted: cell.$refs.player ? false : true })
       : createYoutubeSdk({ muted: false });
-  const player = createFakePlayerComponent(provider, sdk, true);
-  cell.$refs.player = player;
+  const player = createFakePlayerComponent(provider, sdk);
+  // New component; do not clear cell.twPlayer/ytPlayer before READY (onReady updates them)
+  mountPlayerOnCell(cell, player, { readyBeforeInstall: true });
   env.sdks.set(key, sdk);
   return player;
 }

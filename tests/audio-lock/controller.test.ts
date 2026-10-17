@@ -22,6 +22,7 @@ import {
   createYoutubeSdk,
   effectiveMuteProp,
   fireReady,
+  mountPlayerOnCell,
   flushMicrotasks,
   removeFakeCell,
   replaceCellContent,
@@ -40,8 +41,8 @@ function setupMixed() {
   });
   const ytSdk = createYoutubeSdk({ muted: false });
   const twSdk = createTwitchSdk({ muted: false }); // reports unmuted while store muted
-  const ytPlayer = createFakePlayerComponent("youtube", ytSdk, true);
-  const twPlayer = createFakePlayerComponent("twitch", twSdk, true);
+  const ytPlayer = createFakePlayerComponent("youtube", ytSdk);
+  const twPlayer = createFakePlayerComponent("twitch", twSdk);
   const cellA = createFakeVideoCell({
     store,
     key: "a",
@@ -164,7 +165,7 @@ describe("controller", () => {
           ? createTwitchSdk({ muted: false })
           : createYoutubeSdk({ muted: false });
       sdks.push(sdk);
-      const player = createFakePlayerComponent(provider, sdk, true);
+      const player = createFakePlayerComponent(provider, sdk);
       const cell = createFakeVideoCell({ store, key, provider, player });
       cell.editMode = true; // not eligible for fallback
       cells.push(cell);
@@ -210,7 +211,7 @@ describe("controller", () => {
       ],
     });
     const sdk = createTwitchSdk({ muted: true });
-    const player = createFakePlayerComponent("twitch", sdk, true);
+    const player = createFakePlayerComponent("twitch", sdk);
     const cellA = createFakeVideoCell({
       store,
       key: "a",
@@ -260,9 +261,9 @@ describe("controller", () => {
     handle.__ports.delete("a");
     const port = createPlayerPort({
       identity: idA,
+      cell: cellA,
       playerComponent: player,
       provider: "twitch",
-      isReady: () => true,
     });
     expect(port).toBeTruthy();
     const restored = await port!.restoreSelectedAudio(grant);
@@ -396,6 +397,7 @@ describe("controller", () => {
       key: string;
       provider: "youtube" | "twitch";
       muted?: boolean | "omit";
+      readyBeforeInstall?: boolean;
     }>,
   ): FakeEnv {
     const store = createFakeStore({ muteOthers: true, cells });
@@ -407,12 +409,13 @@ describe("controller", () => {
         c.provider === "twitch"
           ? createTwitchSdk({ muted: c.muted === true })
           : createYoutubeSdk({ muted: c.muted === true });
-      const player = createFakePlayerComponent(c.provider, sdk, true);
+      const player = createFakePlayerComponent(c.provider, sdk);
       const cell = createFakeVideoCell({
         store,
         key: c.key,
         provider: c.provider,
         player,
+        readyBeforeInstall: c.readyBeforeInstall,
       });
       cellList.push(cell);
       cellMap.set(c.key, cell);
@@ -435,7 +438,7 @@ describe("controller", () => {
     expect(handle.__getState().active?.key).toBe("a");
 
     await vi.advanceTimersByTimeAsync(121_000);
-    addFakeCell(env, { key: "b", provider: "twitch", muted: true, ready: true });
+    addFakeCell(env, { key: "b", provider: "twitch", muted: true, readyBeforeInstall: true });
     await vi.advanceTimersByTimeAsync(16);
     await vi.advanceTimersByTimeAsync(0);
     // heartbeat also rescans
@@ -591,7 +594,10 @@ describe("controller", () => {
       { key: "b", provider: "twitch", muted: true },
     ]);
     const hang = createTwitchSdk({ hangRead: true });
-    env.cells.get("b")!.$refs.player = createFakePlayerComponent("twitch", hang, true);
+    {
+      const __p = createFakePlayerComponent("twitch", hang);
+      mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
+    }
     env.sdks.set("b", hang);
     handle = createAudioLockController({ window, document }) as TestableHandle;
     handle.setEnabled(true);
@@ -691,7 +697,7 @@ describe("controller", () => {
       c.editMode = false;
     }
     const c0 = env.cells.get("0")!;
-    c0.$refs.player!.ready = true;
+    // player already READY via fixture mount (no player.ready field)
     // mark 0 paused via wrapper
     c0.updatePausedState(true);
     // only cell 2 playing
@@ -775,7 +781,7 @@ describe("controller", () => {
         key: "n",
         provider,
         muted: "omit",
-        ready: false,
+        readyBeforeInstall: false,
       });
       const sdk = env.sdks.get("n")!;
       await vi.advanceTimersByTimeAsync(16);
@@ -892,7 +898,10 @@ describe("controller", () => {
       { key: "b", provider: "twitch", muted: true },
     ]);
     const sdk = createTwitchSdk({ muted: false, ignoreMute: true });
-    env.cells.get("b")!.$refs.player = createFakePlayerComponent("twitch", sdk, true);
+    {
+      const __p = createFakePlayerComponent("twitch", sdk);
+      mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
+    }
     env.sdks.set("b", sdk);
     handle = createAudioLockController({ window, document }) as TestableHandle;
     handle.setEnabled(true);
@@ -926,7 +935,10 @@ describe("controller", () => {
   it("player_rebuild_bumps_generation_and_drops_stale_results", async () => {
     const env = setupEnv([{ key: "a", provider: "twitch", muted: false }]);
     const hang = createTwitchSdk({ hangRead: true, muted: false });
-    env.cells.get("a")!.$refs.player = createFakePlayerComponent("twitch", hang, true);
+    {
+      const __p = createFakePlayerComponent("twitch", hang);
+      mountPlayerOnCell(env.cells.get("a")!, __p, { readyBeforeInstall: true });
+    }
     env.sdks.set("a", hang);
     handle = createAudioLockController({ window, document }) as TestableHandle;
     handle.setEnabled(true);
@@ -949,7 +961,10 @@ describe("controller", () => {
       { key: "b", provider: "twitch", muted: true },
     ]);
     const sdk = createTwitchSdk({ muted: false, ignoreMute: true });
-    env.cells.get("b")!.$refs.player = createFakePlayerComponent("twitch", sdk, true);
+    {
+      const __p = createFakePlayerComponent("twitch", sdk);
+      mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
+    }
     handle = createAudioLockController({ window, document }) as TestableHandle;
     handle.setEnabled(true);
     handle.__tryDiscover();
@@ -994,7 +1009,10 @@ describe("controller", () => {
       { key: "b", provider: "twitch", muted: true },
     ]);
     const sdk = createTwitchSdk({ muted: true, settleDelayMs: 800 });
-    env.cells.get("b")!.$refs.player = createFakePlayerComponent("twitch", sdk, true);
+    {
+      const __p = createFakePlayerComponent("twitch", sdk);
+      mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
+    }
     handle = createAudioLockController({ window, document }) as TestableHandle;
     handle.setEnabled(true);
     handle.__tryDiscover();
@@ -1075,7 +1093,10 @@ describe("controller", () => {
       { key: "b", provider: "twitch", muted: true },
     ]);
     const hang = createTwitchSdk({ hangUnmute: true, muted: true });
-    env.cells.get("a")!.$refs.player = createFakePlayerComponent("twitch", hang, true);
+    {
+      const __p = createFakePlayerComponent("twitch", hang);
+      mountPlayerOnCell(env.cells.get("a")!, __p, { readyBeforeInstall: true });
+    }
     env.sdks.set("a", hang);
     handle = createAudioLockController({ window, document }) as TestableHandle;
     handle.setEnabled(true);
@@ -1143,6 +1164,57 @@ describe("controller", () => {
       (page as { __reconcile?: unknown }).__reconcile,
     ).toBeUndefined();
     page.dispose();
+  });
+
+  it("upstream_shape_ready_event_binds_and_guards", async () => {
+    for (const provider of ["twitch", "youtube"] as const) {
+      document.body.innerHTML = "";
+      const env = setupEnv([
+        { key: "a", provider, muted: false, readyBeforeInstall: false },
+        { key: "b", provider, muted: true, readyBeforeInstall: false },
+      ]);
+      handle = createAudioLockController({ window, document }) as TestableHandle;
+      handle.setEnabled(true);
+      for (const cell of env.cells.values()) {
+        fireReady(cell.$refs.player!);
+      }
+      await vi.advanceTimersByTimeAsync(0);
+      expect(handle.__ports.size).toBe(2);
+      for (const [, port] of handle.__ports) {
+        expect(port.isBound()).toBe(true);
+      }
+      expect(handle.__getState().active?.key).toBe("a");
+      const sdkB = env.sdks.get("b")!;
+      sdkB.rawMuted = false;
+      await env.cells.get("b")!.manualCheckMuted();
+      expect(sdkB.rawMuted).toBe(true);
+      expect(handle.__getState().active?.key).toBe("a");
+      handle.dispose();
+    }
+  });
+
+  it("upstream_shape_late_bind_guards", async () => {
+    for (const provider of ["twitch", "youtube"] as const) {
+      document.body.innerHTML = "";
+      const env = setupEnv([
+        { key: "a", provider, muted: false, readyBeforeInstall: true },
+        { key: "b", provider, muted: true, readyBeforeInstall: true },
+      ]);
+      handle = createAudioLockController({ window, document }) as TestableHandle;
+      handle.setEnabled(true);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(handle.__ports.size).toBe(2);
+      for (const [, port] of handle.__ports) {
+        expect(port.isBound()).toBe(true);
+      }
+      expect(handle.__getState().active?.key).toBe("a");
+      const sdkB = env.sdks.get("b")!;
+      sdkB.rawMuted = false;
+      await env.cells.get("b")!.manualCheckMuted();
+      expect(sdkB.rawMuted).toBe(true);
+      expect(handle.__getState().active?.key).toBe("a");
+      handle.dispose();
+    }
   });
 });
 
