@@ -291,27 +291,37 @@ try {
   const clickPlay = async (which) => {
     const box = await iframeBox(which);
     if (!box) throw new Error('no iframe for ' + which);
+    const sid = iframeSessions.get(which) || await waitSession(which, 5000);
+    if (sid) {
+      await send('Runtime.runIfWaitingForDebugger', {}, sid).catch(() => {});
+    }
+    // hover to reveal controls
+    await send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved',
+      x: box.x + box.w / 2,
+      y: box.y + box.h / 2,
+    }, S);
+    await sleep(400);
     let btn = null;
-    const sid = iframeSessions.get(which);
     if (sid) {
       try {
         btn = await E(`(()=>{
-          const sel=${which === 'youtube'
-            ? `'.ytp-large-play-button'`
-            : `'button[data-a-target="player-play-pause-button"]'`};
-          const el=document.querySelector(sel);
-          if(!el)return null;
-          const r=el.getBoundingClientRect();
-          return {x:r.left+r.width/2,y:r.top+r.height/2};
+          const sels=${which === 'youtube'
+            ? `['.ytp-large-play-button','button.ytp-play-button']`
+            : `['button[data-a-target="player-play-pause-button"]','button[data-a-target="player-overlay-play-button"]','.click-to-play','.player-overlay-play']`};
+          for(const sel of sels){const el=document.querySelector(sel);if(el){const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,sel};}}
+          return null;
         })()`, sid);
       } catch { /* ignore */ }
     }
-    const pt = btn
-      ? { x: box.x + btn.x, y: box.y + btn.y }
-      : { x: box.x + box.w / 2, y: box.y + box.h / 2 };
-    result.clickPoints[which + 'Play'] = pt;
-    await clickAt(pt.x, pt.y);
-    await sleep(200);
+    const pts = [];
+    if (btn) pts.push({ x: box.x + btn.x, y: box.y + btn.y, how: btn.sel });
+    pts.push({ x: box.x + box.w / 2, y: box.y + box.h / 2, how: 'center' });
+    result.clickPoints[which + 'Play'] = pts;
+    for (const pt of pts) {
+      await clickAt(pt.x, pt.y);
+      await sleep(300);
+    }
     await clickAt(blankClick.x, blankClick.y);
   };
 
@@ -425,9 +435,58 @@ try {
       lastVideo: await readVideo('twitch'),
       iframe: await iframeBox('twitch'),
     };
-    result.verdict = 'SKIP';
-    result.skipReason = 'no-live-twitch';
-    await done(4);
+    // try up to 2 alternate channels from Twitch directory
+    await send('Page.navigate', { url: 'https://www.twitch.tv/directory/all' }, S);
+    await sleep(4000);
+    const channels = await E(`(()=>{
+      const cards=[...document.querySelectorAll('a[href^=\"/\"]')].map(a=>a.getAttribute('href')||'');
+      const names=[];
+      for(const h of cards){
+        const m=h.match(/^\\/([A-Za-z0-9_]{3,25})$/);
+        if(m && !['directory','videos','downloads','jobs','p','prime','turbo','settings','search','privacy','warranty'].includes(m[1].toLowerCase())){
+          if(!names.includes(m[1])) names.push(m[1]);
+        }
+        if(names.length>=10)break;
+      }
+      return names;
+    })()`).catch(() => []);
+    await send('Page.navigate', { url: 'https://holodex.net/multiview' }, S);
+    await waitFor(
+      `!!(document.querySelector('#app')&&document.querySelector('#app').__vue__&&document.querySelector('#app').__vue__.$store)`,
+      60000,
+      'vue after twitch pick',
+    );
+    await E(`(()=>{const st=document.querySelector('#app').__vue__.$store;const yt=${JSON.stringify(result.picks.youtube)};
+      st.commit('multiview/setLayout',[{x:0,y:0,w:12,h:24,i:'a'},{x:12,y:0,w:12,h:24,i:'b'}]);
+      st.commit('multiview/setLayoutContent',{a:{type:'video',id:yt,video:{id:yt,type:'stream',status:'live',title:'YT',channel:{id:'c1',name:'yt'}},muted:false}});
+      st.commit('multiview/setMuteOthers',true);
+      return true;})()`);
+    let okTw = false;
+    for (const ch of (channels || []).slice(0, 2)) {
+      if (ch === twitchChannel) continue;
+      result.picks.triedTwitch = [...(result.picks.triedTwitch || []), ch];
+      await E(`(()=>{const st=document.querySelector('#app').__vue__.$store;const ch=${JSON.stringify(ch)};
+        st.commit('multiview/setLayoutContentById',{id:'b',content:{type:'video',id:ch,video:{id:ch,type:'twitch',status:'live',title:'TW',channel:{name:ch}}}});
+        return ch;})()`);
+      iframeSessions.delete('twitch');
+      await sleep(4000);
+      await waitSession('twitch', 20000);
+      await clickPlay('youtube');
+      await waitPlaying('youtube', 20000);
+      await clickPlay('twitch');
+      twPlaying = await waitPlaying('twitch', 30000);
+      if (twPlaying) {
+        result.picks.twitch = ch;
+        result.picks.method = (result.picks.method || '') + '+twitch-directory';
+        okTw = true;
+        break;
+      }
+    }
+    if (!okTw) {
+      result.verdict = 'SKIP';
+      result.skipReason = 'no-live-twitch';
+      await done(4);
+    }
   }
 
   // Calibration Twitch
