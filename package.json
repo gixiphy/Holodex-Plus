@@ -16,6 +16,7 @@
     "dev:firefox": "nodemon --config nodemon.firefox.json",
     "test:audio-lock": "vitest run --config vitest.audio-lock.config.ts",
     "test:audio-lock:watch": "vitest --config vitest.audio-lock.config.ts",
+    "test:artifacts": "node --test --test-timeout=60000 tests/build-artifacts/",
     "typecheck:audio-lock": "tsc --noEmit && tsc --noEmit -p tsconfig.audio-lock.tests.json"
   },
   "type": "module",
