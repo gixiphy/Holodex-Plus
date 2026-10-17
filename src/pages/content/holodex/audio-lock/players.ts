@@ -117,7 +117,7 @@ export function createPlayerPort(binding: PlayerBinding): PlayerPort | null {
   let methods: BoundMethods | null = null;
   let boundInstance: object | null = null;
   let readyListener: (() => void) | null = null;
-  let usedGrants = new Set<string>();
+  const usedGrants = new Set<string>();
 
   const tryBind = (): boolean => {
     if (disposed) return false;

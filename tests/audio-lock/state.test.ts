@@ -197,7 +197,7 @@ describe("transition table", () => {
 
   it("four U bootstrap: first NATIVE_FIRST_PLAY calls muteOthers once; second blocked", () => {
     const cells = [id("0"), id("1"), id("2"), id("3")];
-    let state = enabledBootstrap();
+    const state = enabledBootstrap();
     const first = transition(state, {
       type: "NATIVE_FIRST_PLAY",
       now: 0,
@@ -280,7 +280,7 @@ describe("transition table", () => {
   it("initial unique false becomes selected", () => {
     const a = id("a");
     const b = id("b");
-    let state = {
+    const state = {
       ...createInitialState(),
       extensionEnabled: true,
       muteOthers: true,

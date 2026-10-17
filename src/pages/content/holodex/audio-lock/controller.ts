@@ -16,7 +16,6 @@ import {
 import { createPlayerPort, type PlayerBinding } from "./players";
 import {
   createInitialState,
-  desiredMute,
   pollObservation,
   transition,
 } from "./state";
@@ -319,18 +318,9 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       if (
         runtime &&
         runtime.consecutiveFailures > 0 &&
-        t - runtime.lastMuteAt < TIMING.FAILURE_COOLDOWN_MS &&
-        runtime.consecutiveFailures >= 1
+        t - runtime.lastMuteAt < TIMING.FAILURE_COOLDOWN_MS
       ) {
-        // cool down after access-error — still allow after cooldown
-        if (
-          runtime.consecutiveFailures >= 1 &&
-          t < (runtime.lastMuteAt || 0) + TIMING.FAILURE_COOLDOWN_MS &&
-          runtime.consecutiveFailures > 0 &&
-          false
-        ) {
-          return;
-        }
+        return;
       }
       const epoch = state.epoch;
       const read = await port.readMuted();

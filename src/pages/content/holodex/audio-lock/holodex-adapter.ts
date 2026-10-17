@@ -419,7 +419,7 @@ export function createHolodexAdapter(
         const muted = mutedAssignment(content.muted);
         if (muted === "invalid") continue;
         const provider = providerFromContent(content) ?? "youtube";
-        let gen = generationByKey.get(key) ?? 1;
+        const gen = generationByKey.get(key) ?? 1;
         cells.push({
           identity: {
             key,

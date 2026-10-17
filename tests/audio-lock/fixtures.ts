@@ -266,6 +266,8 @@ export type FakeVideoCell = {
   muteOthersCalls: Array<string | number>;
   setMutedCalls: boolean[];
   watcherCalls: number;
+  lastMuteProp: boolean;
+  applyMuteProp: (prop: boolean) => void;
 };
 
 export function createFakeVideoCell(opts: {
@@ -307,17 +309,8 @@ export function createFakeVideoCell(opts: {
     },
     setMuted(val: boolean) {
       cell.setMutedCalls.push(val);
-      const prevProp = effectiveMuteProp(cell.muted);
-      if (val === !!cell.muted && cell.muted !== undefined) {
-        // VideoCell early return when val === !!this.muted
-        // but undefined: !!undefined === false, so setMuted(false) returns early
-        return;
-      }
-      if (cell.muted === undefined && val === false) {
-        // U → false: early return without muteOthers (val === !!undefined === false)
-        return;
-      }
-      if (cell.muted === false && val === false) {
+      // VideoCell.vue:174 — val === !!this.muted early return (undefined → false)
+      if (val === !!cell.muted) {
         return;
       }
       if (!val) {
@@ -333,7 +326,6 @@ export function createFakeVideoCell(opts: {
           cell.applyMuteProp(after);
         }
       }
-      void prevProp;
     },
     muteOthers(id: string | number) {
       cell.muteOthersCalls.push(id);
@@ -374,28 +366,6 @@ export function createFakeVideoCell(opts: {
       }
     },
     lastMuteProp: false,
-  } as FakeVideoCell & { applyMuteProp: (p: boolean) => void; lastMuteProp: boolean };
-
-  // Fix muted getter early-return semantics to match VideoCell.vue:174
-  cell.setMuted = function setMuted(val: boolean) {
-    cell.setMutedCalls.push(val);
-    // val === !!this.muted → early return (undefined → !!undefined = false)
-    if (val === !!cell.muted) {
-      return;
-    }
-    if (!val) {
-      cell.muteOthers(cell.item.i);
-    }
-    const c = opts.store.state.multiview.layoutContent[opts.key];
-    if (c) {
-      const before = effectiveMuteProp(c.muted);
-      c.muted = val;
-      const after = effectiveMuteProp(c.muted);
-      if (before !== after) {
-        cell.watcherCalls += 1;
-        (cell as unknown as { applyMuteProp: (p: boolean) => void }).applyMuteProp(after);
-      }
-    }
   };
 
   cell.__orig = {
@@ -455,7 +425,7 @@ export function flushMicrotasks(): Promise<void> {
 
 export function createPanelEvent(trusted: boolean): Event {
   // jsdom Event.isTrusted is non-configurable; use a plain stand-in for gate tests.
-  let phase = Event.AT_TARGET;
+  let phase: number = Event.AT_TARGET;
   const event = {
     type: "click",
     bubbles: true,

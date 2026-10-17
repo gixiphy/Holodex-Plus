@@ -248,7 +248,7 @@ describe("options page form", () => {
   });
 
   it("renders existing options plus twitchAudioLock checkbox", async () => {
-    await import("../../src/pages/options/index.ts");
+    await import("../../src/pages/options/index");
     document.dispatchEvent(new Event("DOMContentLoaded"));
     // wait for async Options.get loops
     await vi.waitFor(() => {

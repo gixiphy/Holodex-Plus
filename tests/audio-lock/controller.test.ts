@@ -338,26 +338,28 @@ describe("controller", () => {
       provider: "twitch" as const,
       generation: 1,
     };
-    let state = {
-      ...createInitialState(),
-      extensionEnabled: true,
-      muteOthers: true,
-      mode: "locked" as const,
-      selection: "selected" as const,
-      active: {
-        key: "a",
-        contentId: "id-a",
-        provider: "youtube" as const,
-        generation: 1,
+    const state = transition(
+      {
+        ...createInitialState(),
+        extensionEnabled: true,
+        muteOthers: true,
+        mode: "locked",
+        selection: "selected",
+        active: {
+          key: "a",
+          contentId: "id-a",
+          provider: "youtube",
+          generation: 1,
+        },
+        epoch: 1,
       },
-      epoch: 1,
-    };
-    state = transition(state, {
-      type: "IFRAME_INTENT",
-      now: 1000,
-      identity: id,
-      source: "iframe",
-    }).state;
+      {
+        type: "IFRAME_INTENT",
+        now: 1000,
+        identity: id,
+        source: "iframe",
+      },
+    ).state;
     expect(state.intent?.expiresAt).toBe(1000 + TIMING.USER_INTENT_MS);
     const late = transition(state, {
       type: "OBSERVED_MUTED",

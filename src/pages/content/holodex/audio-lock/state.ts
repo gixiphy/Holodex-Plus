@@ -402,7 +402,7 @@ export function transition(
         return { state, effects };
       }
       // unmuted → select this cell
-      let next = consumeToken(state);
+      const next = consumeToken(state);
       const chosen = withActive(next, event.identity, "selected", "explicit");
       effects.push({
         type: "CALL_ORIGINAL_SET_MUTED",
@@ -475,7 +475,7 @@ export function transition(
 
       // player reports unmuted (false)
       if (event.hasValidToken || tokenValid(state, event.identity, event.now)) {
-        let next = consumeToken(state);
+        const next = consumeToken(state);
         const chosen = withActive(next, event.identity, "selected", "explicit");
         effects.push({
           type: "CALL_ORIGINAL_SET_MUTED",
@@ -486,32 +486,11 @@ export function transition(
         return { state: chosen.state, effects };
       }
 
-      const assignmentForDesired: MutedAssignment =
-        state.selection === "bootstrap" ? false : true;
-      // For desiredMute, pass the store assignment semantics from selection:
-      // bootstrap U/false → unassigned; we treat unauthorized unmute as needing mute
-      // only when desired is muted.
-      const d = desiredMute(state, assignmentForDesired, event.identity);
-      // Override: use selection-aware desired with null assignment for bootstrap check
-      const d2 = desiredMute(
-        state,
-        state.selection === "bootstrap" ? false : undefined,
-        event.identity,
-      );
       // Plan: bootstrap U/false = unassigned — no MUTE_PLAYER
       // selected non-active / silence = muted → MUTE_PLAYER
       // selected active = audible → no mute
       let want: DesiredMute;
-      if (
-        state.mode === "disabled" ||
-        state.mode === "discovering" ||
-        state.mode === "degraded"
-      ) {
-        want = "unassigned";
-      } else if (state.selection === "bootstrap") {
-        // observation alone does not know assignment; controller passes via STORE
-        // For pure OBSERVED with bootstrap: only mute if we somehow know desired muted.
-        // Default: unassigned for false observation under bootstrap.
+      if (state.selection === "bootstrap") {
         want = "unassigned";
       } else if (state.selection === "silence") {
         want = "muted";
@@ -520,8 +499,6 @@ export function transition(
       } else {
         want = "muted";
       }
-      void d;
-      void d2;
 
       if (want === "muted") {
         effects.push({
@@ -630,7 +607,8 @@ export function transition(
       if (state.active && identityCore(state.active) === identityCore(event.identity)) {
         return { state: toSilence(state), effects };
       }
-      const { [event.identity.key]: _removed, ...rest } = state.cells;
+      const rest = { ...state.cells };
+      delete rest[event.identity.key];
       return { state: { ...state, cells: rest }, effects };
     }
 
