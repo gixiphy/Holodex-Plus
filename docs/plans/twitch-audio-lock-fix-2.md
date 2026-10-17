@@ -86,7 +86,7 @@
 
 ---
 
-## 任務
+## 步驟（任務）
 
 每個任務先寫測試、跑過確認 FAIL，再實作到 PASS（TDD）。單檔測試指令（120 秒逾時）：
 
@@ -379,7 +379,7 @@ python3 .cache/run-with-timeout.py 120 npx --yes yarn@1.22.22 test:audio-lock te
 - 每個 commit 只 `git add` 白名單內、該任務列出的檔案；禁止 `git add -A`／`git add .`。產品 commit 不夾帶任何 `docs/` 檔案；docs commit 不夾帶產品檔案。
 - 不 push、不開 PR、不 merge。
 
-## 驗證指令
+## 測試與驗證指令
 
 每個 process 都用 `.cache/run-with-timeout.py` 包住，逾時一律 exit 124，不能當作通過。vitest config 的 `testTimeout`／`hookTimeout`／`teardownTimeout` 維持 5000ms，不准調高。
 
