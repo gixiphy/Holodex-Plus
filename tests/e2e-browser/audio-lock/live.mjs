@@ -388,16 +388,27 @@ try {
     }
   }
 
-  // Calibration YouTube
+  // Calibration YouTube (mute-others off so lock does not fight the toggle)
+  await E(`document.querySelector('#app').__vue__.$store.commit('multiview/setMuteOthers', false)`);
   const ytBefore = await readVideo('youtube');
   const ytBox = await iframeBox('youtube');
+  if (ytBox) {
+    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: ytBox.x + ytBox.w / 2, y: ytBox.y + ytBox.h - 30 }, S);
+    await sleep(400);
+  }
   const ytMuteBtn = iframeSessions.get('youtube')
-    ? await E(`(()=>{const el=document.querySelector('.ytp-mute-button');if(!el)return null;const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};})()`, iframeSessions.get('youtube')).catch(() => null)
+    ? await E(`(()=>{const el=document.querySelector('.ytp-mute-button,button.ytp-mute-button');if(!el)return null;const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};})()`, iframeSessions.get('youtube')).catch(() => null)
     : null;
   if (ytMuteBtn && ytBox) {
     await clickAt(ytBox.x + ytMuteBtn.x, ytBox.y + ytMuteBtn.y);
-    await sleep(500);
-    await clickAt(blankClick.x, blankClick.y);
+    await sleep(800);
+  } else if (ytBox) {
+    // fallback: press 'm' while iframe focused
+    await clickAt(ytBox.x + ytBox.w / 2, ytBox.y + ytBox.h / 2);
+    await sleep(200);
+    await send('Input.dispatchKeyEvent', { type: 'keyDown', text: 'm', key: 'm', code: 'KeyM', windowsVirtualKeyCode: 77 }, S);
+    await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'm', code: 'KeyM', windowsVirtualKeyCode: 77 }, S);
+    await sleep(800);
   }
   const ytAfter = await readVideo('youtube');
   const ytCalOk = ytBefore && ytAfter && (ytBefore.muted !== ytAfter.muted || Math.abs((ytBefore.volume || 0) - (ytAfter.volume || 0)) > 0.01);
@@ -406,10 +417,11 @@ try {
     if (ytMuteBtn && ytBox) {
       await clickAt(ytBox.x + ytMuteBtn.x, ytBox.y + ytMuteBtn.y);
       await sleep(400);
-      await clickAt(blankClick.x, blankClick.y);
     }
   }
+  await clickAt(blankClick.x, blankClick.y);
   result.calibration.youtube = { ok: !!ytCalOk, before: ytBefore, after: ytAfter };
+  await E(`document.querySelector('#app').__vue__.$store.commit('multiview/setMuteOthers', true)`);
 
   scenarioAStarted = true;
 
@@ -489,40 +501,46 @@ try {
     }
   }
 
-  // Calibration Twitch
+  // Calibration Twitch with mute-others off so remute does not hide the toggle
+  await E(`document.querySelector('#app').__vue__.$store.commit('multiview/setMuteOthers', false)`);
   const twBefore = await readVideo('twitch');
   const twBox = await iframeBox('twitch');
-  // hover to reveal controls
   if (twBox) {
-    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: twBox.x + twBox.w / 2, y: twBox.y + twBox.h / 2 }, S);
-    await sleep(400);
+    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: twBox.x + twBox.w / 2, y: twBox.y + twBox.h - 40 }, S);
+    await sleep(500);
   }
   const twMuteBtn = iframeSessions.get('twitch')
-    ? await E(`(()=>{const el=document.querySelector('button[data-a-target="player-mute-unmute-button"],button[aria-label*="Mute"],button[aria-label*="Unmute"]');if(!el)return null;const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,label:el.getAttribute('aria-label')};})()`, iframeSessions.get('twitch')).catch(() => null)
+    ? await E(`(()=>{const el=document.querySelector('button[data-a-target="player-mute-unmute-button"],button[aria-label*="Mute"],button[aria-label*="Unmute"],button[aria-label*="靜音"],button[aria-label*="静音"]');if(!el)return null;const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,label:el.getAttribute('aria-label')};})()`, iframeSessions.get('twitch')).catch(() => null)
     : null;
   result.clickPoints.twitchMute = twMuteBtn && twBox
     ? { x: twBox.x + twMuteBtn.x, y: twBox.y + twMuteBtn.y, label: twMuteBtn.label }
     : null;
   if (twMuteBtn && twBox) {
     await clickAt(twBox.x + twMuteBtn.x, twBox.y + twMuteBtn.y);
-    await sleep(600);
-    await clickAt(blankClick.x, blankClick.y);
+    await sleep(1000);
+  } else if (twBox) {
+    await clickAt(twBox.x + twBox.w / 2, twBox.y + twBox.h / 2);
+    await sleep(200);
+    await send('Input.dispatchKeyEvent', { type: 'keyDown', text: 'm', key: 'm', code: 'KeyM', windowsVirtualKeyCode: 77 }, S);
+    await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'm', code: 'KeyM', windowsVirtualKeyCode: 77 }, S);
+    await sleep(1000);
   }
   const twAfter = await readVideo('twitch');
   const twCalOk = twBefore && twAfter && (twBefore.muted !== twAfter.muted || Math.abs((twBefore.volume || 0) - (twAfter.volume || 0)) > 0.01);
   result.calibration.twitch = { ok: !!twCalOk, before: twBefore, after: twAfter };
+  // restore muted Twitch before re-enabling lock
+  if (twAfter && !twAfter.muted && twMuteBtn && twBox) {
+    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: twBox.x + twBox.w / 2, y: twBox.y + twBox.h - 40 }, S);
+    await sleep(300);
+    await clickAt(twBox.x + twMuteBtn.x, twBox.y + twMuteBtn.y);
+    await sleep(500);
+  }
+  await clickAt(blankClick.x, blankClick.y);
+  await E(`document.querySelector('#app').__vue__.$store.commit('multiview/setMuteOthers', true)`);
   if (!ytCalOk || !twCalOk) {
     result.verdict = 'FAIL';
     result.failReason = 'truth-method-invalid';
     await done(1);
-  }
-  // leave Twitch muted if calibration unmuted it
-  if (twAfter && !twAfter.muted && twMuteBtn && twBox) {
-    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: twBox.x + twBox.w / 2, y: twBox.y + 10 }, S);
-    await sleep(300);
-    await clickAt(twBox.x + twMuteBtn.x, twBox.y + twMuteBtn.y);
-    await sleep(400);
-    await clickAt(blankClick.x, blankClick.y);
   }
 
   const sampleOnce = async () => {
