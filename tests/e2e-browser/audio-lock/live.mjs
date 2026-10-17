@@ -600,6 +600,7 @@ try {
     result.clickPoints.panelOpen=opener;await clickAt(opener.x,opener.y);
     await waitFor(`!!document.querySelector('.v-dialog--active .media-controls-list')`,5000,'media dialog');
     await waitFor(`!!document.querySelector('.v-dialog--active .media-controls-list .v-list-item__title,.v-dialog--active .media-controls-list .v-list-item-title')`,5000,'media rows rendered');
+    const openingGeometry=await E(`(()=>{const rows=[...document.querySelectorAll('.v-dialog--active .media-controls-list .v-list-item')];return rows.map(r=>({title:r.querySelector('.v-list-item__title,.v-list-item-title')?.textContent,buttons:[...r.querySelectorAll('button')].map(b=>b.getBoundingClientRect().toJSON())}));})()`);
     await sleep(400); // Let Vuetify's scale transition settle before measuring click coordinates.
     // Per-cell mute is the last icon button on the YouTube row (MediaControls.vue).
     // Match by title text, seeded "YT", or first titled row. Always close on failure.
@@ -624,6 +625,8 @@ try {
         throw new Error('YouTube panel row mute button missing: ' + JSON.stringify(pt).slice(0, 300));
       }
       result.clickPoints.panelYoutube=pt;
+      result.panelGeometryLog??=[];
+      result.panelGeometryLog.push({t:Date.now(),openingGeometry,settledPoint:pt});
       await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: pt.x, y: pt.y }, S);
       const t=Date.now();
       await clickAt(pt.x,pt.y);
