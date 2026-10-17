@@ -61,6 +61,24 @@ function isFunction(v: unknown): v is (...args: never[]) => unknown {
   return typeof v === "function";
 }
 
+/** Sync hint from store; undefined when missing or non-boolean. */
+export function readMuteOthersHint(doc: Document): boolean | undefined {
+  try {
+    const app = doc.querySelector("#app") as
+      | (Element & {
+          __vue__?: {
+            $store?: { state?: { multiview?: { muteOthers?: unknown } } };
+          };
+        })
+      | null;
+    const value = app?.__vue__?.$store?.state?.multiview?.muteOthers;
+    if (typeof value === "boolean") return value;
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function isTopFrame(win: Window): boolean {
   try {
     return win.top === win;

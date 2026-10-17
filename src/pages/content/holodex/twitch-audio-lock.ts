@@ -13,6 +13,11 @@ import {
   type AudioLockHandle,
 } from "./audio-lock/contracts";
 import { createAudioLockController } from "./audio-lock/controller";
+import { readMuteOthersHint } from "./audio-lock/holodex-adapter";
+import {
+  installTwitchPlayerGuard,
+  installTwitchStateListener,
+} from "./audio-lock/twitch-embed";
 
 type PageWindow = Window & {
   __HDX_AUDIO_LOCK_HANDLE__?: AudioLockHandle;
@@ -31,6 +36,13 @@ export function installAudioLock(): AudioLockHandle {
     };
   }
 
+  let lastEnabled: boolean | null = null;
+  installTwitchPlayerGuard(
+    w,
+    () => lastEnabled !== false && readMuteOthersHint(w.document) !== false,
+  );
+  installTwitchStateListener(w, () => Date.now());
+
   if (w.__HDX_AUDIO_LOCK_HANDLE__) {
     return w.__HDX_AUDIO_LOCK_HANDLE__;
   }
@@ -46,6 +58,7 @@ export function installAudioLock(): AudioLockHandle {
     if (event.origin !== w.location.origin) return;
     const msg = parseAudioLockMessage(event.data);
     if (!msg || msg.type !== "config") return;
+    lastEnabled = msg.enabled;
     controller.setEnabled(msg.enabled);
   };
 
@@ -53,6 +66,7 @@ export function installAudioLock(): AudioLockHandle {
 
   const handle: AudioLockHandle = {
     setEnabled(value: boolean) {
+      lastEnabled = value;
       controller.setEnabled(value);
     },
     dispose() {
