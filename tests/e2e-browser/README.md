@@ -107,17 +107,32 @@ Blank clicks scan the lower-right viewport for an element that is not a control,
 
 Mute uses a trusted click on the player mute control, then polls every 100ms for up to 1000ms. Only if muted/volume are unchanged does it send keyboard `m`, then poll again up to 1000ms. This avoids a delayed button unmute being cancelled by the keyboard fallback. Returns `method`, `clickAt`, `changedAt`, `keyAt`.
 
+Scenario c round 2 starts a 50ms sampler before that input and keeps it until 2000ms after the timing origin. The origin is `clickAt` when `keyAt` is null, and `keyAt` when the keyboard `m` fallback was required. The round records `inputFallback` (`true` only when `keyAt` is set). `switched` is the first sample in `[origin, origin+2000]` with YouTube audible and Twitch `<video>.muted === true`.
+
 ### Scenario isolation and page exceptions
 
 Scenarios b, each c round, d, e, and f run in try/catch. A scenario exception records `{ pass:false, error }` in that scenario plus `scenarioErrors` / `harnessErrors`, then continues. Only browser start, extension load, calibration, and scenario a setup abort the whole run (exit 2).
 
-`Runtime.exceptionThrown` goes to `pageExceptions` (timestamped). Classification:
+`Runtime.exceptionThrown` goes to `pageExceptions` with `firstLine` (first line of `exception.description`, else `text`), `frames` (`{functionName, url}` from `stackTrace.callFrames` only), and `allowId`. Classification uses those frames, not a substring of the whole stack string:
 
-- `extensionExceptions`: stack/url contains `chrome-extension://`, or message contains `AudioLock` / `Holodex+`
-- `hostExceptions`: every stack URL is under `https://holodex.net/assets/`
+- `extension`: a frame URL or `exceptionDetails.url` contains `chrome-extension://`, or the message contains `AudioLock` / `Holodex+`
+- `host`: there is at least one frame and every frame URL starts with `https://holodex.net/assets/`
 - anything else is unclassified and fails scenario f
 
-Scenario f (normal/MVP): after removing the Twitch cell, for 5s there must be no new `extensionExceptions`, no unclassified exceptions, YouTube still audible, and any new `hostExceptions` messages must match the allowlist (`this.player.getCurrentTime is not a function`, `fetchVideoData`). Final acceptance also requires the same host messages on the same-round MVP JSON.
+Host allowlist (`tests/e2e-browser/audio-lock/live-exceptions.mjs`), both the line and the frame predicate:
+
+- `null-length-fetchVideoData`: first line matches `TypeError: Cannot read properties of null (reading '…')`, and some frame's `functionName` ends with `fetchVideoData` on `https://holodex.net/assets/`
+- `getCurrentTime-not-function`: first line is exactly `TypeError: this.player.getCurrentTime is not a function`, and every frame URL starts with `https://holodex.net/assets/`
+
+Scenario f (normal/MVP): after removing the Twitch cell, for 5s there must be no new extension exceptions, no new unclassified exceptions, YouTube still audible, and every new host exception must have a non-null `allowId`. Those rows are `hostAllowedPendingMvp`. `live-compare.mjs` checks each one against the same-round MVP JSON (`allowId` plus `firstLine`). A miss marks column f as `FAIL(mvp-missing)` and forces `effectiveVerdict` off `PASS`. Acceptance uses `effectiveVerdict`. One `live.mjs` run cannot see the MVP file yet, so its own `verdict` does not do that comparison.
+
+`[Holodex+ AudioLock]` console warnings store `code`. Object arguments use `preview.properties` named `code`, or `Runtime.callFunctionOn` plus `JSON.stringify` when preview has no code. Missing code is `null`. Scenario e rejects degraded codes (`player-unavailable`, `player-mute-did-not-settle`, `store-did-not-settle`, `restore-failed`, `cell-contract-changed`) in normal and MVP. Fallback allows only `code === "twitch-guard-unavailable"`; `code === null` fails e.
+
+If calibration `waitPlaying('twitch')` fails, the harness reads the Twitch iframe (`readyState`, `body.innerHTML.length`, `video` count, `location.href`). When the URL matches the picked channel and the body is empty or there are zero videos, it reloads the page once, seeds YouTube again, and retries `addTwitch` / `waitPlaying('twitch')`. The result is `twitchMountRetry: { at, diagnosticsBefore, diagnosticsAfter, recovered }`. A second failure is `SKIP` / `no-live-twitch` (exit 4). This retry happens only before scenario a. Picks stay the same. The retry is the same e2e run.
+
+`fallbackProbe` is a read-only snapshot (no component method calls) at the end of a, the end of b, and before each c-round input. It records whether cell b has `twPlayer`, whether that player is the Vue instance, `__ob__`, `setMuted` / `getMuted`, Vue `ready` listener count, iframe origin and count, whether `manualCheckMuted` is the extension wrapper, store `b.muted` and `muteOthers`, command counts, the last `UPDATE_STATE` muted flag, and AudioLock warning codes. `live-compare.mjs` prints the last probe's `twPlayerSet`, `instHasOb`, `readyListeners`, and `wrapperInstalled` for fallback runs.
+
+`logsByPhase` keeps `twitchCommandLog` and `updateStates` under `a`, `b`, `c1`, `c2`, `c3`, `d-before`, `d-after`, and `f`. A later reload does not replace an earlier phase key.
 
 Modes covered to completion: fallback runs a, b, c×3, e, g; normal and MVP run a, b (MVP also b′), c×3, d, e, f. Later scenarios still run after an earlier FAIL.
 
@@ -134,6 +149,7 @@ node tests/e2e-browser/audio-lock/live.mjs live-fix dist_chrome .cache/e2e-brows
 node tests/e2e-browser/audio-lock/live.mjs live-fix-fallback dist_chrome .cache/e2e-browser/live-fix-fallback.json --mode=fallback
 node tests/e2e-browser/audio-lock/live.mjs live-mvp /Applications/Extensions/holodex-plus-audiolock-chrome .cache/e2e-browser/live-mvp.json
 node tests/e2e-browser/audio-lock/live-compare.mjs .cache/e2e-browser/live-fix.json .cache/e2e-browser/live-fix-fallback.json .cache/e2e-browser/live-mvp.json
+# exit 0 only when the first JSON has effectiveVerdict PASS
 # or: yarn e2e:audio-lock:live
 ```
 

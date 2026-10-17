@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { classifyException } from './live-exceptions.mjs';
 
 const args = process.argv.slice(2);
 const modeArg = args.find((a) => a.startsWith('--mode='));
@@ -67,10 +68,6 @@ const send = (method, params = {}, sessionId) => new Promise((res, rej) => {
 });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const HOST_EXCEPTION_ALLOWLIST = [
-  'this.player.getCurrentTime is not a function',
-  'fetchVideoData',
-];
 const result = {
   label,
   mode,
@@ -95,24 +92,44 @@ const result = {
   clickPoints: {},
   toggleLog: [],
   focusEvents: [],
+  logsByPhase: {},
+  fallbackProbe: [],
+  hostAllowedPendingMvp: [],
+  twitchMountRetry: null,
+};
+
+const consolePending = [];
+const flushConsole = async () => {
+  while (consolePending.length) {
+    const batch = consolePending.splice(0, consolePending.length);
+    await Promise.all(batch);
+  }
+};
+
+const argumentCode = async (arg, sessionId) => {
+  if (!arg || arg.type !== 'object') return null;
+  const previewCode = arg.preview?.properties?.find((prop) => prop.name === 'code')?.value;
+  if (previewCode != null) return previewCode;
+  if (!arg.objectId) return null;
+  try {
+    const returned = await send('Runtime.callFunctionOn', {
+      objectId: arg.objectId,
+      functionDeclaration: 'function(){try{return JSON.stringify(this)}catch(e){return null}}',
+      returnByValue: true,
+    }, sessionId);
+    const raw = returned?.result?.value;
+    if (typeof raw !== 'string') return null;
+    const parsed = JSON.parse(raw);
+    return parsed && Object.prototype.hasOwnProperty.call(parsed, 'code') ? parsed.code : null;
+  } catch {
+    return null;
+  }
 };
 
 const classifyPageException = (entry) => {
-  const text = `${entry.message || ''} ${JSON.stringify(entry.stackUrls || [])}`;
-  const urls = entry.stackUrls || [];
-  if (/chrome-extension:\/\//.test(text) || /AudioLock|Holodex\+/.test(entry.message || '')) {
-    result.extensionExceptions.push(entry);
-    return 'extension';
-  }
-  if (urls.length > 0 && urls.every((u) => /^https:\/\/holodex\.net\/assets\//.test(u))) {
-    result.hostExceptions.push(entry);
-    return 'host';
-  }
-  if (urls.length === 0 && /holodex\.net\/assets\//.test(text) && !/chrome-extension:\/\//.test(text)) {
-    result.hostExceptions.push(entry);
-    return 'host';
-  }
-  return 'unclassified';
+  if (entry.kind === 'extension') result.extensionExceptions.push(entry);
+  else if (entry.kind === 'host') result.hostExceptions.push(entry);
+  return entry.kind;
 };
 
 let scenarioAStarted = false;
@@ -165,13 +182,23 @@ try {
 
   const onEvent = (m) => {
     if (m.method === 'Runtime.consoleAPICalled') {
-      const t = (m.params.args || []).map((a) => a.value ?? a.description ?? a.type).join(' ');
-      if (/Holodex\+|AudioLock/.test(t) || ['error','warning'].includes(m.params.type)) {
-        result.audioLockWarnings.push({ t: Date.now(), type: m.params.type, text: t.slice(0, 400) });
-      }
-      if (/__v_isRef/.test(t) && /SecurityError|Blocked a frame/i.test(t)) {
-        result.vIsRefErrors += 1;
-      }
+      const job = (async () => {
+        const args = m.params.args || [];
+        let code = null;
+        for (const arg of args) {
+          if (arg.type !== 'object') continue;
+          const found = await argumentCode(arg, m.sessionId);
+          if (found != null) code = found;
+        }
+        const t = args.map((a) => a.value ?? a.description ?? a.type).join(' ');
+        if (/Holodex\+|AudioLock/.test(t) || ['error','warning'].includes(m.params.type)) {
+          result.audioLockWarnings.push({ t: Date.now(), type: m.params.type, text: t.slice(0, 400), code });
+        }
+        if (/__v_isRef/.test(t) && /SecurityError|Blocked a frame/i.test(t)) {
+          result.vIsRefErrors += 1;
+        }
+      })();
+      consolePending.push(job);
     }
     if (m.method === 'Runtime.exceptionThrown') {
       const details = m.params.exceptionDetails || {};
@@ -182,8 +209,18 @@ try {
         if (f.url) stackUrls.push(f.url);
       }
       if (details.url) stackUrls.push(details.url);
+      const classified = classifyException(details);
       const message = details.exception?.description || details.text || desc;
-      const entry = { t: Date.now(), message: String(message).slice(0, 800), stackUrls: [...new Set(stackUrls)], raw: desc.slice(0, 2000) };
+      const entry = {
+        t: Date.now(),
+        message: String(message).slice(0, 800),
+        firstLine: classified.firstLine,
+        frames: classified.frames,
+        allowId: classified.allowId,
+        kind: classified.kind,
+        stackUrls: [...new Set(stackUrls)],
+        raw: desc.slice(0, 2000),
+      };
       result.pageExceptions.push(entry);
       classifyPageException(entry);
     }
@@ -271,12 +308,12 @@ try {
   );
   result.versions.vue = await E(`document.querySelector('#app').__vue__.$root.constructor.version||document.querySelector('#app').__vue__.constructor.version||'unknown'`);
 
-  // Seed YouTube-only first
-  await E(`(()=>{const st=document.querySelector('#app').__vue__.$store;
+  const seedYoutube = () => E(`(()=>{const st=document.querySelector('#app').__vue__.$store;
     st.commit('multiview/setLayout',[{x:0,y:0,w:24,h:24,i:'a'}]);
     st.commit('multiview/setLayoutContent',{a:{type:'video',id:${JSON.stringify(youtubeId)},video:{id:${JSON.stringify(youtubeId)},type:'stream',status:'live',title:'YT',channel:{id:'c1',name:'yt'}},muted:false}});
     st.commit('multiview/setMuteOthers',true);
     return true;})()`);
+  await seedYoutube();
 
   const progress = (step) => {
     result.step = step;
@@ -453,7 +490,8 @@ try {
     return samples;
   };
   const observed = () => E(`(()=>{let found=null;function walk(v){if(v.$options?.name==='TwitchPlayer'&&v.player)found=v.player;for(const c of v.$children||[])walk(c)}walk(document.querySelector('#app').__vue__.$root);return found?Object.prototype.hasOwnProperty.call(found,'__ob__'):null})()`);
-  const refreshCounters = async () => {
+  const refreshCounters = async (phase) => {
+    await flushConsole();
     const updates = await E('window.__hplusUpdates||[]');
     result.focusEvents = await E('window.__hplusFocusEvents||[]');
     result.updateStateMessages = updates.length;
@@ -463,6 +501,75 @@ try {
       result.twitchCommandsReceived = await E('window.__hplusCmdCount||{mute:0,unmute:0}', sid).catch(() => ({ mute: 0, unmute: 0 }));
       result.twitchCommandLog = await E('window.__hplusCmdLog||[]', sid).catch(() => []);
     }
+    if (phase) {
+      result.logsByPhase[phase] = {
+        phase,
+        twitchCommandLog: result.twitchCommandLog,
+        updateStates: result.updateStates,
+      };
+    }
+  };
+  const readFallbackProbe = async (at) => {
+    await flushConsole();
+    const fields = await E(`(()=>{
+      let cell=null;
+      function walk(v){
+        if(v.$options&&v.$options.name==='VideoCell'&&v.item&&v.item.i==='b') cell=v;
+        for(const c of v.$children||[]) walk(c);
+      }
+      const app=document.querySelector('#app');
+      if(app&&app.__vue__) walk(app.__vue__);
+      if(!cell) return {found:false};
+      const p=cell.$refs&&cell.$refs.player;
+      const inst=p&&p.player;
+      const iframeNodes=p&&p.$el&&p.$el.querySelectorAll?p.$el.querySelectorAll('iframe'):[];
+      const iframe=iframeNodes[0]||null;
+      let iframeOrigin=null;
+      try { if(iframe&&iframe.src) iframeOrigin=new URL(iframe.src).origin; } catch(e) {}
+      const store=app.__vue__.$store.state.multiview;
+      const readyList=p&&p._events&&p._events.ready;
+      return {
+        found:true,
+        twPlayerSet: cell.twPlayer!=null,
+        twPlayerIsInstance: cell.twPlayer===inst,
+        instHasOb: !!(inst&&Object.prototype.hasOwnProperty.call(inst,'__ob__')),
+        instHasSetMuted: typeof (inst&&inst.setMuted)==='function',
+        instHasGetMuted: typeof (inst&&inst.getMuted)==='function',
+        readyListeners: readyList?readyList.length:0,
+        iframeOrigin,
+        iframeCount: iframeNodes.length,
+        wrapperInstalled: typeof cell.manualCheckMuted==='function' && !String(cell.manualCheckMuted.name||'').startsWith('bound '),
+        storeBMuted: store.layoutContent.b?store.layoutContent.b.muted:undefined,
+        muteOthers: store.muteOthers,
+      };
+    })()`);
+    const lastUpdate = (result.updateStates || []).at(-1);
+    result.fallbackProbe.push({
+      at,
+      ...fields,
+      twitchCommandsReceived: result.twitchCommandsReceived,
+      lastUpdateMuted: lastUpdate ? lastUpdate.muted : null,
+      audioLockWarningCodes: result.audioLockWarnings.filter((w) => w.text.includes('[Holodex+ AudioLock]')).map((w) => w.code ?? null),
+    });
+  };
+  const twitchMountDiagnostics = async () => {
+    const sid = iframeSessions.get('twitch') || await waitSession('twitch', 2000);
+    if (!sid) return { error: 'no-session', href: null, bodyLength: null, videoCount: null, readyState: null };
+    return await E(`({readyState:document.readyState, bodyLength:document.body?document.body.innerHTML.length:null, videoCount:document.querySelectorAll('video').length, href:location.href})`, sid).catch((e) => ({ error: String(e), href: null, bodyLength: null, videoCount: null, readyState: null }));
+  };
+  const twitchHrefMatchesPick = (href) => {
+    if (!href || !/player\.twitch\.tv/.test(href)) return false;
+    try {
+      const url = new URL(href);
+      return url.searchParams.get('channel') === twitchChannel || href.includes(twitchChannel);
+    } catch {
+      return href.includes(twitchChannel);
+    }
+  };
+  const startYoutube = async () => {
+    await waitFor(`!![...document.querySelectorAll('iframe')].find(f=>/youtube\\.com\\/embed\\//.test(f.src))`, 60000, 'youtube iframe');
+    await waitSession('youtube', 20000);
+    return waitPlaying('youtube');
   };
   const addTwitch = async () => {
     await E(`(()=>{const s=document.querySelector('#app').__vue__.$store;
@@ -474,15 +581,36 @@ try {
     await waitSession('twitch', 45000);
   };
   progress('calibration');
-  await waitFor(`!![...document.querySelectorAll('iframe')].find(f=>/youtube\\.com\\/embed\\//.test(f.src))`, 60000, 'youtube iframe');
-  await waitSession('youtube', 20000);
-  if (!await waitPlaying('youtube')) { result.verdict = 'SKIP'; result.skipReason = 'no-live-youtube'; await done(4); }
+  if (!await startYoutube()) { result.verdict = 'SKIP'; result.skipReason = 'no-live-youtube'; await done(4); }
   progress('calibration-youtube-playing');
   await addTwitch();
   progress('calibration-twitch-mounted');
   if (!await waitPlaying('twitch')) {
-    result.playback = { youtube: await readVideo('youtube'), twitch: await readVideo('twitch') };
-    result.verdict = 'SKIP'; result.skipReason = 'no-live-twitch'; await done(4);
+    const diagnosticsBefore = await twitchMountDiagnostics();
+    const blankMount = twitchHrefMatchesPick(diagnosticsBefore.href) && (diagnosticsBefore.bodyLength === 0 || diagnosticsBefore.videoCount === 0);
+    if (!blankMount) {
+      result.playback = { youtube: await readVideo('youtube'), twitch: await readVideo('twitch'), twitchMount: diagnosticsBefore };
+      result.verdict = 'SKIP'; result.skipReason = 'no-live-twitch'; await done(4);
+    }
+    result.twitchMountRetry = { at: Date.now(), diagnosticsBefore, diagnosticsAfter: null, recovered: false };
+    iframeSessions.clear();
+    await send('Page.reload', {}, S);
+    await waitFor(
+      `!!(document.querySelector('#app')&&document.querySelector('#app').__vue__&&document.querySelector('#app').__vue__.$store)`,
+      60000,
+      'vue store after twitch blank reload',
+    );
+    await seedYoutube();
+    progress('calibration-twitch-remount');
+    if (!await startYoutube()) { result.verdict = 'SKIP'; result.skipReason = 'no-live-youtube'; await done(4); }
+    await addTwitch();
+    const recoveredPlaying = await waitPlaying('twitch');
+    result.twitchMountRetry.diagnosticsAfter = await twitchMountDiagnostics();
+    result.twitchMountRetry.recovered = !!recoveredPlaying;
+    if (!recoveredPlaying) {
+      result.playback = { youtube: await readVideo('youtube'), twitch: await readVideo('twitch') };
+      result.verdict = 'SKIP'; result.skipReason = 'no-live-twitch'; await done(4);
+    }
   }
   result.twitchObserved = await observed();
   await sleep(1000);
@@ -524,7 +652,8 @@ try {
   await sleep(Math.max(0, 45000 - (Date.now() - aSamples[0].t)));
   sampleA = false; await sampler;
   result.twitchObserved = await observed();
-  await refreshCounters();
+  await refreshCounters('a');
+  await readFallbackProbe('a-end');
   const isMvp = /holodex-plus-audiolock|mvp/i.test(extDirArg);
   const aLast = aSamples.at(-1);
   result.scenarios.a = {
@@ -547,12 +676,12 @@ try {
       result.scenarioErrors.push({ scenario: 'bPrime', error: String(e?.stack || e) });
     }
   }
-  const switchToTwitch = async () => {
+  const switchToTwitch = async (phase) => {
     const before = await sampleOnce();
     let toggle = null;
     if (!before.twAudible) toggle = await toggleMute('twitch', { keepFocus: true });
     const samples = await sampleFor(3000);const hold=await sampleFor(3000);
-    await refreshCounters();
+    await refreshCounters(phase);
     const updates = result.updateStates || [];
     const afterToggle = toggle?.clickAt ?? toggle?.t ?? (samples[0]?.t ?? 0);
     const unmuteUpdateStateAt = updates.find((u) => u.t >= afterToggle - 100 && u.muted === false)?.t ?? null;
@@ -649,24 +778,32 @@ try {
   progress('b/c');
   result.scenarios.c=[];
   for(let round=1;round<=3;round++){
-    const b = await runScenario(round === 1 ? 'b' : `c${round}-switch`, async () => switchToTwitch());
-    if(round===1)result.scenarios.b=b;
+    const b = await runScenario(round === 1 ? 'b' : `c${round}-switch`, async () => switchToTwitch(round === 1 ? 'b' : null));
+    if(round===1){
+      result.scenarios.b=b;
+      await readFallbackProbe('b-end');
+    }
     if (b.error && round === 1) {
       // continue c rounds even if b failed
     }
     const cResult = await runScenario(`c${round}`, async () => {
       const before=await sampleOnce();await refreshCounters();const muteBefore=result.twitchCommandsReceived.mute;
-      let t=Date.now(),close=async()=>{},toggle=null;
+      await readFallbackProbe(`c${round}-before-input`);
+      let t=Date.now(),close=async()=>{},toggle=null,inputFallback=false;
       const samples=[];let collecting=true;
       const collector=(async()=>{while(collecting){samples.push(await sampleOnce());await sleep(50);}})();
       try {
-        if(round===2){toggle=await toggleMute('youtube',{keepFocus:true});t=toggle.clickAt;}else{const panel=await panelUnmuteYoutube();t=panel.t;close=panel.close;}
+        if(round===2){
+          toggle=await toggleMute('youtube',{keepFocus:true});
+          inputFallback=toggle.keyAt!=null;
+          t=inputFallback?toggle.keyAt:toggle.clickAt;
+        }else{const panel=await panelUnmuteYoutube();t=panel.t;close=panel.close;}
         await sleep(Math.max(0,2000-(Date.now()-t)));
       } finally {collecting=false;await collector;}
       const switched=samples.find(s=>s.t>=t&&s.t-t<=2000&&s.ytAudible&&s.tw?.muted===true);
       const switchedInMs=switched?switched.t-t:null;
-      await close();const hold=await sampleFor(5000);await refreshCounters();const muteDelta=result.twitchCommandsReceived.mute-muteBefore;
-      return {round,method:round===2?'youtube-player-mute':'trusted-media-controls-list',precondition:!!b.pass&&before.twAudible&&before.yt?.muted===true,toggle,inputAt:t,
+      await close();const hold=await sampleFor(5000);await refreshCounters(`c${round}`);const muteDelta=result.twitchCommandsReceived.mute-muteBefore;
+      return {round,method:round===2?'youtube-player-mute':'trusted-media-controls-list',precondition:!!b.pass&&before.twAudible&&before.yt?.muted===true,toggle,inputAt:t,inputFallback,
         pass:!!b.pass&&before.twAudible&&switchedInMs!==null&&hold.every(s=>s.ytAudible&&s.tw?.muted===true)&&(mode!=='fallback'||muteDelta>0),switchedInMs,muteDelta,b,samples,hold};
     });
     result.scenarios.c.push(cResult);
@@ -678,6 +815,7 @@ try {
       if(!inherited.ytAudible){const panel=await panelUnmuteYoutube();await panel.close();await sleep(3000);}
       const preReload=await sampleOnce();
       result.preReload={inherited,preReload,focusEvents:await E('window.__hplusFocusEvents||[]')};
+      await refreshCounters('d-before');
       await E('window.__hplusBeforeReviewReload=true');
       iframeSessions.clear();await send('Page.reload',{},S);
       await waitFor(`!window.__hplusBeforeReviewReload && !!document.querySelector('#app')?.__vue__?.$store`,60000,'new document reload store');
@@ -685,7 +823,7 @@ try {
       await waitSession('youtube',15000);await waitSession('twitch',15000);
       const y=await waitPlaying('youtube',30000);const tw=await waitPlaying('twitch',30000);
       const samples=await sampleFor(20000);
-      await refreshCounters();
+      await refreshCounters('d-after');
       return {precondition:preReload.ytAudible&&preReload.tw?.muted===true,preReload,pass:preReload.ytAudible&&preReload.tw?.muted===true&&!!y&&!!tw&&samples.every(s=>s.ytAudible&&s.store.a!==true)&&samples.filter(s=>s.twAudible).length<=4&&samples.some(s=>s.store.b===true),samples};
     });
     progress('f');
@@ -700,8 +838,10 @@ try {
       const newHost = result.hostExceptions.slice(hostBefore);
       const newPage = result.pageExceptions.slice(pageBefore);
       const newUnclassified = newPage.filter((e) => !newHost.includes(e) && !newExt.includes(e));
-      const hostAllowed = newHost.every((e) => HOST_EXCEPTION_ALLOWLIST.some((needle) => (e.message || '').includes(needle)));
-      // MVP same-run presence is checked later by the report; here allowlisted host messages pass.
+      const hostAllowed = newHost.every((e) => e.allowId != null);
+      const hostAllowedPendingMvp = newHost.filter((e) => e.allowId != null).map((e) => ({ allowId: e.allowId, firstLine: e.firstLine }));
+      result.hostAllowedPendingMvp = hostAllowedPendingMvp;
+      await refreshCounters('f');
       const pass = newExt.length === 0 && newUnclassified.length === 0 && hostAllowed && after.ytAudible;
       return {
         pass,
@@ -710,6 +850,7 @@ try {
         newHostExceptions: newHost,
         newUnclassifiedExceptions: newUnclassified,
         hostAllowed,
+        hostAllowedPendingMvp,
         extensionExceptionsDelta: newExt.length,
         hostExceptionsDelta: newHost.length,
       };
@@ -717,7 +858,12 @@ try {
   }
   const badCodes=['player-unavailable','player-mute-did-not-settle','store-did-not-settle','restore-failed','cell-contract-changed'];
   result.scenarios.e = await runScenario('e', async () => {
-    const bad=result.audioLockWarnings.filter(w=>w.text.includes('[Holodex+ AudioLock]')&&(badCodes.some(c=>w.text.includes(c))||(mode==='fallback'&&w.type==='warning'&&!w.text.includes('twitch-guard-unavailable'))));
+    await flushConsole();
+    const audioWarns = result.audioLockWarnings.filter((w) => w.text.includes('[Holodex+ AudioLock]'));
+    const bad = audioWarns.filter((w) => {
+      if (mode === 'fallback') return w.code !== 'twitch-guard-unavailable';
+      return badCodes.includes(w.code);
+    });
     return {pass:bad.length===0&&(mode==='fallback'||isMvp||result.vIsRefErrors===0),badWarns:bad.length,vIsRefErrors:result.vIsRefErrors,warnings:result.audioLockWarnings};
   });
   if(mode==='fallback'){
