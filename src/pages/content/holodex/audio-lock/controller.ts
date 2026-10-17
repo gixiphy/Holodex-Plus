@@ -118,7 +118,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
   const pausedByKey = new Map<string, boolean>();
   const firstPlayDepth = { value: 0 };
   const authDepth = { value: 0 };
-  const authScope = { muteOthersCalls: 0 };
+  const authScope = { mappedMuteOthers: 0 };
   let discoveryTimer: ReturnType<typeof setTimeout> | null = null;
   let discoveryStarted = 0;
   let session: Session | null = null;
@@ -326,7 +326,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
           const binding = lastBindings.get(effect.identity.key);
           if (!binding) break;
           authDepth.value += 1;
-          const before = authScope.muteOthersCalls;
+          const before = authScope.mappedMuteOthers;
           try {
             const cell = binding.cell as {
               setMuted: (v: boolean) => void;
@@ -336,7 +336,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
             cell.setMuted(effect.muted);
             if (
               effect.muted === false &&
-              authScope.muteOthersCalls === before &&
+              authScope.mappedMuteOthers === before &&
               state.active &&
               sameIdentity(state.active, effect.identity)
             ) {
@@ -639,7 +639,7 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
         const identity = lastBindings.get(key)?.identity;
         if (!identity) return originalMuteOthers.call(cell, id);
         if (authDepth.value > 0) {
-          authScope.muteOthersCalls += 1;
+          authScope.mappedMuteOthers += 1;
           return originalMuteOthers.call(cell, id);
         }
         if (!enabled || !state.muteOthers || state.mode === "degraded") {

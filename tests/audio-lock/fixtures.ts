@@ -387,7 +387,9 @@ export function createFakeVideoCell(opts: {
       }
     },
     muteOthers(id: string | number) {
-      cell.muteOthersCalls.push(id);
+      if (Array.isArray(cell.muteOthersCalls)) {
+        cell.muteOthersCalls.push(id);
+      }
       // trailing debounce 0
       if (opts.store._muteOthersTimer) clearTimeout(opts.store._muteOthersTimer);
       opts.store._muteOthersTimer = setTimeout(() => {

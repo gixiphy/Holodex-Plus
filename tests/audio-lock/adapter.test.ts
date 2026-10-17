@@ -382,6 +382,7 @@ describe("createHolodexAdapter", () => {
 
     let building = false;
     let snapFromSubscribe = false;
+    const shimSubs: Array<(m: { type: string }) => void> = [];
     const shimStore = {
       state: found.store.state,
       commit: found.store.commit.bind(found.store),
@@ -392,11 +393,10 @@ describe("createHolodexAdapter", () => {
           cb(m);
           building = false;
         };
-        found.store._subscribers.push(wrap);
+        shimSubs.push(wrap);
         return () => {
-          found.store._subscribers = found.store._subscribers.filter(
-            (s) => s !== wrap,
-          );
+          const i = shimSubs.indexOf(wrap);
+          if (i >= 0) shimSubs.splice(i, 1);
         };
       },
     };
@@ -409,7 +409,7 @@ describe("createHolodexAdapter", () => {
         /* onMutation only — must not invoke onSnapshot */
       },
     );
-    for (const sub of [...found.store._subscribers]) {
+    for (const sub of [...shimSubs]) {
       sub({ type: "multiview/setLayoutContentWithKey" });
     }
     expect(snapFromSubscribe).toBe(false);
