@@ -1,0 +1,2249 @@
+{
+ "label": "new",
+ "extDir": "/tmp/hplus-repro/ext-new",
+ "console": [
+  [
+   1792244123968,
+   "NAV",
+   "https://holodex.net/multiview"
+  ],
+  [
+   1792244123999,
+   "exception",
+   "{\"exceptionId\":1,\"text\":\"Uncaught\",\"lineNumber\":0,\"columnNumber\":0,\"scriptId\":\"10\",\"url\":\"chrome-extension://oimplgilijiacndklfkhffpoggbfihnj/assets/holodex-inject.ts-BjDs9NrB.js\",\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"SyntaxError\",\"description\":\"SyntaxError: Cannot use import statement outside a module\",\"objectId\":\"-1229913685695444667.2.1\",\"preview\":{\"type\":\"object\",\"subtype"
+  ],
+  [
+   1792244124684,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.login.twitterMsg.0' with 'en' locale."
+  ],
+  [
+   1792244124685,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.home' with 'en' locale."
+  ],
+  [
+   1792244124685,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.favorites' with 'en' locale."
+  ],
+  [
+   1792244124685,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.channels' with 'en' locale."
+  ],
+  [
+   1792244124686,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.playlist' with 'en' locale."
+  ],
+  [
+   1792244124687,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.multiview' with 'en' locale."
+  ],
+  [
+   1792244124687,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.about' with 'en' locale."
+  ],
+  [
+   1792244124687,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.settings' with 'en' locale."
+  ],
+  [
+   1792244124688,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.favorites' with 'en' locale."
+  ],
+  [
+   1792244124689,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.favorites.manageFavorites' with 'en' locale."
+  ],
+  [
+   1792244124700,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.favorites.showall' with 'en' locale."
+  ],
+  [
+   1792244124700,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.channels.sortOptions.org' with 'en' locale."
+  ],
+  [
+   1792244124700,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.search.searchLabel' with 'en' locale."
+  ],
+  [
+   1792244124701,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  ],
+  [
+   1792244124702,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.app.nowSupportsMultiOrg' with 'en' locale."
+  ],
+  [
+   1792244124702,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.app.loginCallToAction' with 'en' locale."
+  ],
+  [
+   1792244124705,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.search.searchLabel' with 'en' locale."
+  ],
+  [
+   1792244124708,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath '$vuetify.noDataText' with 'en' locale."
+  ],
+  [
+   1792244124712,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.reportDialog.success' with 'en' locale."
+  ],
+  [
+   1792244124712,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  ],
+  [
+   1792244124713,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.login.linkAcc' with 'en' locale."
+  ],
+  [
+   1792244124713,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  ],
+  [
+   1792244124835,
+   "log-error",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED https://www.google-analytics.com/g/collect?v=2&tid=G-VYN1GF9R4F&gtm=45je6ae1v887533579za20oxf1&_p=1792244124675&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAI&cid=358059381.1792244125&frm=0&ngs=1&pscdl=noapi&rcb=16&sr=800x600&uaa=arm&uab=64&uafvl=Google%2520Chrome%3B155.0.8059.82%7CChromium%3B155.0.8059.82%7CNot(A%253ABrand%3B24.0.0.0&uam=&uamb=0&uap=mac"
+  ],
+  [
+   1792244126259,
+   "warning",
+   "[vue-i18n] Value of key '$vuetify.noDataText' is not a string or function !"
+  ],
+  [
+   1792244126259,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath '$vuetify.noDataText' with 'en' locale."
+  ],
+  [
+   1792244126721,
+   "NAV",
+   "https://holodex.net/multiview"
+  ],
+  [
+   1792244126766,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.login.twitterMsg.0' with 'en' locale."
+  ],
+  [
+   1792244126767,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.home' with 'en' locale."
+  ],
+  [
+   1792244126767,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.favorites' with 'en' locale."
+  ],
+  [
+   1792244126767,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.channels' with 'en' locale."
+  ],
+  [
+   1792244126767,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.playlist' with 'en' locale."
+  ],
+  [
+   1792244126767,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.multiview' with 'en' locale."
+  ],
+  [
+   1792244126767,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.about' with 'en' locale."
+  ],
+  [
+   1792244126767,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.settings' with 'en' locale."
+  ],
+  [
+   1792244126770,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.mainNav.favorites' with 'en' locale."
+  ],
+  [
+   1792244126770,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.favorites.manageFavorites' with 'en' locale."
+  ],
+  [
+   1792244126778,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.favorites.showall' with 'en' locale."
+  ],
+  [
+   1792244126778,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.channels.sortOptions.org' with 'en' locale."
+  ],
+  [
+   1792244126778,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.search.searchLabel' with 'en' locale."
+  ],
+  [
+   1792244126779,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  ],
+  [
+   1792244126780,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.app.nowSupportsMultiOrg' with 'en' locale."
+  ],
+  [
+   1792244126780,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.app.loginCallToAction' with 'en' locale."
+  ],
+  [
+   1792244126782,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.search.searchLabel' with 'en' locale."
+  ],
+  [
+   1792244126783,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath '$vuetify.noDataText' with 'en' locale."
+  ],
+  [
+   1792244126789,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'component.reportDialog.success' with 'en' locale."
+  ],
+  [
+   1792244126789,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  ],
+  [
+   1792244126789,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.login.linkAcc' with 'en' locale."
+  ],
+  [
+   1792244126790,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  ],
+  [
+   1792244126830,
+   "warning",
+   "[vue-i18n] Value of key '$vuetify.noDataText' is not a string or function !"
+  ],
+  [
+   1792244126830,
+   "warning",
+   "[vue-i18n] Fall back to translate the keypath '$vuetify.noDataText' with 'en' locale."
+  ],
+  [
+   1792244126841,
+   "exception",
+   "{\"exceptionId\":2,\"text\":\"Uncaught\",\"lineNumber\":0,\"columnNumber\":0,\"scriptId\":\"19\",\"url\":\"chrome-extension://oimplgilijiacndklfkhffpoggbfihnj/assets/holodex-inject.ts-BjDs9NrB.js\",\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"SyntaxError\",\"description\":\"SyntaxError: Cannot use import statement outside a module\",\"objectId\":\"-1229913685695444667.4.1\",\"preview\":{\"type\":\"object\",\"subtype"
+  ],
+  [
+   1792244126842,
+   "log-error",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED https://www.google-analytics.com/g/collect?v=2&tid=G-VYN1GF9R4F&gtm=45je6ae1v887533579za20oxf1&_p=1792244126763&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AAAIAAQ&cid=358059381.1792244125&frm=0&ngs=1&pscdl=noapi&rcb=0&sr=800x600&uaa=arm&uab=64&uafvl=Google%2520Chrome%3B155.0.8059.82%7CChromium%3B155.0.8059.82%7CNot(A%253ABrand%3B24.0.0.0&uam=&uamb=0&uap=m"
+  ],
+  [
+   1792244127338,
+   "error",
+   "[Vue warn]: The computed property \"hidePlaceholder\" is already defined as a prop.\n\nfound in\n\n---> <VideoSelector> at src/components/multiview/VideoSelector.vue\n       <VToolbar>\n         <MultiviewToolbar> at src/components/multiview/MultiviewToolbar.vue\n           <MultiView> at src/views/MultiView.vue\n             <VMain>\n               <VApp>\n                 <App> at src/App.vue\n              "
+  ],
+  [
+   1792244127368,
+   "log-error",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED https://www.google-analytics.com/g/collect?v=2&tid=G-VYN1GF9R4F&gtm=45je6ae1v887533579za20gxf1&_p=1792244126763&gcd=13l3l3l3l1l1&npa=0&dma=0&_eu=AEAIAAQ&ae=a&cid=358059381.1792244125&frm=0&ngs=1&pscdl=noapi&rcb=0&sr=800x600&uaa=arm&uab=64&uafvl=Google%2520Chrome%3B155.0.8059.82%7CChromium%3B155.0.8059.82%7CNot(A%253ABrand%3B24.0.0.0&uam=&uamb=0&"
+  ],
+  [
+   1792244127377,
+   "exception",
+   "{\"exceptionId\":3,\"text\":\"Uncaught TypeError: c.get is not a function\",\"lineNumber\":943,\"columnNumber\":290,\"scriptId\":\"16\",\"url\":\"https://www.googletagmanager.com/gtag/js?id=G-VYN1GF9R4F&cx=c&gtm=4e6ae1\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"YL\",\"scriptId\":\"16\",\"url\":\"https://www.googletagmanager.com/gtag/js?id=G-VYN1GF9R4F&cx=c&gtm=4e6ae1\",\"lineNumber\":943,\"columnNumber\":290},{\"functionName"
+  ],
+  [
+   1792244127589,
+   "exception",
+   "{\"exceptionId\":4,\"text\":\"Uncaught (in promise)\",\"lineNumber\":34,\"columnNumber\":18760,\"scriptId\":\"12\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"jf\",\"scriptId\":\"12\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":34,\"columnNumber\":18760},{\"functionName\":\"S5\",\"scriptId\":\"12\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.j"
+  ]
+ ],
+ "timeline": [
+  {
+   "t": 1792244137052,
+   "storeA": false,
+   "storeB": true,
+   "ytMuted": false,
+   "twMuted": true,
+   "muteOthers": true,
+   "twCalls": 1,
+   "tag": "yt-play"
+  },
+  {
+   "t": 1792244137303,
+   "storeA": false,
+   "storeB": true,
+   "ytMuted": false,
+   "twMuted": true,
+   "muteOthers": true,
+   "twCalls": 1,
+   "tag": "yt-play"
+  },
+  {
+   "t": 1792244137554,
+   "storeA": false,
+   "storeB": true,
+   "ytMuted": false,
+   "twMuted": true,
+   "muteOthers": true,
+   "twCalls": 1,
+   "tag": "yt-play"
+  },
+  {
+   "t": 1792244137806,
+   "storeA": false,
+   "storeB": true,
+   "ytMuted": false,
+   "twMuted": true,
+   "muteOthers": true,
+   "twCalls": 1,
+   "tag": "yt-play"
+  },
+  {
+   "t": 1792244138057,
+   "storeA": false,
+   "storeB": true,
+   "ytMuted": false,
+   "twMuted": true,
+   "muteOthers": true,
+   "twCalls": 1,
+   "tag": "yt-play"
+  },
+  {
+   "t": 1792244138309,
+   "storeA": false,
+   "storeB": true,
+   "ytMuted": false,
+   "twMuted": true,
+   "muteOthers": true,
+   "twCalls": 1,
+   "tag": "yt-play"
+  },
+  {
+   "t": 1792244138560,
+   "storeA": false,
+   "storeB": true,
+   "ytMuted": false,
+   "twMuted": true,
+   "muteOthers": true,
+   "twCalls": 1,
+   "tag": "yt-play"
+  },
+  {
+   "t": 1792244138812,
+   "storeA": false,
+   "storeB": true,
+   "ytMuted": false,
+   "twMuted": true,
+   "muteOthers": true,
+   "twCalls": 1,
+   "tag": "yt-play"
+  },
+  {
+   "t": 1792244139063,
+   "storeA": false,
+   "storeB": true,
+   "ytMuted": false,
+   "twMuted": true,
+   "muteOthers": true,
+   "twCalls": 1,
+   "tag": "yt-play"
+  },
+  {
+   "t": 1792244139315,
+   "storeA": false,
+   "storeB": true,
+   "ytMuted": false,
+   "twMuted": true,
+   "muteOthers": true,
+   "twCalls": 1,
+   "tag": "yt-play"
+  },
+  {
+   "t": 1792244139566,
+   "storeA": false,
+   "storeB": true,
+   "ytMuted": false,
+   "twMuted": true,
+   "muteOthers": true,
+   "twCalls": 1,
+   "tag": "yt-play"
+  },
+  {
+   "t": 1792244139816,
+   "storeA": false,
+   "storeB": true,
+   "ytMuted": false,
+   "twMuted": true,
+   "muteOthers": true,
+   "twCalls": 1,
+   "tag": "yt-play"
+  },
+  {
+   "t": 1792244140076,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244140328,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244140580,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244140832,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244141083,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244141335,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244141586,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244141838,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244142089,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244142340,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244142592,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244142844,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244143096,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244143347,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244143599,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244143850,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  {
+   "t": 1792244144102,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244144354,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244144606,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244144858,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244145110,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244145362,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244145613,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244145865,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244146117,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244146369,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244146621,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244146873,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244147124,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244147376,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244147628,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244147880,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244148132,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244148384,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244148636,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244148887,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244149139,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244149391,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244149642,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244149894,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  {
+   "t": 1792244150146,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244150397,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244150649,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244150901,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244151152,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244151404,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244151655,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244151906,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244152158,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244152410,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244152661,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244152913,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244153165,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244153416,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244153668,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244153919,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-2"
+  },
+  {
+   "t": 1792244154171,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244154423,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244154675,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244154926,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244155178,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244155430,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244155681,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244155932,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244156184,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244156436,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244156687,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244156939,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244157190,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244157442,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244157693,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244157945,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-3"
+  },
+  {
+   "t": 1792244158197,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244158448,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244158699,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244158950,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244159201,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244159453,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244159704,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244159956,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244160207,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244160459,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244160710,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244160961,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244161213,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244161464,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244161715,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244161966,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-4"
+  },
+  {
+   "t": 1792244162218,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244162469,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244162721,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244162972,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244163224,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244163475,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244163726,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244163978,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244164229,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244164481,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244164732,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244164983,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244165235,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244165487,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244165738,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244165990,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-5"
+  },
+  {
+   "t": 1792244166242,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244166493,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244166745,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244166996,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244167247,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244167498,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244167750,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244168001,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244168253,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244168505,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244168756,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244169007,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244169259,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244169511,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244169762,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244170013,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-6"
+  },
+  {
+   "t": 1792244170265,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244170517,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244170768,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244171025,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244171280,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244171532,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244171784,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244172036,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244172289,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244172541,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244172793,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244173045,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244173297,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244173548,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244173800,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244174051,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-unmute-7"
+  },
+  {
+   "t": 1792244174303,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244174554,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244174806,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244175057,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244175309,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244175561,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244175812,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244176063,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244176315,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244176566,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244176818,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244177069,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244177321,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244177572,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244177823,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244178075,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244178326,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244178578,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244178829,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244179080,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  {
+   "t": 1792244179667,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244179918,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244180169,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244180421,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244180672,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244180924,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244181176,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244181427,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244181678,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244181929,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244182180,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244182432,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244182684,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244182934,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244183185,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244183437,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244183688,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244183940,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244184192,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  },
+  {
+   "t": 1792244184443,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  }
+ ],
+ "checks": {
+  "flags": {
+   "v3": false,
+   "mvpLock": false,
+   "newHandle": false,
+   "scripts": [
+    "chrome-extension://oimplgilijiacndklfkhffpoggbfihnj/assets/holodex-inject.ts-BjDs9NrB.js"
+   ],
+   "path": "/multiview"
+  },
+  "initial": {
+   "t": 1792244137040,
+   "storeA": false,
+   "storeB": true,
+   "ytMuted": false,
+   "twMuted": true,
+   "muteOthers": true,
+   "twCalls": 1
+  },
+  "afterBothPlay": {
+   "audible": "TW",
+   "t": 1792244143850,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-play"
+  },
+  "forcedYT": true,
+  "afterSelfUnmute1": {
+   "audible": "TW",
+   "t": 1792244149894,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-self-unmute-1"
+  },
+  "afterLaggedRepeats": {
+   "audible": "TW",
+   "t": 1792244179080,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "tw-lag-settle"
+  },
+  "everStolenDuringLag": 116,
+  "ytMutedSamples": 156,
+  "samples": 168,
+  "afterUserUnmuteTwitch": {
+   "audible": "TW",
+   "activeIsIframe": "IFRAME",
+   "t": 1792244184443,
+   "storeA": true,
+   "storeB": false,
+   "ytMuted": true,
+   "twMuted": false,
+   "muteOthers": true,
+   "twCalls": 2,
+   "tag": "user-unmute-tw"
+  }
+ },
+ "errors": [],
+ "extensionId": "oimplgilijiacndklfkhffpoggbfihnj"
+}
