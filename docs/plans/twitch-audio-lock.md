@@ -6,11 +6,13 @@
 
 第 2 版依 `docs/plans/reviews/twitch-audio-lock-verify-1.md` 修訂（報告基準 `d33360b`），修訂提交為 `0ab5af5`。第 3 版依 `DISPATCH-2610171451093196` 增加獨立上游 PR 範圍與打包；文末保留逐項驗收回應，報告本身不修改。
 
+第 4 版依第 2 輪驗收報告（受驗提交 `09b7bf2`，報告提交 `e9ed025`）處理 N1–N4；「驗收回應（第 3 版）」對應這輪新發現，不表示修改原審查報告。
+
 **目標：** Holodex multiview 開啟 Mute Others 時，Twitch 自行取消靜音、初始化或重連不得搶走使用者選定的聲音；使用者仍能明確切換或全部靜音。
 
 **架構：** 保留現有 content script → page script 注入途徑。將純狀態機、Vue 2 相容層、播放器 API、意圖追蹤與設定橋接分開；Vuex 保留 Holodex 的畫面狀態，狀態機保存短期使用者意圖與非同步操作世代。
 
-**技術：** 既有 Vite 7.1.11、TypeScript、`webextension-polyfill`、原生 DOM；options 目前是 TypeScript 動態產生表單，並非 React 元件。第一個 PR 建議只加 Vitest 3.2.6 與 jsdom 26.1.0 作 feature 測試；使用局部假 Vue/store/player fixture，不加 Vue runtime、coverage、瀏覽器自動化或通用測試基礎建設。Fi 可在題 8 改選不新增測試框架的方案。
+**技術／工具取捨：** 既有 Vite 7.1.11、TypeScript、`webextension-polyfill`、原生 DOM；options 是 TypeScript 動態表單。audio lock 的本文預設保留 Vitest 3.2.6＋jsdom 26.1.0（兩個測試 devDependency），因為需要 DOM/options 與 watcher／計時器回歸；不加 Vue runtime。另一個 auto-multiview-layout PR 已選 node:test、零新依賴，兩案目前工具不同，並非已達成統一。Fi 題 8 可選接受不同／兩案統一 node:test／兩案統一 Vitest；選統一時需分別修訂各案計畫，不共享新 runner 或先合併工具 PR。lint 工具一律只在 worktree .cache 臨時安裝，不加回產品依賴。
 
 **交付定位：** 本 worktree 的 `gixiphy/twitch-audio-lock` 是含原型、計畫、prompts、reviews 的工作分支，不能直接送上游。最終產品從 `upstream/dev` 的 `709e96319bc93965509f83e5f2a897b5d2dc37c7` 整理成乾淨 `fi/twitch-audio-lock`，方向為 `gixiphy/Holodex-Plus:fi/twitch-audio-lock` → `HolodexNet/Holodex-Plus:dev`。這是未來交付規格，**本輪禁止建立／切換分支、push、開 PR 或 merge**；具體白名單與未來打包門檻見「上游 PR 打包」。
 
@@ -50,8 +52,8 @@ Fi 已在 M1 Vivaldi 用 unpacked 原型確認功能有效。約 6800 次 Securi
 第一個 PR 僅解決「Mute Others 下非使用者選擇的 Twitch 取消靜音搶聲」，並帶上使它可安全使用的選項、相容性降級與必要回歸測試。這是一個功能 PR，三波／五任務是同一 PR 的實作順序，不拆出必須先合併的 framework/helper PR。
 
 - 包含：三態 muted 初始化／新增格／preset、輪詢與 manualRefresh 與首播攔截、可靠面板選聲、短期一次性 iframe 意圖、late-bind API 錯誤邊界、清理與熱切換；不犧牲第 2 版修正的兩個 high 項目來縮小行數。
-- 包含：`twitchAudioLock` schema/description 的小幅新增、既有 flags 旁的單一安裝入口、feature 專用測試/config/scripts、必要 lockfile 及缺失 lint parser/plugin 的最小補齊。零新 runtime dependency、零新權限、零通用 helper。
-- 保留目前細分模組，但所有新碼／測試只屬 audio lock，不為 auto-multiview-layout 抽共用 root finder、storage bus、Vue adapter 或事件工具。每個新模組都有本 PR 內的直接使用者。
+- 包含：`twitchAudioLock` schema/description 的小幅新增、既有 flags 旁的單一安裝入口、feature 專用測試/config/scripts、只為 Vitest/jsdom 所需的 lockfile 差異；不加回 lint parser/plugin。零新 runtime dependency、零新權限、零通用 helper。
+- 縮小模組面：意圖追蹤與 gate 合併到 controller.ts，message 型別／validator 與窄型別合併到純 contracts.ts；共六個新產品模組。contracts 只在本功能的 page/content contexts 共用，不為 auto-multiview-layout 抽 root finder、storage bus、Vue adapter 或事件工具。
 
 ### 之後再說的範圍
 
@@ -74,7 +76,9 @@ auto-multiview-layout 是另一個獨立 PR，不屬於上述後續相依工作�
 | `src/pages/content/holodex/holodex-inject.ts` | 既有 ARCHIVE_CHAT_OVERRIDE、HOLODEX_PLUS_INSTALLED、HOLODEX_PLUS_INSTALLED_V3 flags 保留值與時序；只加 audio-lock 相對 import／install 呼叫。不得順便改其他旗標或新增全站 audio flag。 |
 | `package.json`、`.nvmrc`、`.github/workflows/ci.yml` | 無 lint/test script；.nvmrc 是 18.17.1，手動 CI 用 Node 18，但既有 Vite 7 需要較新 Node。這是 baseline 工具鏈落差，第一 PR 不改 CI/.nvmrc；用 Node 22.12+ 做本機驗證，PR 草稿如實註記，不能宣稱舊 CI 已通過。 |
 
-缺失的 `@typescript-eslint/parser`／`@typescript-eslint/eslint-plugin` 是現有 config 的依賴缺口，不是導入新 lint 規則。建議第一個 PR 補兩者相同的 v8 相容版本（`^8.0.0`，實作安裝時確認兩者解析相同版本且 peer 同時接受 ESLint 8.57、TypeScript 5.6、Node 22，精確結果留 yarn.lock）。官方仍列出 [legacy config](https://typescript-eslint.io/users/configs/) 與 [dependency ranges](https://typescript-eslint.io/users/dependency-versions/)；不要因文件預設展示新版 flat config 就升級本 repo 的 ESLint。若上游拒絕額外 lint 套件，另用不改產品依賴的外部驗證環境處理並記錄；不能跳過 lint 或假稱通過。
+**上游移除歷史：** `a5ff26975574923f894c3c1b4ee2b3bbf9125576`（2024-12-29，latest）的 package.json diff 明確移除 `@typescript-eslint/parser` 與 `@typescript-eslint/eslint-plugin` 的 `^7.8.0`。目前 .eslintrc 仍引用它們，不能只稱為偶然漏裝，更不能預設把新版加回功能 PR；移除原因未在該 diff 說明，不推測維護者意圖。本輪用 git show 只讀確認，沒有安裝套件。
+
+**lint 預設方案：** 不改產品 package.json／yarn.lock 的 lint 依賴或 scripts。在 `.cache/audio-lock-lint/` 臨時安裝 ESLint 8.57.0、React plugin 7.37.2、parser/plugin 同版 8.18.0、TypeScript 5.6.3；這是驗證環境，不是產品依賴。8.18.0 的 [官方 parser peer range](https://github.com/typescript-eslint/typescript-eslint/blob/v8.18.0/packages/parser/package.json) 接受 ESLint 8.57 及 TS 5.6，與現有 yarn.lock 的 TS 5.6.3 相符；不能拿不相容舊版的警告當 pass。從 .eslintrc 產生本地 CJS config，只把 parser 解析為暫存環境的絕對路徑，保留所有 extends/rules/env；CLI 關閉自動尋找其他 config，plugins 從暫存環境解析。全部操作／npm cache／logs 只在 worktree，scope 與既有整合檔 baseline 用同一套環境；具體命令見打包段。產品 PR 排除整個 .cache，不讓維護者重新承擔被移除工具的依賴變更。
 
 ## 設計
 
@@ -102,7 +106,7 @@ auto-multiview-layout 是另一個獨立 PR，不屬於上述後續相依工作�
 
 ### 2. PlayerPort 與 SecurityError 邊界
 
-介面定義在 `audio-lock/types.ts`：
+介面定義在 `audio-lock/contracts.ts`：
 
 ```ts
 type CellKey = string; // String(item.i)
@@ -116,21 +120,27 @@ type CellIdentity = {
 type ReadMuted =
   | { kind: 'known'; muted: boolean }
   | { kind: 'unavailable'; reason: 'not-ready' | 'timeout' | 'access-error' };
+type SelectionGrant = {
+  identity: CellIdentity;
+  epoch: number;
+  source: 'bootstrap' | 'explicit';
+};
 interface PlayerPort {
   readMuted(): Promise<ReadMuted>;
   mute(): Promise<boolean>;
+  restoreSelectedAudio(grant: SelectionGrant): Promise<boolean>;
   dispose(): void;
 }
 ```
 
-PlayerPort 不提供自動 `unmute()`：修正器只能壓回非 active 的聲音；明確使用者命令與規定的單次 bootstrap 經 Holodex 既有流程選聲，不直接呼叫 SDK unmute。SDK 回傳 false 是已知沒靜音；undefined、非 boolean、異常回傳不可用 `!!value` 強制轉成「沒靜音」。這與合法的 store 未指派值分開處理。
+PlayerPort 不提供任意 `unmute()`；一般輪詢只能 mute。唯一例外是 `restoreSelectedAudio(grant)`：只在剛獲准的 bootstrap／明確選擇交易中，為了補足 U→false 不觸發站方 Boolean prop watcher 的情況，允許一次恢復所選 player。它使用與站方 setMute(false) 相同的公開 SDK 路徑（Twitch setMuted(false)、YouTube unMute()），仍以原始綁定 method、ready、try/catch、Promise rejection／750ms timeout 邊界執行；不呼叫 play，不修改 SDK 內部或 Vue observer。SDK 回傳 false 是已知沒靜音；undefined、非 boolean、異常回傳不可用 `!!value` 強制轉成「沒靜音」。這與合法的 store 未指派值分開處理。
 
 **取得原始參考的策略（第 2 版只做 late-bind）：**
 
 - Twitch：只從已驗證 `$refs.player` 的單一 `player` 欄位取得現有 instance，將 `getMuted`／`setMuted` 這兩個公開 method 綁定該 instance 保存在 closure。不攔截建構、不改 `window.Twitch`／`Twitch.Player`、不代建 iframe、不重建 player，也不改任何 SDK descriptor 或 options。
 - Vue 2 就地觀察該 instance，建構當下捕捉的參考與 late-bind 仍是同一物件；提前捕捉不能保證日後 method 執行時未經 reactive getter。因此移除 Proxy、assignment trap、未配對 instance registry 與其 64 筆／120 秒管理。這是縮減風險，並未改用會遍歷 SDK 的方案。
 - 實例還未建立屬 not-ready；實例存在卻無法取得必要公開 method 則整組降級。這是 late-bound 原始參考，**不是**還原成未觀察物件；不能深入 SDK 或讀 iframe window 尋找「更 raw」的版本。
-- YouTube：同樣只取已驗證 player component 的 `player` 原始參考，綁定 youtube-player 公開 `isMuted`／`mute`。它可能回傳 Promise，必須接受並處理。不在我們的輪詢中呼叫 component `isMuted()` 來穿越更多 Vue 層。
+- YouTube：同樣只取已驗證 player component 的 `player` 原始參考，綁定 youtube-player 公開 `isMuted`／`mute`／`unMute`；最後一項只有上述 selection grant 可用。它可能回傳 Promise，必須接受並處理。不在我們的輪詢中呼叫 component `isMuted()` 來穿越更多 Vue 層。
 - 綁定函式、以已配對 cell 為 key 的 WeakMap 與 controller handle 都只存在 closure／非 reactive 的擴充功能物件，不塞進 VM、Vuex、`$data`。已被 Vue 2 觀察的 SDK 原始 instance 仍可能有 reactive getter；這個策略減少我們的存取面，不能承諾把 SDK 去 reactive。
 
 read 前必須確認 ready：在 player component 用 Vue `$on('ready', listener)`／`$off` 取得訊號；若 late-bind 發生在 ready 之後，Twitch 以 `cell.twPlayer === boundInstance`、YouTube 以已存在的 `cell.ytPlayer` 與已驗證 binding 判定。不使用 SDK 私有 ready 欄位，也不把 SDK 初始快取 false 當真實 unmute。沒有 ready 訊號時回 not-ready，配合 120 秒有界等待。不向 SDK 添加無法移除的事件 listener；需要重新 reconcile 的 READY 使用這個 Vue 事件，PLAYING/ONLINE 若沒有可撤銷公開訂閱就省略，既有 polling 仍可處理恢復。
@@ -147,19 +157,40 @@ read 前必須確認 ready：在 player component 用 Vue `$on('ready', listener
 
 ### 3. 意圖來源、狀態機與輪詢競態
 
-**狀態：** `mode: 'disabled' | 'discovering' | 'waiting-for-choice' | 'locked' | 'degraded'`，另有 `selection: 'bootstrap' | 'selected' | 'silence'`、`active: CellIdentity | null`、`epoch: number`、`intent: { identity, source, expiresAt, consumed } | null`，以及各 cell 的 read/mute in-flight、最後寫入時間與連續失敗數。active 綁定 key + provider + contentId + player generation，不能只用 DOM 順序或格子索引。重新排序不改 active；換片、換 provider、重建 player 時舊非同步結果及 token 必須失效。active=null 不足以決定是否允許首播：bootstrap 可初始化一次，silence 必須保持全靜音。
+**狀態：** `mode: 'disabled' | 'discovering' | 'waiting-for-choice' | 'locked' | 'degraded'`，另有 `selection: 'bootstrap' | 'selected' | 'silence'`、`active: CellIdentity | null`、`epoch: number`、`intent: { identity, source, expiresAt, consumed } | null`、`selectionGrant: { grant: SelectionGrant; consumed: boolean } | null`，以及各 cell 的 read/mute in-flight、同 generation 的 guard-mute 紀錄、最後寫入時間與連續失敗數。active 綁定 key + provider + contentId + player generation，不能只用 DOM 順序或格子索引。重新排序不改 active；換片、換 provider、重建 player 時舊非同步結果及 token/grant 必須失效。active=null 不足以決定是否允許首播：bootstrap 可初始化一次，silence 必須保持全靜音。
 
 store 的 `MutedAssignment` 保留 true／false／undefined 三態；primitive snapshot 明確編成 `M`／`A`／`U`，不要用 JSON 省略 undefined 後丟失差異。undefined 的原生播放器效果雖近似 false，但語義是「Holodex 尚未指派」，不能因此 degraded，也不是使用者取消靜音的證據。它與 PlayerPort.readMuted() 的未知回傳不同：SDK 回傳 undefined 仍是 unavailable。
 
-純函式為 `transition(state: LockState, event: LockEvent): { state: LockState; effects: LockEffect[] }`，時間由 event 的 `now` 注入；不在 reducer 讀 DOM、store、Date.now 或 player。`LockEvent` 至少包含 `ENABLE`、`DISABLE`、`DISCOVERED`、`NATIVE_FIRST_PLAY`、`BOOTSTRAP_READY`、`LAYOUT_CHANGED`、`PLAYER_READY`、`EXPLICIT_SET_MUTED`、`IFRAME_INTENT`、`OBSERVED_MUTED`、`STORE_SNAPSHOT`、`CELL_REMOVED`、`CONTRACT_FAILED`。effects 包含 `MUTE_PLAYER`、`CALL_ORIGINAL_SET_MUTED`、`CALL_ORIGINAL_MUTE_OTHERS`、`SET_STORE_MUTED`、`REPORT_ONCE`，附 identity 與 epoch；套用前再次核對最新狀態。`SET_STORE_MUTED` 僅能寫 true，使用站方 `multiview/setLayoutContentWithKey`，不得直接修改 reactive 物件或誤觸 solo。
+**desired 狀態必須先判斷 selection，不能用 active=null 推導「全部非 active 都應靜音」。** 在 state.ts 實作純函式 `desiredMute(state, assignment, identity): 'muted' | 'audible' | 'unassigned'`：
+
+| selection／條件 | desired 結果 | poll 行為 |
+| --- | --- | --- |
+| disabled／discovering／degraded | unassigned | 不發音訊 effects。 |
+| bootstrap，assignment 為 U 或 false | unassigned | **不發 MUTE_PLAYER、不改 store、不因讀到 true 進 silence**；等首播／fallback／明確選擇。 |
+| bootstrap，assignment 為 true | muted | 已知 false 時可壓回，維持站方已有靜音指派。 |
+| selected，identity 是 active | audible | 不壓靜音；有尚未完成的合法 selection grant 時可做一次恢復。 |
+| selected 的其他格／silence 的所有格 | muted | 已知 false 時按限速壓回；U 格 ready 後正規化 true。 |
+
+U→false 的 store 變更不等於播放器會被取消靜音：PlayerMixin 的 Boolean mute prop 預設 false（`:13`），所以 U 與 false 可落成同一個 effective prop；Twitch mute watcher（`TwitchPlayer.vue:57`）與 YouTube mute watcher（`YoutubePlayer.vue:45`）不會因此觸發。必須用下面的選聲交易補足，不能假設 mutation 已代表實際有聲。
+
+純函式為 `transition(state: LockState, event: LockEvent): { state: LockState; effects: LockEffect[] }`，時間由 event 的 `now` 注入；不在 reducer 讀 DOM、store、Date.now 或 player。`LockEvent` 至少包含 `ENABLE`、`DISABLE`、`DISCOVERED`、`NATIVE_FIRST_PLAY`、`BOOTSTRAP_READY`、`LAYOUT_CHANGED`、`PLAYER_READY`、`EXPLICIT_SET_MUTED`、`IFRAME_INTENT`、`OBSERVED_MUTED`、`STORE_SNAPSHOT`、`CELL_REMOVED`、`CONTRACT_FAILED`。effects 包含 `MUTE_PLAYER`、`CALL_ORIGINAL_SET_MUTED`、`CALL_ORIGINAL_MUTE_OTHERS`、`RESTORE_SELECTED_AUDIO`、`SET_STORE_MUTED`、`REPORT_ONCE`，附 identity 與 epoch；套用前再次核對最新狀態。`SET_STORE_MUTED` 僅能寫 true，使用站方 `multiview/setLayoutContentWithKey`，不得直接修改 reactive 物件或誤觸 solo。
 
 **預設初始化／新增／preset 規則（與 Fi 選項題 1、2 一致）：**
 
 - 初次非空 snapshot 若恰有一個明確 false，採它為 active；其他 U 不算第二個選擇，待 ready 後正規化成 true。若所有 video 都是 true，進 silence。空 layout 留在 bootstrap 等 cell，不挑不存在的 active。
 - 其他初始組合（全 U、多個 false、U 與 true 混合且沒有唯一 false）進 bootstrap；保留原生首播選聲**一次**，YouTube／Twitch 都可。第一個實際進入原生 first-play `muteOthers(self)` 的 cell 立即保留 active、epoch++，再放行原 mapped method；後來的 first play 即使在 debounce 尚未寫 state 前也不得覆蓋。bootstrap 是初始化來源，不偽稱使用者命令。
-- 若掛勾晚於 first play，已有 ready 且 `editMode === false` 的 U／false cell，排一次 1000ms fallback；執行時仍為同 epoch 的 bootstrap 才按 layout 順序選第一個這類 cell，呼叫原 `muteOthers` 一次收斂。paused／未 ready／明確 true 不參選；沒有播放候選就等待，不直接呼叫 SDK play/unmute。這避免四格一直同時有聲，又不把「全靜音」當作 bootstrap。
+- 若掛勾晚於 first play，已有 ready 且 `editMode === false` 的 U／false cell，排一次 1000ms fallback；執行時仍為同 epoch 的 bootstrap 才按 layout 順序選第一個這類 cell，呼叫原 `muteOthers` 一次收斂。paused／未 ready／明確 true 不參選；沒有播放候選就等待，不呼叫 play；選格取消靜音只依下述單次 grant，不假定 U→false 會觸發 watcher。這避免四格一直同時有聲，又不把「全靜音」當作 bootstrap。
 - 已 selected 時新增 U 格不影響 active：立即在 controller 標為 desired-muted，先裝 cell wrappers 擋首播搶聲；等該 player READY 後以 `SET_STORE_MUTED(true)` 正規化並透過 PlayerPort 壓回聲音。SDK 未 ready 前不改 mute prop，避免觸發 `TwitchPlayer.vue:57` 的 watcher 去呼叫尚未存在的 `setMuted`。silence 下新增格也同樣靜音。ready 前的短暫漏音仍屬輪詢／初始化限制。
 - `setLayoutContent` 加 `setLayout` 的一批 preset 操作合併到後續 macrotask 判定，先使舊 generation／read／token 失效；若原 active 的 key/provider/contentId 仍在（包括 merge preset），保留它並正規化新增格。若 active 已不在且原 selection 不是 silence，開始新的 bootstrap；原本 silence 則維持 silence。單格刪除／替換 active 則進 silence，不能被誤判為整批新 preset。只有順序或尺寸改動不重置選擇。
+
+**所有「選成 active」的路徑使用同一個選聲交易，不能只補 mapped mutation：**
+
+1. bootstrap 原生首播、1000ms fallback、明確面板選擇／有效 iframe token 都先設定 active、epoch，建立同 identity/epoch 的一次性 SelectionGrant，再呼叫原 mapped mutation 或帶授權的 setMuted(false)。原本 U／false 的 setMuted 提前返回規則仍依攔截段補 mutation 恰一次。
+2. 在 debounce 的後續 macrotask 確認 store 已收斂且 player ready，做一次 fresh read。若讀到 true，或這一 generation 曾被我們發出 mute，產生 RESTORE_SELECTED_AUDIO。若已知 false 且沒有我們的 mute 紀錄，直接消耗 grant，不多送取消靜音。fresh read unavailable 且沒有自身 mute 紀錄時取消這次 grant，不猜測發 unmute，按既有 read error／冷卻／降級規則處理；不得留下永久 pending grant。尚未 ready 的 grant 只暫存到同 binding 的 READY、有界 120 秒，不能靠普通 poll 無限重建 grant。
+3. controller 套用 effect 前再次確認 enabled、Mute Others、active、identity/generation、epoch 與 grant 未消耗；將 grant 標已消耗後呼叫 PlayerPort.restoreSelectedAudio 一次。即使 API throw/reject/timeout 也不重複 unmute；已排到但尚未發出的舊 grant，遇停用、全部靜音、換格、preset 或新選擇必須取消。已送出的 SDK 命令無法撤銷，後續仍按目前 desired 靜音收斂。
+4. 以實際 fresh read 驗證結果，1500ms settle 期間不把 stale true 立即轉成 silence；settle 後仍 true，採保守 silence／一次 restore-failed 診斷，不自動 play、不持續嘗試取消靜音。已 consumed 的 active 後來因廣告／使用者再靜音，沿 Fi 題 5 處理，不重新授權恢復。
+
+這條一次性例外只補「選格」的播放器狀態，不是維持 audible 的無限 unmute 鎖；也不靠 true→false 快速兩次 store commit（Vue batch 可能合併成同一個 false，仍不觸發 watcher）。初始 snapshot 接受唯一 false 時，若為本 controller 先前保留的選擇就遵循現有 grant；單純重新啟用讀到歷史 false 不視為新明確選擇，不因它無限恢復聲音。
 
 | 輸入情況 | 轉移與動作 |
 | --- | --- |
@@ -169,7 +200,7 @@ store 的 `MutedAssignment` 保留 true／false／undefined 三態；primitive s
 | URL 四格全 U／多格初始 false | selection=bootstrap；允許第一個原生 first play 一次，或 1000ms fallback 選已在播的合格格子；以原 muteOthers 收斂為一格 false、其他 true。 |
 | 使用者在 Holodex 面板明確對 B `setMuted(false)` | 立即 active=B、selection=selected、epoch++、消耗 token；同步範圍內呼叫原 `setMuted(false)`，確保其 `muteOthers(B)` 恰一次，其他 cell 立即視為應靜音。不用等 debounced Vuex mutation 才更新意圖。 |
 | B 的實際值 false，但 store／active 要 B 靜音；有 B 尚未消耗的有效 iframe token | 接受一次同上；焦點本身不切 active，還必須觀察到從 muted → unmuted 的變化。 |
-| 非 active B 自行回報 false，沒有有效 token | 不呼叫原 `setMuted(false)`／`muteOthers`，保持 active；對 B 發 MUTE_PLAYER。 |
+| B 回報 false，沒有有效 token | **只有 desiredMute(...) === 'muted' 才發 MUTE_PLAYER**；bootstrap 的 U／false 為 unassigned，不呼叫 setMuted(false)、不壓靜音，也不自行切 active。 |
 | active 回報 true | 若沒有待完成的更新或過期 read，原 `setMuted(true)` 同步 store，清 active、selection=silence → waiting-for-choice。不自動取消靜音；廣告／播放政策造成暫時靜音也採保守的全靜音行為。 |
 | 明確靜音 active／全部靜音 | 原生 setMuted(true)，active=null、selection=silence、epoch++、清 token；其他 player 自行取消靜音全部壓回。 |
 | 已 selected 或 silence，其他格 first play／READY／ONLINE／刷新 | 不授權切換，兩個 provider 相同；READY 只重試 pending 正規化。這有別於原生「新播放格取得聲音」，須由 Fi 題 1 確認。 |
@@ -207,6 +238,7 @@ store 的 `MutedAssignment` 保留 true／false／undefined 三態；primitive s
 - 每次 read 開始保存 identity、epoch、read sequence；結果返回前核對。A→B→A、換片／刪格、停用、延遲 false／true 結果都不得覆蓋新決定。先處理已知的 bootstrap、pending U、preset、重排及 controller 自己的 mutation；這些都不是矛盾。只有既有且身分未變的已指派格，遭未知來源切成另一個 active，才報 `store-state-conflict` 降級，不自行承認為使用者選擇。
 - `SET_STORE_MUTED(true)` 只處理 selected 的其他格／silence 的所有待正規化格；在 READY 與最新 identity 確認後，進入帶 epoch 的 internal-write scope，commit `multiview/setLayoutContentWithKey({ id: key, key: 'muted', value: true })`。這是站方已用的單格 mutation（store `:168`），不呼叫 setMuted(false) 或 muteOthers；相鄰 watch 可辨認為自己的預期寫入。pending-port 期間 snapshot 可保持 U，不啟動 500ms 收斂倒數；READY 後正規化 deadline 才開始，逾時仍未成功才降級。
 - 新選 B 後舊 active A 的延遲 mute=true 不得清掉 B；active read 若正處於自身狀態切換的 1500ms settle 期，不把短暫 stale true 當成全部靜音。settle 到期後真實 true 才同步為全靜音；不得無限延長。
+- grant 尚在等待 store／ready／fresh read／一次性恢復時，不把 active 的 true 當成普通「active 再次被靜音」；整個選聲交易有界，完成或失敗才回到一般 observation 規則。RESTORE_SELECTED_AUDIO 與 MUTE_PLAYER 的 late result 都要核對 epoch，不能在選擇已改變後再發舊取消靜音命令。
 - MUTE_PLAYER 只對 desired-muted 且已知 false 的格執行；每格最多每 1000ms 一次，同時最多一個寫入；命令後 1500ms 為 settle 期，這期間快取 false 不算新意圖、不重打寫入。settle 後仍 false 可重試，連續 3 次無法收斂即 `player-mute-did-not-settle` 降級。SDK 異步快取不應造成暴量 API 呼叫或 console 輸出。
 - 保留 Holodex 1000ms polling 作為主要時鐘，不再增加第二個音訊 interval。新 cell、READY／ONLINE 可排一次合併 reconcile；所有 reconcile 套用相同 read/write 限制。
 
@@ -221,7 +253,7 @@ store 的 `MutedAssignment` 保留 true／false／undefined 三態；primitive s
 
 生效條件嚴格為：`extensionSetting === true && store.multiview.muteOthers === true && compatibleMultiview`。不代替使用者開啟 Mute Others，不寫 `setMuteOthers`。切到 true 後以 Holodex 當時 store snapshot 建立狀態；切到 false 立即卸載 cell wrappers／ports，不把原型「永遠 muted=true」留在關閉情境。第 2 版沒有 Twitch constructor 攔截。
 
-page script 沒有 extension storage 權限，**不可**在 `holodex-inject.ts` 或 audio-lock 子模組 import `@utils` barrel／`webextension-polyfill`；該 barrel 會引入 runtime/storage。content script 負責讀 Options，page script 只接布林值。新增純資料模組 `audio-lock-protocol.ts`，協定如下：
+page script 沒有 extension storage 權限，**不可**在 `holodex-inject.ts` 或 audio-lock 子模組 import `@utils` barrel／`webextension-polyfill`；該 barrel 會引入 runtime/storage。content script 負責讀 Options，page script 只接布林值。協定與 `parseAudioLockMessage` 放入純 `audio-lock/contracts.ts`，與既有本功能窄型別合併，不另開 protocol 模組，也不把 parser 放進會 import storage 的 settings.ts。協定如下：
 
 ```ts
 type AudioLockMessage =
@@ -251,13 +283,11 @@ extension 設定更新應在同頁約 1 秒內套用（前景、已收到 storag
 | 動作／檔案 | 責任與主要函式 |
 | --- | --- |
 | 重寫 `src/pages/content/holodex/twitch-audio-lock.ts` | 輕量入口，`installAudioLock(): AudioLockHandle`；page config listener、單例 handle；移除原型全域 mixin、hover、localStorage 與逐次 log。 |
-| 新增 `src/pages/content/holodex/audio-lock/types.ts` | `MutedAssignment`、`CellIdentity`、`PlayerPort`、`LockState/Event/Effect`、`AudioLockHandle`、adapter binding 型別；不 import extension API。 |
-| 新增 `src/pages/content/holodex/audio-lock/state.ts` | `createInitialState(): LockState`、`transition(...)`；純決策、全部時限常數與 identity/epoch 驗證。 |
+| 新增 `src/pages/content/holodex/audio-lock/contracts.ts` | `MutedAssignment`、`CellIdentity`、`SelectionGrant`、`PlayerPort`、state/event/effect、binding 型別，以及純 message 型別／常數／`parseAudioLockMessage(value: unknown): AudioLockMessage \| null`；無 DOM side effect、無 extension API import。 |
+| 新增 `src/pages/content/holodex/audio-lock/state.ts` | `createInitialState(): LockState`、`desiredMute(...)`、`transition(...)`；純決策、全部時限常數、一次性 grant 與 identity/epoch 驗證。 |
 | 新增 `src/pages/content/holodex/audio-lock/holodex-adapter.ts` | `createHolodexAdapter(...)`；`discover()`、`patchCell(binding, handlers): () => void`、`watchSnapshot(cb): () => void`、`dispose()`；Vue/DOM/store 契約與可撤銷 wrappers。 |
-| 新增 `src/pages/content/holodex/audio-lock/players.ts` | `createPlayerPort(binding): PlayerPort | null`；只做 late-bind、ready 判斷、750ms 邊界與 cell WeakMap 清理；完全不動 Twitch global。 |
-| 新增 `src/pages/content/holodex/audio-lock/intent.ts` | `trackIntent(bindings, onIntent): () => void`、`beginPanelDispatch(event, trusted)`、`endPanelDispatch(event)`、`hasPanelDispatch()`；window capture/bubble 的 Event 配對與 iframe 一次性焦點 token。 |
-| 新增 `src/pages/content/holodex/audio-lock/controller.ts` | `createAudioLockController(deps): AudioLockHandle`；串 reducer、adapter、player、intent；`reconcileCell(identity): Promise<void>`、effects 套用、epoch、cleanup、once-warning closure。deps 注入 clock/timers 以便測試。 |
-| 新增 `src/pages/content/holodex/audio-lock-protocol.ts` | 純 message 型別、常數、`parseAudioLockMessage(value: unknown): AudioLockMessage | null`；不可 import storage。 |
+| 新增 `src/pages/content/holodex/audio-lock/players.ts` | `createPlayerPort(binding): PlayerPort \| null`；late-bind、ready、750ms 邊界、grant 一次性恢復方法與 cell WeakMap 清理，完全不動 Twitch global。 |
+| 新增 `src/pages/content/holodex/audio-lock/controller.ts` | `createAudioLockController(deps): AudioLockHandle`、`reconcileCell(identity): Promise<void>`、選聲 grant executor、effects／cleanup／一次警告；同檔內 `trackIntent` 及 `beginPanelDispatch`／`endPanelDispatch`／`hasPanelDispatch` 負責意圖與 Event gate。透過 deps 注入 clock/timers；不另建 intent.ts。 |
 | 新增 `src/pages/content/holodex/audio-lock-settings.ts` | isolated bridge：`startAudioLockSettingsBridge(win): () => void`，Options get/storage change、一次 ready handshake、讀取期間變更保護。 |
 | 修改 `src/pages/content/holodex/contentScript.ts` | 在 top frame 注入前啟動 bridge，保留既有 `inject` 行為與 flag 注入；對 rejected inject 作有界錯誤處理。 |
 | 修改 `src/pages/content/holodex/holodex-inject.ts` | 保留既有 flags 與 `installAudioLock()` 入口，不引入 extension API。 |
@@ -267,8 +297,8 @@ extension 設定更新應在同頁約 1 秒內套用（前景、已收到 storag
 | 新增 `tests/audio-lock/players.test.ts` | SDK fake、throwing getter、Promise timeout、late-bind；assert Twitch global/constructor 完全未改。 |
 | 新增 `tests/audio-lock/controller.test.ts` | 整合 fake store/player/clock；poll、非同步世代、清理、intent。 |
 | 新增 `tests/audio-lock/settings.test.ts` | mock webextension-polyfill、bridge race/message validation、既有 options 表單。 |
-| 新增 `tests/audio-lock/fixtures.ts` | 最小 store/cell/player 工廠，忠實模擬 trailing debounce 與 READY/manualRefresh；不讀／複製 `.ref` 原始碼。 |
-| 新增 `vitest.audio-lock.config.ts`、`tsconfig.audio-lock.tests.json`、修改 `package.json` | audio-lock 專用 Vitest config（含實際 options aliases）、typecheck／lint／test scripts；只加兩個測試 devDependency 與補齊兩個既有 lint devDependency；不載入 CRXJS plugins。 |
+| 新增 `tests/audio-lock/fixtures.ts` | 最小 store/cell/player 工廠，模擬 trailing debounce、READY/manualRefresh、Boolean prop default 與僅 prop 有差異才觸發 watcher；不讀／複製 .ref 原始碼。 |
+| 新增 `vitest.audio-lock.config.ts`、`tsconfig.audio-lock.tests.json`、修改 `package.json` | audio-lock 專用測試 aliases／typecheck/test scripts；只加 Vitest/jsdom 兩個測試 devDependency，不加 lint 依賴／script，不載入 CRXJS plugins。 |
 | 實作回合更新 `yarn.lock`；`.gitignore` 不改 | 現有 `.cache` 原名規則（`:136`）已涵蓋 `.cache/vitest` 等工具輸出；不產生 `.vitest`，無須再加規則。本規劃回合不改 lockfile。 |
 
 `src/pages/options/index.ts` 原則上只由測試覆蓋，不必為一個新選項改 UI；若目前表單的錯誤處理妨礙此功能，限制修正範圍並在實作記錄解釋。`src/global.d.ts` 不必加大量 any global，將 page handle 型別留在入口的局部 Window 型別。
@@ -280,20 +310,20 @@ extension 設定更新應在同頁約 1 秒內套用（前景、已收到 storag
 - [ ] 實作前閱讀「第一個 PR 的範圍」「上游程式風格」「上游 PR 打包」及 Fi 題 8；沒有另選時照最小 Vitest 方案。核對工作分支仍是 gixiphy/twitch-audio-lock、upstream/dev 本機基準為完整 709e963 hash；此任務不建立／切換分支。
 - [ ] 從 upstream/dev 的 options／contentScript／flags 邊界比對，不把另一個 auto-multiview-layout 分支的 helpers、commits 或 scripts 搬進來。所有新增檔案限定 audio-lock 命名空間；不要改 @utils barrel。
 - [ ] `twitch-audio-lock.ts` 依本計畫**重寫取代** eda5b52 的原型，不疊上其全域 mixin／constructor trap／localStorage patch。保留的入口檔名與 install 呼叫不是保留原型架構；正式 PR 不帶 eda5b52 作祖先 commit。
-- [ ] 後續每個產品 commit 只 stage 本功能產品／測試／必要工具配套白名單，文件修改另作 docs commit；記錄有序產品 SHA，禁止 git add -A 或把工作分支所有 commits 直接 rebase/merge 到 PR 分支。打包時需補上原型路徑前提，方式見打包段，不能只 cherry-pick 依賴 eda 的後續 delta。
+- [ ] 後續每個產品 commit 只 stage 本功能產品／測試／必要工具配套白名單，文件修改另作 docs commit；保留純產品 SHA 供追溯或在前提一致時 cherry-pick。禁止 git add -A 或把整個工作分支 rebase/merge 到 PR；推薦打包只取已驗證產品 tree 的白名單最終內容，不重播原型來補 delta 前提。
 
 ### 波次一：狀態規格與測試基礎（任務 1）
 
 **交付：** 能獨立執行且無 DOM／SDK 的狀態機；尚不接到頁面。
 
 - [ ] 確認基準 diff、Node、Yarn 與輸出位置；不覆蓋原有未提交檔案。後續安裝／build 只用本 worktree 的 cache，不將新檔指向 `.ref`。
-- [ ] 在 `package.json` 加測試 devDependency `vitest: "3.2.6"`、`jsdom: "26.1.0"`，不加 vue；補既有 config 缺失的 @typescript-eslint/parser 與 eslint-plugin 相同相容 v8，確認 peer ranges 並保留 lockfile。新增 `test:audio-lock` = `vitest run --config vitest.audio-lock.config.ts`、`test:audio-lock:watch` = `vitest --config vitest.audio-lock.config.ts`、`typecheck:audio-lock` = `tsc --noEmit && tsc --noEmit -p tsconfig.audio-lock.tests.json`。不新增通用 test/typecheck script，避免與另一 PR 搶命名。
-- [ ] 新增 `lint:audio-lock` script：`eslint --max-warnings 0 --ext .ts src/pages/content/holodex/audio-lock src/pages/content/holodex/twitch-audio-lock.ts src/pages/content/holodex/audio-lock-protocol.ts src/pages/content/holodex/audio-lock-settings.ts tests/audio-lock vitest.audio-lock.config.ts`。只驗證新增功能碼與測試的零警告；既有整合檔的 lint 另依打包段與 709e963 比 baseline，不把 baseline 錯誤藏起來。
+- [ ] 先核對 Fi 題 8：本文方案 A 保留 audio lock 的 Vitest＋jsdom，接受與另一 PR node:test 不同；如 Fi 選統一先修訂相應計畫。A 只在 package.json 加 `vitest: "3.2.6"`、`jsdom: "26.1.0"`，不加 Vue／lint 套件。scripts：test:audio-lock = `vitest run --config vitest.audio-lock.config.ts`，test:audio-lock:watch = `vitest --config vitest.audio-lock.config.ts`，typecheck:audio-lock = `tsc --noEmit && tsc --noEmit -p tsconfig.audio-lock.tests.json`。
+- [ ] 依打包段只在 .cache/audio-lock-lint 建立臨時 lint 安裝／config／run.cjs；不要在產品 package.json 新增 lint script，也不回填上游 a5ff269 移除的依賴。scope 零警告、既有整合檔比 baseline 的門檻照舊。
 - [ ] 新增 `tsconfig.audio-lock.tests.json`，`extends: './tsconfig.json'`、`include: ['tests/audio-lock/**/*.ts', 'vitest.audio-lock.config.ts']`，覆寫 `compilerOptions.moduleResolution: 'bundler'`，保留 esnext module、noEmit、strict、paths 與 types。tests 都顯式 import Vitest API，不靠全域型別。這個 config 加上原 tsc 指令涵蓋本功能產品／tests／fixture／config，不引用另一 PR 的測試 setup，也不修改原產品 tsconfig。
 - [ ] `vitest.audio-lock.config.ts` 用 `defineConfig` from `vitest/config`，`test.include: ['tests/audio-lock/**/*.test.ts']`、`environment: 'jsdom'`、`environmentOptions.jsdom.url: 'https://holodex.net/multiview'`、`css: false`、`testTimeout: 5000`、`hookTimeout: 5000`、`teardownTimeout: 5000`、`restoreMocks: true`；cacheDir 指 worktree `.cache/vitest`。不載入 CRXJS config。
 - [ ] 同一個 Vitest config 必須加 `resolve.alias`，用 `fileURLToPath(new URL(relativePath, import.meta.url))` 建絕對路徑：`@utils` → `./src/utils/index.ts`、`@assets` → `./src/assets`、`@src` → `./src`、`@pages` → `./src/pages`、`@locales` → `./src/locales`。即使測試本身用相對 import，實際 options entry 的 `@utils` 與 `@assets/styles/tailwind.css` 仍需解析；CSS 內容在測試中略過，alias 解析不可略過。沿用既有 aliases，不新增 dependency。
 - [ ] 先寫 state 測試，至少用表格 assert：disabled 無 effects；locked A 下未授權 B false 只產生 MUTE_PLAYER(B)；有 token B false 只產生一次 CALL_ORIGINAL_SET_MUTED(B,false)；token 在 2500ms 後無效；全部靜音 active=null、selection=silence；過期 epoch 不產生 effects；四格全 U 為 bootstrap、第一個 NATIVE_FIRST_PLAY 才產生一次 CALL_ORIGINAL_MUTE_OTHERS，第二個在 debounce 前即被擋。執行 `yarn test:audio-lock tests/audio-lock/state.test.ts` 確認尚未實作時 FAIL。
-- [ ] 建立 `types.ts`、`state.ts`，完成上列介面與完整轉移表，再跑同一命令預期 PASS。用明確常數表達 2500／750／1500／1000／500／5000ms，不散落魔術數。
+- [ ] 在 state.test.ts 先補 `bootstrap_poll_does_not_mute_unassigned_or_false_cells`：selection=bootstrap、active=null，U 與 false 的每次 poll(false) 均為 desired=unassigned、effects 不含 MUTE_PLAYER；另有 true 格 poll(false) 才可 MUTE_PLAYER。之後實作 contracts.ts、state.ts 的 desiredMute、grant 與轉移表，再跑同一命令 PASS；時限用常數，不散落魔術數。
 - [ ] review 決策與型別是否一致，將此獨立任務留在本機功能 commit（僅在當輪已允許 Git 中繼資料寫入時）；不 push。
 
 ### 波次二：相容層與整合（任務 2、3）
@@ -303,7 +333,7 @@ extension 設定更新應在同頁約 1 秒內套用（前景、已收到 storag
 **輸入：** types、report callback `(code: string) => void`。**輸出：** cell bindings、snapshot subscription、PlayerPort 與 disposers。
 
 - [ ] 先在 `adapter.test.ts` 寫 root 名稱改掉仍成功、muted 欄位省略／undefined 仍成功、null／錯型才降級、假 VideoCell 名稱但形狀錯誤不動作、無 root 在 120 秒停止、cyclic children 有界、readonly method 安裝回滾、未知 provider 整組降級等失敗測試。新 cell 的 pending-port 不卸載原 active wrappers。
-- [ ] 在 `players.test.ts` 寫 SDK public methods 假物件；`_embedWindow` 設成一讀就 throw 的 getter，assert 未被讀過；ready 前回 not-ready，不取 SDK 初始 false；`getMuted` throw／reject／750ms 不 resolve 時 read 回 unavailable，沒有 unhandled rejection。保存 `window.Twitch`、Player、static、prototype 的 identity／descriptor，assert 安裝到 dispose 全程都未改動，也沒有新增 getter/setter trap。
+- [ ] 在 players.test.ts 寫 SDK public methods 假物件；危險 _embedWindow getter 不可被讀；ready 前不讀寫、read throw/reject/750ms 不 resolve 回 unavailable。新增 restoreSelectedAudio 的正確 binding/epoch 一次呼叫、錯 generation／重複 grant／dispose 不得呼叫、restore reject/timeout 無 unhandled rejection，Twitch 與 YouTube 各測。保存 globals/constructor 的 identity/descriptor，安裝到 dispose 全程不改 SDK。
 - [ ] 執行 `yarn test:audio-lock tests/audio-lock/adapter.test.ts tests/audio-lock/players.test.ts` 確認 FAIL，再實作兩個模組。所有存取限白名單欄位，不用全域 mixin 或 generic 深搜。
 - [ ] 以本 feature 內的假 Vue instance／store 建 fixture：元件 name 隨機、$children/$refs/ready hooks 及原 mapped method 呼叫存在，初始 content 不宣告 muted；模擬 setLayoutContentWithKey 新增 key 後通知 watch，驗證三態 snapshot 會更新。player 帶危險 getter，assert late-bind/read 未觸碰它、不把 ports 塞入假 reactive state。這是契約測試，不能宣稱驗證真 Vue observer；真 Vue 相容性依人工頁面測試，Vue runtime fixture 延後。
 - [ ] 重跑兩組測試及 state 測試預期全 PASS；fake timers 有界 advance，不可對持續 scheduler 用無限制 `runAllTimers()`。還原後 cell 方法 strictEqual 原值，SDK globals 始終 strictEqual 原值。
@@ -315,8 +345,11 @@ extension 設定更新應在同頁約 1 秒內套用（前景、已收到 storag
 - [ ] 先在 `controller.test.ts` 重現 A=YouTube 已有聲、B=Twitch store muted 卻回 false；fake MediaControls 每秒 poll，assert A 的 mute／store 沒被 B 改、B 只有有限 mute 呼叫。
 - [ ] 同時覆蓋 `manualRefresh → updateListeners → @mute(false)`，以及已 selected A 下 B 首次播放 `updatePausedState(false) → muteOthers(B)`：兩者都不能切 active。Twitch／YouTube 各跑一次；bootstrap 例外另測，不能寫成任何時候 first play 一律被擋。測試 original editMode／firstPlay 仍照原生方法更新。
 - [ ] 加三個完整初始化測試：① URL 載入四格完全省略 muted，首播一次後 trailing timer 令一格 false／三格 true；若 missed first play，1000ms fallback 只選 ready 且正在播的候選；② locked A 後新增 U 格，尚未 ready 不碰 SDK 或 mute prop、ready 後該格 true，A 不變且不降級；③ 換 preset 同時改 layout/content，舊 Promise 無效，新內容依 preset 規則 bootstrap，merge 保留 A，先前 silence 則全部繼續靜音。fixture 要有真正省略欄位，不只 `{ muted: false }`。
+- [ ] 新增 `bootstrap_poll_does_not_mute_unassigned_or_false_cells` controller 測試：四 U 格尚未首播且 editMode=true（不符合 fallback），多次 1000ms poll 後 raw mute 呼叫數皆 0、store 仍 U、selection 仍 bootstrap；bootstrap 裡原本 true 的格若 raw=false 才可被壓回。
+- [ ] fixture 明確定義 `effectiveMuteProp = assignment === undefined ? false : assignment`，只有前後 prop 不同才呼叫假的站方 watcher。以首播、1000ms fallback、可信面板 false 命令三條路徑，分別測 `unassigned_selection_restores_actual_player_audio`：被選格 store 起始 U、effective prop=false、raw player 起始 muted=true（含先前被 guard 壓過）；muteOthers 後 U→false，**被選格 watcher 呼叫數必須為 0**，再由合法 grant 恢復至 rawMuted=false、active 維持所選格、其他格 true。不能讓 fake store 每次 commit 都無條件呼叫 watcher，把問題藏掉。
+- [ ] 同組測試：raw 已 false 且未被我們 mute 時不呼叫 restore；停用／全部靜音／選 B 發生於 pending grant fresh read 返回前，舊 A 不得收到 restore；同 epoch 重複 reconcile 最多一次 restore。SDK 拒絕恢復後 settle 到期進 silence，不連續 unmute，也不自動 play。
 - [ ] 加面板 dispatch 測試：`beginPanelDispatch(event,true)` → **手動 await/flush microtasks** → 目標 `setMuted(false)` 成功 → `endPanelDispatch(sameEvent)` → 再次命令不獲授權。另測錯 Event 不能關掉別筆、stopPropagation 未走 window bubble 但 eventPhase=NONE 時資格失效、0ms timer 會清理、untrusted nested click 不繼承資格、鍵盤 trusted click 首次生效。不要只靠 `dispatchEvent` 模擬瀏覽器 listener 間的 checkpoint。
-- [ ] 加 iframe token 測試，再執行上述 tests 確認 FAIL；實作 `intent.ts`、`controller.ts` 及 `updatePausedState` 的 first-play context，重寫入口。jsdom 不能建立真的 trusted event，gate 測試以注入 trusted boolean 與可控制 eventPhase 的 Event fixture 進行；production 只讀 event.isTrusted，真實硬體 click 仍須人工驗證，不把 fixture 偽稱為可信瀏覽器事件。
+- [ ] 加 iframe token 測試，再執行上述 tests 確認 FAIL；實作 `controller.ts` 及 `updatePausedState` 的 first-play context，重寫入口。jsdom 不能建立真的 trusted event，gate 測試以注入 trusted boolean 與可控制 eventPhase 的 Event fixture 進行；production 只讀 event.isTrusted，真實硬體 click 仍須人工驗證，不把 fixture 偽稱為可信瀏覽器事件。
 - [ ] 明確測試原 `setMuted(false)` 在 muted=undefined／false 時提前返回，effect executor 仍補原 mapped muteOthers **恰一次**；在 muted=true 時原方法已呼叫，不能補第二次。Bootstrap 所呼叫的 mapped method 也只能一次。all-mute 後新增 U／first play 不能重新啟動 bootstrap。
 - [ ] 明確測試 store trailing timer 尚未執行時 B 已是 active、A→B→A 最後命令獲勝、舊 read 晚回不改 active、500ms 未收斂降級、iframe hover 30 秒仍無授權、焦點 token 不重複使用、現成 iframe focus 不每秒續期。
 - [ ] 測試開關關閉、換路由、BFCache、重排、同 key 換片、player 重建、root 替換；assert dispose 後已配對 ports/listener/observer/timer 回到初始數量，pending Promise 返回不再寫 player/store。
@@ -346,10 +379,10 @@ extension 設定更新應在同頁約 1 秒內套用（前景、已收到 storag
 
 | 測試檔 | 必須覆蓋與斷言 |
 | --- | --- |
-| state | muted 真／假／缺值三態；四格全 U 首播只選一次；單 false 加 U 正規化；bootstrap 與 silence 分離；extension × Mute Others 四種組合；A/B 切換、全部靜音、同 id 換內容；2500ms token 到期／單次消耗；epoch 過期無 effects。 |
+| state | muted 三態、desired 三態；bootstrap U／false 不 MUTE_PLAYER、原 true 才壓回；四 U 首播只選一次；單 false 加 U 正規化；bootstrap/silence 分離；selection grant 僅建立一次且在新選擇／全靜音時失效；extension × Mute Others；token／epoch 過期無 effects。 |
 | adapter | 非 top frame、非 multiview 不 patch；component 改名但相同形狀仍可用；U 合法、null 失配；結構錯／無 root／無 store 不動作；warn 同 code 一次；有界遍歷；pending-port 不拆原保護；不可寫方法兩階段回滾；他人後裝 patch 不覆蓋。 |
-| players | 只做 late-bind；getMuted 非 boolean 不變 false；throw/reject/hang/stale；不讀危險 iframe window getter；SDK globals/constructor/static/prototype/descriptor 從安裝到卸載皆未改；ready 前不讀 API。 |
-| controller | first-play 與 bootstrap 例外、self-unmute、manualRefresh；URL 四 U、locked 新增 U、preset 取代／合併／silence；1000ms fallback 不選 paused；兩 provider 的首播政策；setMuted 提前返回仍只呼叫 mapped mutation 一次；capture → flush microtasks → target → window bubble 成功，stopPropagation／timer／untrusted nested click 清理；debounce、stale API、settle、冷卻與卸載。 |
+| players | late-bind；getMuted 非 boolean 不變 false；throw/reject/hang/stale；危險 getter 不讀；globals/constructor/descriptor 全程未改；ready 前不讀寫；restoreSelectedAudio 僅合法 grant 一次，失敗／timeout 全接住，不呼叫 play。 |
+| controller | 四 U 首播前 poll 不 mute；首播／fallback／明確選 U 三路徑皆保證有效 prop false→false、被選 watcher=0 時仍以 grant 恢復 rawMuted=false；重複 poll 不再 unmute；新選擇／全靜音取消舊 grant；既有 first-play/manualRefresh、preset、capture→flush microtasks→target→window bubble、debounce/stale/settle/清理回歸全部保留。 |
 | settings | 真實 options entry 經 aliases 及 CSS import 可載入、原有及新選項都呈現；沿用 Options local schema；預設／持久／熱更新；單次 ready 與讀取期間 change/reject race；5000ms timeout；設定停用時 pending read 零副作用；page 訊息不能修改 storage。 |
 
 所有單元測試與 hook 各 5000ms，teardown 5000ms；timer 情境用 fake clock 推進，read timeout 750ms，root discovery 120 秒用 fake time，不實際等 2 分鐘。每個 test finally/afterEach dispose、清 timers、回 real timers、清 DOM。測試、typecheck 與 lint process 各有 **120 秒 wall-clock 上限**，避免卡住 runner／fake clock；build 各 **180 秒**，install **300 秒**。逾時要非零 exit，不能把 SIGTERM 當通過。
@@ -370,9 +403,10 @@ export YARN_CACHE_FOLDER="$PWD/.cache/yarn"
 export TMPDIR="$PWD/.cache/tmp"
 mkdir -p "$TMPDIR"
 
-# 初次實作更新 yarn.lock；之後重現使用 yarn install --frozen-lockfile。
+# 初次實作只為兩個測試依賴更新 yarn.lock；之後重現用 --frozen-lockfile。
+# 執行下面的 lint 前，先依「PR 前」段建立 worktree .cache 的臨時工具。
 yarn install --non-interactive --cache-folder "$YARN_CACHE_FOLDER"
-yarn lint:audio-lock
+node .cache/audio-lock-lint/run.cjs
 yarn typecheck:audio-lock
 yarn test:audio-lock
 yarn build:chrome
@@ -381,14 +415,14 @@ yarn build:firefox
 
 執行前將每個 install/lint/typecheck/test/build 命令交給執行環境的 wall-clock timeout；macOS 沒有預裝 GNU timeout 時，用 Python 標準函式庫 `subprocess.Popen(..., start_new_session=True)`、`communicate(timeout=秒數)`，逾時用 `os.killpg` 結束這次建立的 process group 並 exit 124，不留 Vite/Yarn 子行程。不為 timeout 安裝系統套件，也不以縮短 testTimeout 取代整個 process 的上限。若需要把此 wrapper 保存成檔案，限本 worktree 的 `.cache/`，不得提交。
 
-- `yarn lint:audio-lock`：exit 0、限定功能檔案零 error／warning；另跑打包段的三個既有整合檔 lint 並比 baseline，不能把 scoped pass 說成全倉 pass。
+- `node .cache/audio-lock-lint/run.cjs`：exit 0、限定功能檔案零 error／warning；另跑打包段的三個既有整合檔 lint 並比 baseline，不能把 scoped pass 說成全倉 pass。
 - `yarn typecheck:audio-lock`：exit 0，依序跑 `tsc --noEmit` 與 `tsc --noEmit -p tsconfig.audio-lock.tests.json`，兩者都要過。可用 `yarn exec tsc --noEmit -p tsconfig.audio-lock.tests.json --listFilesOnly` 核對清單含 tests、fixtures 及 vitest.audio-lock.config.ts；不能把 Vitest/Vite transpile 當作完整 TS 檢查。
 - `yarn test:audio-lock`：exit 0、全部預定測試 PASS、沒有 unhandled rejection、teardown 殘留或無限制重試。
 - `yarn build:chrome`：exit 0；產生 `dist_chrome/manifest.json`、`dist_chrome/src/pages/options/index.html` 與帶 hash 的 assets/page 注入 script；Chrome background 為 service_worker。資源名稱以生成 manifest／HTML 引用為準，不寫死 hash。
 - `yarn build:firefox`：exit 0；產生 `dist_firefox/manifest.json`、`dist_firefox/src/pages/options/index.html` 與其引用 chunks；background scripts 由現有 Firefox config／CRXJS 生成。
 - 兩個輸出的 manifest 權限集合與基準相同；引用檔案全部存在。build 會清理各自 outDir，執行前確認 outDir 不是 worktree 外的 symlink，裡面沒有使用者需保留資料。
-- 既有 lint 依賴缺口只做上述最小補齊；不修整個 repo。對既有旗標的 @ts-ignore 等診斷先實跑比較 baseline，不預填錯誤次數，也不為 lint 改寫無關 flags。
-- 正式實作可依當輪授權提交 `package.json`／`yarn.lock` 等必要產品改動；本輪第 3 版修訂只 stage `docs/plans/twitch-audio-lock.md`。prompt 與審查報告保持原樣，不提交其他檔案或產物。
+- lint 臨時工具只放 worktree .cache，不加回 a5ff269 刪掉的依賴、不改整個 repo。既有 flags 的 @ts-ignore 等診斷實跑比較 baseline，不預填次數，不為 lint 改寫無關 flags。
+- 正式實作可依當輪授權提交 `package.json`／`yarn.lock` 等必要產品改動；本輪第 4 版修訂只 stage `docs/plans/twitch-audio-lock.md`。prompt 與審查報告保持原樣，不提交其他檔案或產物。
 
 ### 人工測試清單（Chrome／M1 Vivaldi／Firefox）
 
@@ -397,6 +431,7 @@ yarn build:firefox
 | 場景 | 操作與觀察時間 | 通過條件 |
 | --- | --- | --- |
 | URL 初始化（缺值） | 新 URL 開 2 YouTube + 2 Twitch、全部 content 省略 muted；觀察第一批首播與收斂後 30 秒 | 首次有效首播只選一格，其他格 true；不因 U degraded，不持續四格同時出聲。若 hook 晚到，ready 且在播的候選經 1000ms fallback 收斂。 |
+| U 格原本已靜音再選聲 | 用合成 fixture 的 U 格、rawMuted=true，依序從首播／fallback／面板選聲；真瀏覽器用全靜音後新增／選格交叉檢查 | 父層 U→false 不觸發 Boolean watcher 的 fixture 仍得到 rawMuted=false；真頁面明確選格可聽見，後續手動 mute 不被自動恢復。fixture 不在真頁面注入破壞性 patch。 |
 | 原始問題 | 2 YouTube + 2 Twitch，Mute Others 開；面板選 YouTube A，操作其他格／等待 5 分鐘 | Twitch 不能讓 A 的 store mute 被改成 true；沒有每秒 re-mute log。 |
 | 面板真實事件第一擊 | Chrome／Vivaldi／Firefox 各自用實體滑鼠第一次點 B 的取消靜音，再以鍵盤 Tab→Enter／Space 各 3 次；不可用 console `.click()` 代替 | **第一次就成功切換**，不需第二次點擊、不因 capture/target 間 microtask 清掉資格；同一事件以外的後續自動 false 仍被壓回。 |
 | 明確切音訊 | 用媒體控制逐格選 A→B→A、快速連按、靜音目前格、全部靜音／全部取消靜音；各 10 次 | 最後一次選擇生效；全部靜音不自選其他格；Mute Others 開時全部取消靜音仍只有最後一個被選格。 |
@@ -431,12 +466,12 @@ yarn build:firefox
 第一個 PR 只允許以下範圍；若 Fi 題 8 改選，先更新這份白名單和測試步驟。`tests`／設定檔只為 audio lock，不建立另一 PR 可依賴的新模組。
 
 - `src/pages/content/holodex/twitch-audio-lock.ts`
-- `src/pages/content/holodex/audio-lock/` 下本計畫列出的六個模組：types、state、holodex-adapter、players、intent、controller。
-- `src/pages/content/holodex/audio-lock-protocol.ts`、`audio-lock-settings.ts`。
+- `src/pages/content/holodex/audio-lock/` 下五個模組：contracts、state、holodex-adapter、players、controller（包含意圖／Event gate）。
+- `src/pages/content/holodex/audio-lock-settings.ts`；沒有獨立 intent.ts 或 protocol.ts。
 - `src/pages/content/holodex/contentScript.ts`、`holodex-inject.ts` 的最小整合 hunk。
 - `src/utils/options.ts` 的一個 schema key 與其 name/description；不重排其他選項。
 - `tests/audio-lock/` 的五個測試檔與 fixtures.ts；`vitest.audio-lock.config.ts`、`tsconfig.audio-lock.tests.json`。
-- `package.json` 僅 audio-lock scripts、Vitest/jsdom 與既有 lint 缺失套件；`yarn.lock` 僅必要的依賴解析。不得順便 upgrade 現有 runtime/build dependencies、套不同 package manager 或生成 package-lock.json。
+- `package.json` 僅 audio-lock test/watch/typecheck scripts 與 Vitest/jsdom；`yarn.lock` 僅這兩個測試 devDependency 所需解析。parser/plugin 等 lint 工具只在 .cache，不回填產品依賴；不得順便 upgrade runtime/build dependencies、套不同 package manager 或生成根目錄 package-lock.json。
 
 **一律排除：** `docs/plans/`（含本計畫、`docs/plans/reviews/`、`docs/plans/prompts/`）、`.ref/`、`.cache/`、node_modules、dist_chrome、dist_firefox、zip、console dump、profile、個人 agent 設定與 auto-multiview-layout 的全部新碼／測試／文件。這些工作資料可留在目前工作分支，不進產品 commit。`.eslintrc`、tsconfig.json、manifest.json.ts、options HTML/CSS、CI/.nvmrc、src/utils/index.ts／misc.ts 預期不改；需要例外時先修改範圍說明，不自行擴大 PR。
 
@@ -448,7 +483,7 @@ yarn build:firefox
 | `src/pages/options/index.ts`、index.html、index.css | 本 PR 不改，自動 schema 表單已足夠；測試只驗證本選項及原有選項存在，不寫「表單總共恰好四個」等會因另一 PR 新選項而失效的斷言。 |
 | `src/pages/content/holodex/holodex-inject.ts` | 只加相對 import＋installAudioLock() 呼叫，保留既有 flags。兩功能各自初始化，不建立共同 installFeatures()、不等另一功能 ready；同一插入點的衝突只需保留各自 import/呼叫，單獨打包時不得夾帶另一項。 |
 | `src/pages/content/holodex/contentScript.ts` | 只啟動本功能的 settings bridge，既有 inject 呼叫仍只執行一次；不包成 layout 專用 controller、不等待 layout 設定或 store、不改另一功能注入順序。 |
-| `package.json`／`yarn.lock` | scripts 使用 :audio-lock 命名空間；每個 PR 各自宣告所需 devDependencies、各有獨立產品 commit，不依賴另一 PR 先加套件。可能同時新增相同既有工具依賴，之後 rebase 可合併相同 key，但不可共用一個未合併的 setup commit。lockfile 在各自基準重裝生成，不複製另一分支整份 lockfile。 |
+| `package.json`／`yarn.lock` | audio lock 的本文方案只新增兩個測試 devDependency；layout 的已讀計畫採 node:test，第一 PR 不改這兩檔。兩套工具不同交給 Fi 題 8，不把「以後可能同加工具」當現在事實。若選統一，各自新增自己的 runner/config/commit，不能共享 setup commit；不把 lint 套件加回產品 lockfile。 |
 | `tsconfig.json`／Vite configs／新測試 config | 不改產品 config；使用 vitest.audio-lock.config.ts 與 tsconfig.audio-lock.tests.json，include 僅 tests/audio-lock，不爭用 vitest.config.ts／通用 tests/setup.ts。 |
 | `src/utils/index.ts`／misc.ts、Vue root/store 探索 | 本 PR 不改這些 utility；audio-lock/holodex-adapter.ts 為內部模組，不匯出給 layout、不 import 對方 helper，也不共用新 module。兩邊可各自有小型、有界發現邏輯，日後兩 PR 都合併再另案評估抽象。 |
 
@@ -456,24 +491,58 @@ yarn build:firefox
 
 ### 未來整理產品分支的操作順序（本輪不執行）
 
-以下會建立／移動／切換分支，只能等另行明確授權後執行；這份計畫不包含 push 或開 PR 的可執行命令。本輪到文件 commit 與 r3 DONE 即停止。
+以下會建立／移動／切換分支，只能等另行明確授權後執行；這份計畫不包含 push 或開 PR 的可執行命令。本輪到文件 commit 與 r4 DONE 即停止。
 
-1. 在工作分支完成前述五任務，保留各任務的**純產品 commit** 與有序 SHA 清單；docs commit 另列，不混 stage。先用 `git show --stat`／`git show --name-only` 逐一確認每個候選產品 commit 均在白名單；不能以整個 709e963..工作分支範圍直接 cherry-pick。
+1. 在工作分支完成前述五任務，保留**純產品 commit** 的 SHA 清單供 review／追溯，docs commit 另列。記錄最後已驗證的產品 tree SHA；用 git diff 709e963 到該 tree 檢查白名單及既有整合檔的每個 hunk，確認沒有 layout 或其他任務的內容。不能只因路徑在白名單就接受夾帶的別項 hunk。
 2. 檢查 worktree 狀態與 `git worktree list --porcelain`，處理既有 fi/twitch-audio-lock 名稱占用前保留 eda 原型參考。若該分支被別的 worktree 使用，不修改別的 worktree，也不 force-reset 它；交由協調者安排名稱／保存方式。只有獲准整理後才以 709e963 為起點建立乾淨 fi/twitch-audio-lock，不能從目前 docs 工作 HEAD 開分支。
-3. 推薦以 `git cherry-pick --no-commit` 先重放 eda5b52（只為建立其兩個產品檔案前提），再按序重放**已核對的產品 SHA**；全程不建立中途 commit，不重放任何 docs／review／prompt commit。eda 的原型內容會被正式重寫產品 commit 覆蓋。最後 staged tree 必須符合白名單，並與已驗證工作 tree 的相同白名單檔案一致，再建立**一個正式產品 commit**。其 parent 為 709e963，eda 本身不是祖先，不會把原型架構當第二套實作交付。
-4. 任一產品 commit 的前提不符合或重放衝突，先停在本地修正白名單內的 hunk；不得以 cherry-pick docs／另一任務來「補前提」，不得 merge。必要時用工作分支相對 709e963 的**白名單限定最終 patch** 重建 staged tree，結果仍須是同一個可獨立驗證的產品 tree。
-5. 只讀檢查 `git diff --name-only 709e963...fi/twitch-audio-lock`，逐檔對白名單；`git diff 709e963...fi/twitch-audio-lock -- docs/plans .ref` 預期完全空。`git merge-base 709e963 fi/twitch-audio-lock` 預期完整 709e963 hash；推薦 squash 方案的 `git rev-list --count 709e963..fi/twitch-audio-lock` 預期 1，且新增 commit 不等於任何工作 docs 或另一任務產品 SHA。
+3. 從已驗證的產品 tree **直接取白名單最終檔案** 到乾淨 709e963 分支的 index/worktree：使用 git restore 的 --source=<已驗證 tree SHA>、--staged、--worktree，加完整明列 paths；不取整棵 tree、不含 docs，也不重播 eda5b52 或工作 commit。對共享既有檔案只保留已在步驟 1 驗過的本功能 hunk；如果來源含其他任務，先隔離最終產品 tree，再取檔，不能夾帶。
+4. 核對 staged 路徑與內容等於已批准白名單產品 diff，再建立一個正式產品 commit（parent 為 709e963）。若 tree／hunk 不符，停在本地修正，不 cherry-pick docs／另一任務來補前提、不 merge。此方式直接交付重寫後內容，eda 與工作 docs 都不是產品祖先。
+5. 只讀檢查 `git diff --name-only 709e963...fi/twitch-audio-lock`，逐檔對白名單；`git diff 709e963...fi/twitch-audio-lock -- docs/plans .ref` 預期完全空。`git merge-base 709e963 fi/twitch-audio-lock` 預期完整 709e963 hash；單產品 commit 方案的 `git rev-list --count 709e963..fi/twitch-audio-lock` 預期 1，且新增 commit 不等於任何工作 docs 或另一任務產品 SHA。
 6. 在乾淨產品 tree 重新安裝 frozen lockfile 並跑下列驗證，不引用 .ref 的 fixture；補英文草稿的實際結果。若 upstream/dev 後來移動，先報告與原指定基準的差異，再安排 rebase／重驗，不默默合入另一項功能；共用已合併 upstream 祖先是正常的，但兩項未合併新增 commit 必須仍各自獨立。
 7. 產出供協調者 review 的本機產品 commit、差異檔案清單、驗證結果及英文 PR 草稿。未取得解除硬性禁令的明確授權前，仍不 push、不開 PR、不 merge；方向資訊不是操作授權。
 
 ### PR 前 lint／typecheck／測試／雙 build
 
-在乾淨產品 tree、Node 22.12+、本地 cache 環境與既有逾時 wrapper 下執行：
+在乾淨產品 tree、Node 22.12+，先設定上述 NPM_CONFIG_CACHE／YARN_CACHE_FOLDER／TMPDIR，所有 npm cache/log 都留在 worktree。以下是**下一輪實作時的本地驗證準備**，本輪不安裝，且檔案／依賴一律不提交：
+
+```sh
+npm install --prefix .cache/audio-lock-lint --no-save --no-package-lock --ignore-scripts eslint@8.57.0 eslint-plugin-react@7.37.2 @typescript-eslint/parser@8.18.0 @typescript-eslint/eslint-plugin@8.18.0 typescript@5.6.3
+```
+
+在 `.cache/audio-lock-lint/config.cjs` 寫入下列內容；只改 parser 的解析位置，不改 repo .eslintrc 或規則：
+
+```js
+const fs = require("node:fs");
+const path = require("node:path");
+const root = path.resolve(__dirname, "../..");
+const config = JSON.parse(fs.readFileSync(path.join(root, ".eslintrc"), "utf8"));
+module.exports = { ...config, parser: require.resolve("@typescript-eslint/parser") };
+```
+
+在同資料夾寫 `run.cjs`。它固定使用 cache 內的 CLI/config/plugins，不靠產品 node_modules 的 parser；有 args 時用 caller 明列的 baseline 檔案，無 args 時只 lint 本功能新增檔案：
+
+```js
+const path = require("node:path");
+const { spawnSync } = require("node:child_process");
+const root = path.resolve(__dirname, "../..");
+const scope = ["--max-warnings", "0", "--ext", ".ts",
+  "src/pages/content/holodex/audio-lock", "src/pages/content/holodex/twitch-audio-lock.ts",
+  "src/pages/content/holodex/audio-lock-settings.ts", "tests/audio-lock", "vitest.audio-lock.config.ts"];
+const args = process.argv.slice(2);
+const result = spawnSync(process.execPath, [path.join(__dirname, "node_modules/eslint/bin/eslint.js"),
+  "--no-eslintrc", "--no-ignore", "--config", path.join(__dirname, "config.cjs"),
+  "--resolve-plugins-relative-to", __dirname, ...(args.length ? args : scope)],
+  { cwd: root, stdio: "inherit", timeout: 120000 });
+if (result.error) process.exit(result.error.code === "ETIMEDOUT" ? 124 : 1);
+process.exit(result.status ?? 1);
+```
+
+完成工具準備後，在相同本地 cache 環境與既有逾時 wrapper 下執行：
 
 ```sh
 yarn install --frozen-lockfile --non-interactive --cache-folder "$YARN_CACHE_FOLDER"
-yarn lint:audio-lock
-yarn exec eslint src/utils/options.ts src/pages/content/holodex/contentScript.ts src/pages/content/holodex/holodex-inject.ts --format json
+node .cache/audio-lock-lint/run.cjs
+node .cache/audio-lock-lint/run.cjs src/utils/options.ts src/pages/content/holodex/contentScript.ts src/pages/content/holodex/holodex-inject.ts --format json
 yarn typecheck:audio-lock
 yarn test:audio-lock
 yarn build:chrome
@@ -481,7 +550,7 @@ yarn build:firefox
 git diff --check 709e963...fi/twitch-audio-lock
 ```
 
-scope lint、typecheck、tests 與兩 build 預期 exit 0。三個既有整合檔的 ESLint 要用**相同安裝版本／相同 .eslintrc** 對 709e963 原檔重跑 baseline（只用 git show 複製到 worktree 的 `.cache/lint-baseline/`，加 `--no-ignore --config "$PWD/.eslintrc"`）；若原生 flags 的既有 @ts-ignore 等報錯，記錄實際 rule/message/source，修改後不得增加診斷或改壞既有行。新 hunk 的診斷必須修正；不能以 baseline 為藉口保留新增問題、關 rule、改無關 flags，或把 exit 1 記為全倉 lint 通過。報告明確區分「新增功能 scoped lint 通過」與「既有檔 baseline 問題」，不預先捏造其數量。
+scope lint、typecheck、tests 與兩 build 預期 exit 0。三個既有整合檔的 ESLint 要用**同一個 run.cjs／同一 .eslintrc 派生 config** 對 709e963 原檔重跑 baseline：只用 git show 複製到 worktree `.cache/lint-baseline/` 的對應檔名，將該三個暫存檔路徑與 --format json 傳給 wrapper。不要回用根 config 的 parser 解析或產品 yarn eslint 指令；wrapper 已固定 --no-eslintrc／--no-ignore 與 cache plugin 路徑。若既有 @ts-ignore 等報錯，記錄實際 rule/message/source；新 hunk 必須零新增診斷，不能關 rule、改無關 flags，或把 exit 1 記為全倉 lint 通過。報告區分 scoped pass 與 baseline 問題，不預先捏造次數；暫存工具與 config 均不進 PR。
 
 重點檢查：產物仍為 dist_chrome 與 dist_firefox、manifest 權限不變、資源引用存在，且產品 bundles 無 Vue 測試 runtime、工作文件或 .ref。`.nvmrc`／手動 CI Node 18 是既有不相容項，這個 PR 不以未跑過的舊 CI 宣稱綠燈，也不混入工具鏈遷移。人工清單的廣告／重連／首次真點擊結果填入 PR，未遇到的廣告寫未覆蓋，不能預先勾選。
 
@@ -513,6 +582,7 @@ This PR is independent of auto-multiview-layout and can be reviewed and merged o
 
 - [ ] 產生可用的 Chrome 與 Firefox build，既有 options、注入 flags、YouTube 相關功能無退化；權限及 host 範圍不變。
 - [ ] adapter 接受 `muted ∈ {true, false, undefined}`，一般 URL 全缺值仍啟用；bootstrap 首播／fallback 將四格收斂成單格，全靜音不會誤啟 bootstrap；locked 新增 U 與 preset 更換／合併各有測試且不誤降級。
+- [ ] bootstrap 的 U／false 明確為 desired=unassigned，首播前 poll 對它們零 mute 呼叫；選成 active 的三條路徑都有 U→false、effective prop 不變、watcher=0、raw player 真正 false 的斷言。恢復只能用當次 grant 一次，停用／全靜音／新選擇取消 pending grant，SDK 拒絕不形成無限 unmute。
 - [ ] A 被選定後，B 的未授權 false、首次播放、READY、manualRefresh 都不能把 active 改成 B；尚未選格的 bootstrap 另允許首播一次。YouTube 新首播政策依 Fi 題 1，不把產品取捨誤稱無行為變動。
 - [ ] 面板真實使用者**第一次 click 就切換成功**，capture 與 target 間 flush microtasks 的測試通過；window bubble／Event 身分／eventPhase／0ms fallback 都覆蓋。可全部靜音、快速最後選擇獲勝；hover 不提供永久授權。
 - [ ] store debounce、750ms read timeout、1500ms settle、500ms store 收斂、舊 generation／epoch 結果與卸載都由測試覆蓋；測試及 build 的 wall-clock timeout 有效。
@@ -523,6 +593,7 @@ This PR is independent of auto-multiview-layout and can be reviewed and merged o
 - [ ] 第一個 PR 的新增模組／helpers／測試與 auto-multiview-layout 完全獨立；沒有引用對方 setting/flag、未合併 commit 或 test setup。相同既有檔案只保留本功能的最小 hunk，沒有通用 utils/config 重構。
 - [ ] PR 產品 tree 由指定 upstream/dev@709e963 準備，正式 head 為 fi/twitch-audio-lock；重寫取代 eda5b52，最終產品 commit 不包含 eda 或 docs 工作 commit 作祖先，亦不包含 docs/plans、reviews、prompts、.ref 或產物。實際整理分支與發佈須另行授權，本輪僅驗收計畫。
 - [ ] scoped lint、既有整合檔 baseline 比較、typecheck、回歸測試、Chrome/Firefox build 都在僅上游基準＋本 PR 的 tree 重跑；英文 PR 草稿填入實際結果／限制，不把尚未執行的項目預勾。產品 commit 與本地文件 commit 各自分開。
+- [ ] lint 只從 .cache/audio-lock-lint 的臨時環境執行，與 baseline 用相同 parser/plugin/config；產品 package.json 不加回 a5ff269 移除的套件、不加 lint script，產品 lockfile 只有 Fi 選定測試方案必要變動。Fi 題 8 已明列本案／layout 的工具差異與兩種統一方向。
 - [ ] options 的 `twitchAudioLock` 預設 true、持久化、同頁熱切換；只有配合 Holodex Mute Others 才生效，沒有 localStorage 秘密第二開關。
 - [ ] 人工測試有瀏覽器版本與結果，真實廣告／重連不能用 fake 或 build 成功代替；未覆蓋項目明列 warning。必要真實場景尚未通過時，只可交付候選版實測。
 - [ ] 關閉／重複安裝／離開頁面釋放所有音訊相關資源；pending effects 不得在停用後改頁面。
@@ -535,12 +606,12 @@ This PR is independent of auto-multiview-layout and can be reviewed and merged o
 3. **Vue 2 私有結構會變。** 形狀驗證比名稱穩健但不是官方 API；React/Vue 3 升級需要新 adapter。降級會回到站方原本行為，不宣稱保護仍在。
 4. **late-bind 不是反應性修復。** Vue 2 可能就地改寫原 SDK instance；late-bound 不能把它還原，提前捕捉同物件也無法避免。已出現的 Holodex SecurityError 不保證減少。console 物件展開、深搜或 deep watch 都可能增加問題，因此禁止。
 5. **初始化與新增格是產品政策。** 預設 bootstrap 保留首次首播一次，已有 active 後則連 YouTube 新首播也不搶聲；與原生及原型都不同，Fi 題 1 明確列出選項。第一版不攔截 SDK 或強迫建構 options `muted=true`；新格 ready 前可能短暫有聲，不能假裝初始化零漏音。
-6. **既有全靜音／暫時靜音。** active 自己確實回報 muted 時，本版傾向同步成全靜音，不主動 unmute，避免違反使用者靜音或 autoplay 限制；廣告後可能需要重新在面板選擇。這是待 Fi 確認的產品取捨。
+6. **既有全靜音／暫時靜音。** 已完成選聲交易的 active 再回報 muted 時，本版傾向同步成全靜音，不重新授權 unmute，避免違反使用者靜音或 autoplay 限制；廣告後可能需要重新在面板選擇。選聲當下的 U→false 補償只有單次 grant，不包含這種日後自動恢復。這是待 Fi 確認的產品取捨。
 7. **有限範圍。** 不做廣告攔截、不改 Twitch 影片／音量／播放品質、不改 Holodex Vuex mutation 原始碼、不修全站 SecurityError、不全域壓 console、不加 overlay、不增加遙測或遠端設定、不改其他 options 行為、不做 Firefox 發佈／簽章或 Chrome 上架。
 
 ### 規模與分波估計
 
-第一 PR 估計約 12 個產品檔案（其中 8 個為新模組）、5 個測試檔＋一個局部 fixture、兩個 feature 專用 config、package／lock 配套；約 22 個檔案，`.gitignore`／CI／產品 tsconfig 不改。產品碼約 600–950 行，最小假物件／DOM 測試約 450–700 行，另計必要 lockfile 差異；這是單一功能的 review 範圍估計，不是實測或硬性配額。若維護者不接受此測試依賴成本，Fi 題 8 提供第一 PR 無框架方案；不得把核心安全修正拆成依賴另一 PR 的半套產品。
+第一 PR 縮為約 10 個產品檔案（其中 6 個為新模組）、5 個測試檔＋一個局部 fixture、兩個 feature config、package／lock 配套，合計約 20 個檔案。intent 合併 controller，protocol 合併純 contracts；臨時 lint 環境不在 review diff，產品只加兩個測試 devDependency。產品碼仍估 600–950 行、測試約 500–750 行，另計測試依賴 lockfile；這是有界功能範圍估計，不能為減行數拿掉 N1／事件順序回歸。Fi 題 8 可選零新依賴並統一 node:test，或維持不同工具；選定後各 PR 仍須獨立可驗證，不共享新 helper／setup commit。
 
 波次一（狀態機＋測試基礎）約 0.5–1 工作日；波次二（adapter、PlayerPort、競態與意圖）約 1.5–3 工作日；波次三（options、雙 build、瀏覽器實測）約 1–2 工作日，另計等待真實廣告與無法即時重現的情境。各任務以測試與可撤銷整合為邊界，先留本機小 commit，不自動合併或發佈。
 
@@ -570,11 +641,12 @@ Fi 可直接回答「1A、2A、3A……」或只回想改的題號。以下 A �
 7. **是否把修 Holodex 自身 SecurityError 納入這版？**
    - **A（建議預設）：** 不納入；只限制本功能存取與捕捉自身錯誤，不改 observer／SDK。
    - **B：** 另行授權隔離實驗研究 markRaw 等方案；實驗不得阻塞或偷偷擴入本候選版。
-8. **第一個上游 PR 要帶哪種自動測試配套？**
-   - **A（建議預設）：** 帶最小 Vitest 3.2.6＋jsdom 26.1.0、feature 專用 configs/scripts 與必要回歸測試；不加 Vue runtime、coverage 或通用 setup。另補現有 ESLint config 缺少的 parser/plugin，合計四個 devDependency、零 runtime dependency。能在同一 PR 保住兩個 high 發現與真 options entry 的自動回歸，維護者不用先合併另一個測試基礎 PR。
-   - **B：** 第一 PR 不加 Vitest/jsdom；先把本計畫的測試步驟改成既有 TypeScript 編譯＋Node 原生 runner 的 state/fake API 測試，DOM/options/可信事件依人工清單驗證，通用測試框架另開後續獨立 PR。仍需既有 lint parser/plugin 或等效外部 lint 驗證，不能宣稱既有 Vitest 步驟已執行，也不能等待 auto-multiview-layout 帶入其測試設定。若改選 B，先補確切 runner/config/指令與等價斷言再實作。
+8. **兩個上游 PR 的測試工具要接受不同，還是統一？** 目前 layout 計畫採 **node:test、零新依賴、不改 package/lockfile**；audio lock 本文採 **Vitest 3.2.6＋jsdom 26.1.0、兩個新測試 devDependency**，有 DOM/options 載入、timer 與 watcher fixture 回歸，第一 PR 會改 package/lockfile。上游 a5ff269 曾移除 @typescript-eslint/parser/plugin；**以下三選項都不把它們加回產品依賴**，lint 均採 .cache 臨時環境。
+   - **A（建議預設）：接受不同。** audio lock 保留本文可直接執行的 Vitest/jsdom suite，layout 保留 node:test；多兩個測試依賴與第二套 runner 是明確成本。建議理由是保住本案真 options entry／DOM 及時間序自動回歸，同時不為純 planner 型的另一案導入框架；不是宣稱兩工具已統一或 Fi 已核准。
+   - **B：兩案統一 node:test、零新測試依賴。** layout 不變；先將本案步驟／allowlist 改為既有 TypeScript 編譯＋本案自己的 Node runner，必須保留 desired/grant/Boolean watcher 與 capture→microtask→target 的 fake API 斷言，DOM/options integration 留明確人工或等價測試。先補確切 runner/config/指令再實作；不從 layout 匯入或 cherry-pick runner/helper，不讓本案依賴它先合併。
+   - **C：兩案統一 Vitest。** audio lock 保留本文；協調者另更新 layout 的計畫與各自產品白名單／依賴決策。兩案各自可獨立安裝／測試、各有局部 config 與 commit，不能共用一個新 infrastructure commit，也不能由本輪擅改另一案或假定已批准其依賴變更。
 
-Git metadata 寫入已在 `DISPATCH-2610171431178858` 核准必要例外，本輪 `DISPATCH-2610171451093196` 延續允許；只提交此計畫檔，不建立／切換分支。未來 fork→upstream 的 PR 方向不解除目前禁止 push、開 PR、merge 的規則。
+Git metadata 寫入已在 `DISPATCH-2610171431178858` 核准必要例外，本輪 `DISPATCH-2610171506069175` 延續允許；只提交此計畫檔，不建立／切換分支。未來 fork→upstream 的 PR 方向不解除目前禁止 push、開 PR、merge 的規則。
 
 ## 驗收回應（第 2 版）
 
@@ -592,3 +664,16 @@ Git metadata 寫入已在 `DISPATCH-2610171431178858` 核准必要例外，本�
 | 8 low：重複 ignore | **接受** | `.gitignore:136` 已有不帶尾斜線的 .cache，`:148` 另有舊規則。本版統一輸出到 .cache，不產生 .vitest；檔案表與規模估計改為不修改 .gitignore，也不改審查報告。 |
 
 第 1 輪全部 high／medium 均接受並落實於本文件；低嚴重度第 6、8 項接受，第 7 項縮減機制但保留非同步讀取的必要失敗邊界。Fi 尚未回覆產品選項時僅按標示預設交付候選版規格，不能稱為 Fi 已核准行為。
+
+## 驗收回應（第 3 版）
+
+對應唯讀 `docs/plans/reviews/twitch-audio-lock-verify-2.md` 的 N1–N4（受驗版 09b7bf2）。第 1 輪項目已由驗收者確認解決，本輪保留其修正，新增以下處置；只核對原始碼／Git 歷史與文件，不宣稱已跑產品測試、lint 或 build。
+
+| 發現 | 回應 | 原始碼證據與修訂／必要斷言 |
+| --- | --- | --- |
+| N1 medium：bootstrap desired／U→false 無 watcher | **接受** | `.ref/holodex/src/components/player/PlayerMixin.ts:13` 的 Boolean mute 預設 false；TwitchPlayer.vue:57、YoutubePlayer.vue:45 只在 prop 變動時呼叫 watcher；store/multiview.module.ts:224 把被選格寫 false，不能保證實際音訊。新增 desiredMute 三態，bootstrap U/false=unassigned、poll 零 mute；首播／fallback／明確選擇共同建立一次 grant，必要時以與站方 `.ref/holodex/src/components/player/TwitchPlayer.vue:120`／`.ref/holodex/src/components/player/YoutubePlayer.vue:104` 相同的公開 SDK 路徑恢復所選 player。fixture 的 effective prop 必須 false→false、被選 watcher=0，仍斷言 rawMuted=false；另測 grant 單次、stale/停用/全靜音取消與 restore 失敗無循環。 |
+| N2 medium：移除歷史與工具差異 | **接受** | `git show a5ff269 -- package.json` 明列移除；`package.json@a5ff269^:35`、`:36` 是原先兩個 ^7.8.0 套件。另一案 `00c261a:docs/plans/auto-multiview-layout.md:295` 明列 node:test／既有 TS／零依賴，`:299` 禁止本案依賴其 runner。背景與 Fi 題 8 現在列出歷史及「接受不同／兩案 Node／兩案 Vitest」三選一，本文方案 A 僅新增兩個測試 devDependency，非已獲 Fi 核准。lint parser/plugin/config/run.cjs 全放 .cache、同版對 baseline；不加回產品 package/lock 或新增 lint script。 |
+| N3 low：重放原型的打包流程過長 | **接受** | 改由已驗證產品 tree 的白名單最終內容，用未來獲准後的 path-scoped git restore 取到乾淨 709e963 分支；共享既有檔案先查 hunk 不夾帶 layout。工作產品 commit 與 docs commit 繼續分開供追溯，不重播 eda、不 cherry-pick 文件；最終一個產品 commit 的 parent 仍為 709e963，兩 PR 完全獨立。 |
+| N4 low：模組／review 面偏大 | **接受，採安全合併** | 意圖追蹤併 controller；protocol 型別／validator 併原窄型別成純 contracts，而非併入會 import Options/storage 的 settings。`src/utils/options.ts:1` 明確 import webextension-polyfill，page script 不能間接載入；contracts 無 side effect／extension import，供本功能兩 context 使用。新產品模組由 8 減到 6、預估總檔案約 22 減到 20；白名單、步驟、scope lint 與估計同步更新，不拿掉安全回歸，也不抽成兩功能共用 helper。 |
+
+本次交付仍只有這份計畫文件。臨時 lint 安裝與 SDK grant 的產品程式均留待之後實作；第 3 版回應章節是驗收回應次序，本文件此次提交標記使用 r4。
