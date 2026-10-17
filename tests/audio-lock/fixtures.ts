@@ -431,6 +431,7 @@ export type FakeVideoCell = {
   watcherCalls: number;
   lastMuteProp: boolean;
   applyMuteProp: (prop: boolean) => void;
+  nativeCheckCalls: number;
 };
 
 /** Wire player $on("ready") like VideoCell template @ready; optionally fire READY. */
@@ -464,6 +465,7 @@ export function createFakeVideoCell(opts: {
   el?: HTMLElement;
   parentEl?: HTMLElement;
   readyBeforeInstall?: boolean;
+  nativeCheckMuted?: boolean;
 }): FakeVideoCell {
   const content = opts.store.state.multiview.layoutContent[opts.key];
   if (!content) throw new Error(`missing content for ${opts.key}`);
@@ -505,8 +507,21 @@ export function createFakeVideoCell(opts: {
     muteOthersCalls: [],
     setMutedCalls: [],
     watcherCalls: 0,
+    nativeCheckCalls: 0,
     manualCheckMuted() {
-      /* original no-op for tests; controller replaces */
+      if (!opts.nativeCheckMuted) return;
+      cell.nativeCheckCalls += 1;
+      const player = cell.$refs.player;
+      if (!player) return;
+      return (async () => {
+        let value: boolean;
+        try {
+          value = !!(await player.isMuted());
+        } catch {
+          return;
+        }
+        cell.setMuted(!!value);
+      })();
     },
     setMuted(val: boolean) {
       cell.setMutedCalls.push(val);
@@ -566,7 +581,10 @@ export function createFakeVideoCell(opts: {
       cell.lastMuteProp = prop;
       if (cell.$refs.player) {
         try {
-          void cell.$refs.player.setMute(prop);
+          const result = cell.$refs.player.setMute(prop) as unknown;
+          if (result && typeof (result as Promise<unknown>).then === "function") {
+            void (result as Promise<unknown>).catch(() => undefined);
+          }
         } catch {
           /* Vue watcher errorHandler swallows */
         }

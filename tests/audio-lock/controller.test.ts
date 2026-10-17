@@ -591,11 +591,11 @@ describe("controller", () => {
   it("degraded_is_not_reinstalled_by_discovery", async () => {
     const env = setupEnv([
       { key: "a", provider: "twitch", muted: false },
-      { key: "b", provider: "twitch", muted: true },
+      { key: "b", provider: "youtube", muted: true },
     ]);
-    const hang = createTwitchSdk({ hangRead: true });
+    const hang = createYoutubeSdk({ hangRead: true });
     {
-      const __p = createFakePlayerComponent("twitch", hang);
+      const __p = createFakePlayerComponent("youtube", hang);
       mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
     }
     env.sdks.set("b", hang);
@@ -636,11 +636,11 @@ describe("controller", () => {
   it("degraded_route_reentry_recovers", async () => {
     const env = setupEnv([
       { key: "a", provider: "twitch", muted: false },
-      { key: "b", provider: "twitch", muted: true },
+      { key: "b", provider: "youtube", muted: true },
     ]);
-    const hang = createTwitchSdk({ hangRead: true });
+    const hang = createYoutubeSdk({ hangRead: true });
     {
-      const __p = createFakePlayerComponent("twitch", hang);
+      const __p = createFakePlayerComponent("youtube", hang);
       mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
     }
     env.sdks.set("b", hang);
@@ -655,8 +655,8 @@ describe("controller", () => {
     expect(handle.__getState().mode).toBe("degraded");
     // Restore a healthy player for B so rediscovery can succeed
     {
-      const sdk = createTwitchSdk({ muted: true });
-      const __p = createFakePlayerComponent("twitch", sdk);
+      const sdk = createYoutubeSdk({ muted: true });
+      const __p = createFakePlayerComponent("youtube", sdk);
       mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
       env.sdks.set("b", sdk);
     }
@@ -676,11 +676,11 @@ describe("controller", () => {
   it("route_watch_released_on_disable_and_dispose", async () => {
     const env = setupEnv([
       { key: "a", provider: "twitch", muted: false },
-      { key: "b", provider: "twitch", muted: true },
+      { key: "b", provider: "youtube", muted: true },
     ]);
-    const hang = createTwitchSdk({ hangRead: true });
+    const hang = createYoutubeSdk({ hangRead: true });
     {
-      const __p = createFakePlayerComponent("twitch", hang);
+      const __p = createFakePlayerComponent("youtube", hang);
       mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
     }
     env.sdks.set("b", hang);
@@ -703,11 +703,11 @@ describe("controller", () => {
   it("route_watch_released_on_dispose", async () => {
     const env = setupEnv([
       { key: "a", provider: "twitch", muted: false },
-      { key: "b", provider: "twitch", muted: true },
+      { key: "b", provider: "youtube", muted: true },
     ]);
-    const hang = createTwitchSdk({ hangRead: true });
+    const hang = createYoutubeSdk({ hangRead: true });
     {
-      const __p = createFakePlayerComponent("twitch", hang);
+      const __p = createFakePlayerComponent("youtube", hang);
       mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
     }
     env.sdks.set("b", hang);
@@ -1009,6 +1009,8 @@ describe("controller", () => {
   });
 
   it("mute_writes_respect_cooldown_and_settle", async () => {
+    // Twitch no longer degrades on unsettled mutes, so retries continue under
+    // MUTE_COOLDOWN_MS + SETTLE_MS (~1.5–2s). Bound reflects that rate.
     const env = setupEnv([
       { key: "a", provider: "twitch", muted: false },
       { key: "b", provider: "twitch", muted: true },
@@ -1029,7 +1031,8 @@ describe("controller", () => {
       await handle.__reconcile(idB);
       await vi.advanceTimersByTimeAsync(1000);
     }
-    expect(sdk.muteCalls).toBeLessThanOrEqual(4);
+    expect(sdk.muteCalls).toBeGreaterThanOrEqual(3);
+    expect(sdk.muteCalls).toBeLessThanOrEqual(8);
   });
 
   it("bfcache_pageshow_revalidates", async () => {
@@ -1074,11 +1077,11 @@ describe("controller", () => {
   it("mute_did_not_settle_degrades_after_three", async () => {
     const env = setupEnv([
       { key: "a", provider: "twitch", muted: false },
-      { key: "b", provider: "twitch", muted: true },
+      { key: "b", provider: "youtube", muted: true },
     ]);
-    const sdk = createTwitchSdk({ muted: false, ignoreMute: true });
+    const sdk = createYoutubeSdk({ muted: false, ignoreMute: true });
     {
-      const __p = createFakePlayerComponent("twitch", sdk);
+      const __p = createFakePlayerComponent("youtube", sdk);
       mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
     }
     handle = createAudioLockController({ window, document }) as TestableHandle;
@@ -1340,11 +1343,11 @@ describe("controller", () => {
   it("duplicate_enable_keeps_degraded_latch", async () => {
     const env = setupEnv([
       { key: "a", provider: "twitch", muted: false },
-      { key: "b", provider: "twitch", muted: true },
+      { key: "b", provider: "youtube", muted: true },
     ]);
-    const hang = createTwitchSdk({ hangRead: true });
+    const hang = createYoutubeSdk({ hangRead: true });
     {
-      const __p = createFakePlayerComponent("twitch", hang);
+      const __p = createFakePlayerComponent("youtube", hang);
       mountPlayerOnCell(env.cells.get("b")!, __p, { readyBeforeInstall: true });
     }
     env.sdks.set("b", hang);
@@ -1365,13 +1368,17 @@ describe("controller", () => {
 
   it("ready_sdk_missing_methods_degrades", async () => {
     const env = setupEnv([
-      { key: "a", provider: "twitch", muted: false },
-      { key: "b", provider: "twitch", muted: true },
+      { key: "a", provider: "youtube", muted: false },
+      { key: "b", provider: "youtube", muted: true },
     ]);
     const cell = env.cells.get("b")!;
-    const empty = {} as ReturnType<typeof createTwitchSdk>;
+    const empty = {} as ReturnType<typeof createYoutubeSdk>;
+    const iframe = cell.$refs.player!.$el.querySelector(
+      "iframe",
+    ) as HTMLIFrameElement;
     cell.$refs.player!.player = empty;
-    cell.twPlayer = empty;
+    // late-bind needs ytPlayer.getIframe() inside current $el
+    cell.ytPlayer = { getIframe: () => iframe };
     env.sdks.set("b", empty);
     handle = createAudioLockController({ window, document }) as TestableHandle;
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);

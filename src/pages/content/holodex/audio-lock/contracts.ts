@@ -64,7 +64,14 @@ export type CellRuntime = {
   ownMuteGeneration: number | null;
   lastObservedMuted: boolean | null;
   unsettledMuteCount: number;
+  /** Epoch of the last successful mute send; null until one succeeds. */
+  lastMuteEpoch: number | null;
 };
+
+/** Twitch failures must not degrade the session or tear down wrappers. */
+export function failuresDegrade(identity: CellIdentity): boolean {
+  return identity.provider !== "twitch";
+}
 
 export type LockState = {
   mode: LockMode;
@@ -146,7 +153,19 @@ export type LockEvent =
       assignment: MutedAssignment;
       origin: "poll" | "refresh";
     }
-  | { type: "MUTE_SENT"; now: number; identity: CellIdentity }
+  | {
+      type: "MUTE_SENT";
+      now: number;
+      identity: CellIdentity;
+      /** undefined treated as true (legacy). */
+      ok?: boolean;
+    }
+  | {
+      type: "UNTRUSTED_POLL";
+      now: number;
+      identity: CellIdentity;
+      assignment: MutedAssignment;
+    }
   | { type: "RESET_DEGRADED"; now: number }
   | { type: "STORE_SNAPSHOT"; now: number; snapshot: StoreSnapshot }
   | { type: "CELL_REMOVED"; now: number; identity: CellIdentity }

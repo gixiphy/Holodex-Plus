@@ -1,0 +1,545 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  beginPanelDispatch,
+  createAudioLockController,
+  endPanelDispatch,
+  type TestableHandle,
+} from "../../src/pages/content/holodex/audio-lock/controller";
+import {
+  createFakeMultiviewRoot,
+  createFakePlayerComponent,
+  createFakeStore,
+  createFakeVideoCell,
+  createPanelEvent,
+  createTwitchSdk,
+  createYoutubeSdk,
+  flushMicrotasks,
+  postTwitchUpdateState,
+  type FakeEnv,
+  type FakeSdk,
+  type FakeVideoCell,
+} from "./fixtures";
+import { installTwitchStateListener } from "../../src/pages/content/holodex/audio-lock/twitch-embed";
+
+function setupBrokenEnv(opts?: {
+  twitchBroken?: boolean;
+  twitchIgnoreMute?: boolean;
+  twitchMuted?: boolean;
+  missingMethods?: boolean;
+  healthyTwitch?: boolean;
+}): FakeEnv & { postSpies: Map<string, ReturnType<typeof vi.fn>> } {
+  const store = createFakeStore({
+    muteOthers: true,
+    cells: [
+      { key: "a", provider: "youtube", muted: false },
+      { key: "b", provider: "twitch", muted: true },
+    ],
+  });
+  const ytSdk = createYoutubeSdk({ muted: false });
+  let twSdk: FakeSdk;
+  if (opts?.missingMethods) {
+    twSdk = {} as FakeSdk;
+    twSdk.rawMuted = false;
+    twSdk.muteCalls = 0;
+    twSdk.unmuteCalls = 0;
+  } else if (opts?.healthyTwitch) {
+    twSdk = createTwitchSdk({
+      muted: opts.twitchMuted ?? false,
+      ignoreMute: opts.twitchIgnoreMute,
+    });
+  } else {
+    twSdk = createTwitchSdk({
+      muted: opts?.twitchMuted ?? true,
+      brokenByVue: opts?.twitchBroken !== false,
+      ignoreMute: opts?.twitchIgnoreMute,
+    });
+  }
+  const ytPlayer = createFakePlayerComponent("youtube", ytSdk);
+  const twPlayer = createFakePlayerComponent("twitch", twSdk);
+  const postSpies = new Map<string, ReturnType<typeof vi.fn>>();
+  const twIframe = twPlayer.$el.querySelector("iframe") as HTMLIFrameElement;
+  const spy = vi.fn();
+  const cw = { postMessage: spy };
+  Object.defineProperty(twIframe, "contentWindow", {
+    value: cw,
+    configurable: true,
+  });
+  postSpies.set("b", spy);
+
+  const cellA = createFakeVideoCell({
+    store,
+    key: "a",
+    provider: "youtube",
+    player: ytPlayer,
+    nativeCheckMuted: true,
+  });
+  const cellB = createFakeVideoCell({
+    store,
+    key: "b",
+    provider: "twitch",
+    player: twPlayer,
+    nativeCheckMuted: true,
+  });
+  if (opts?.missingMethods) {
+    cellB.$refs.player!.player = twSdk;
+    cellB.twPlayer = twSdk;
+  }
+  const { root, appEl, multiview } = createFakeMultiviewRoot(store, [
+    cellA,
+    cellB,
+  ]);
+  window.history.pushState({}, "", "/multiview");
+  const cells = new Map<string, FakeVideoCell>([
+    ["a", cellA],
+    ["b", cellB],
+  ]);
+  const sdks = new Map<string, FakeSdk>([
+    ["a", ytSdk],
+    ["b", twSdk],
+  ]);
+  return { store, root, appEl, multiview, cells, sdks, postSpies };
+}
+
+async function pollSeconds(
+  env: FakeEnv,
+  handle: TestableHandle,
+  seconds: number,
+): Promise<void> {
+  for (let i = 0; i < seconds; i++) {
+    await env.cells.get("a")!.manualCheckMuted();
+    await env.cells.get("b")!.manualCheckMuted();
+    await flushMicrotasks();
+    await vi.advanceTimersByTimeAsync(1000);
+  }
+  void handle;
+}
+
+function triggerIframeIntent(cell: FakeVideoCell): void {
+  const iframe = cell.$el.querySelector("iframe");
+  if (!iframe) throw new Error("no iframe");
+  iframe.dispatchEvent(new Event("pointerdown", { bubbles: true }));
+}
+
+function makeHandle(): TestableHandle {
+  return createAudioLockController({
+    window,
+    document,
+    isTrusted: () => true,
+  }) as TestableHandle;
+}
+
+describe("twitch broken SDK / no-degrade", () => {
+  let handle: TestableHandle;
+
+  beforeEach(() => {
+    document.body.innerHTML = "";
+    vi.useFakeTimers();
+    installTwitchStateListener(window, () => Date.now());
+  });
+
+  afterEach(() => {
+    handle?.dispose();
+    document.body.innerHTML = "";
+    vi.useRealTimers();
+  });
+
+  it("broken_twitch_poll_never_degrades_or_warns", async () => {
+    const env = setupBrokenEnv();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    await pollSeconds(env, handle, 20);
+    expect(handle.__getState().mode).not.toBe("degraded");
+    expect(warn).toHaveBeenCalledTimes(0);
+    expect(env.store.state.multiview.layoutContent.a.muted).toBe(false);
+    expect(env.sdks.get("a")!.muteCalls).toBe(0);
+    warn.mockRestore();
+  });
+
+  it("broken_twitch_never_calls_native_manualCheckMuted", async () => {
+    const env = setupBrokenEnv();
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    const patchedB = env.cells.get("b")!.manualCheckMuted;
+    await pollSeconds(env, handle, 20);
+    expect(env.cells.get("a")!.nativeCheckCalls).toBe(0);
+    expect(env.cells.get("b")!.nativeCheckCalls).toBe(0);
+    expect(env.cells.get("b")!.manualCheckMuted).toBe(patchedB);
+  });
+
+  it("untrusted_twitch_is_muted_once_per_selection", async () => {
+    const env = setupBrokenEnv();
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    await pollSeconds(env, handle, 20);
+    const spy = env.postSpies.get("b")!;
+    const mutePosts = () =>
+      spy.mock.calls.filter((c) => c[0]?.params === true).length;
+    expect(mutePosts()).toBe(1);
+
+    const ev = createPanelEvent(true);
+    beginPanelDispatch(ev, true);
+    env.cells.get("a")!.setMuted(false);
+    endPanelDispatch(ev);
+    await flushMicrotasks();
+    await pollSeconds(env, handle, 3);
+    expect(mutePosts()).toBe(2);
+  });
+
+  it("untrusted_failed_post_is_retried_after_cooldown", async () => {
+    const env = setupBrokenEnv();
+    const spy = env.postSpies.get("b")!;
+    let calls = 0;
+    spy.mockImplementation(() => {
+      calls += 1;
+      if (calls === 1) throw new Error("post failed");
+    });
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    await env.cells.get("b")!.manualCheckMuted();
+    await flushMicrotasks();
+    await vi.advanceTimersByTimeAsync(2000);
+    await env.cells.get("b")!.manualCheckMuted();
+    await flushMicrotasks();
+    expect(calls).toBeGreaterThanOrEqual(2);
+    await pollSeconds(env, handle, 20);
+    // calls includes the first throw; successful posts = calls - 1
+    expect(calls - 1).toBe(1);
+    expect(handle.__getState().mode).not.toBe("degraded");
+    expect(warn).toHaveBeenCalledTimes(0);
+    expect(env.cells.get("b")!.nativeCheckCalls).toBe(0);
+    warn.mockRestore();
+
+    // iframe temporarily missing
+    const env2 = setupBrokenEnv();
+    const cellB = env2.cells.get("b")!;
+    const iframe = cellB.$el.querySelector("iframe")!;
+    iframe.remove();
+    handle?.dispose();
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    await cellB.manualCheckMuted();
+    await flushMicrotasks();
+    await vi.advanceTimersByTimeAsync(1000);
+    cellB.$refs.player!.$el.appendChild(iframe);
+    const spy2 = env2.postSpies.get("b")!;
+    spy2.mockClear();
+    await vi.advanceTimersByTimeAsync(2000);
+    await cellB.manualCheckMuted();
+    await flushMicrotasks();
+    expect(
+      spy2.mock.calls.filter((c) => c[0]?.params === true).length,
+    ).toBeGreaterThanOrEqual(1);
+  });
+
+  it("iframe_state_mute_not_applied_keeps_retrying_until_confirmed", async () => {
+    const env = setupBrokenEnv();
+    // Make b active first
+    env.store.state.multiview.layoutContent.a.muted = true;
+    env.store.state.multiview.layoutContent.b.muted = false;
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    handle.__setState({
+      ...handle.__getState(),
+      mode: "locked",
+      selection: "selected",
+      active: handle.__lastBindings.get("b")!.identity,
+      epoch: 1,
+    });
+    const iframe = env.cells
+      .get("b")!
+      .$el.querySelector("iframe") as HTMLIFrameElement;
+    postTwitchUpdateState(iframe, { muted: false });
+
+    const ev = createPanelEvent(true);
+    beginPanelDispatch(ev, true);
+    env.cells.get("a")!.setMuted(false);
+    endPanelDispatch(ev);
+    await flushMicrotasks();
+
+    const spy = env.postSpies.get("b")!;
+    for (let i = 0; i < 3; i++) {
+      postTwitchUpdateState(iframe, { muted: false });
+      await env.cells.get("b")!.manualCheckMuted();
+      await flushMicrotasks();
+      await vi.advanceTimersByTimeAsync(1000);
+    }
+    const beforeConfirm = spy.mock.calls.filter((c) => c[0]?.params === true)
+      .length;
+    expect(beforeConfirm).toBeGreaterThanOrEqual(2);
+
+    postTwitchUpdateState(iframe, { muted: true });
+    for (let i = 0; i < 5; i++) {
+      await env.cells.get("b")!.manualCheckMuted();
+      await flushMicrotasks();
+      await vi.advanceTimersByTimeAsync(1000);
+    }
+    const after = spy.mock.calls.filter((c) => c[0]?.params === true).length;
+    expect(after).toBe(beforeConfirm);
+    expect(handle.__getState().mode).not.toBe("degraded");
+    expect(env.store.state.multiview.layoutContent.a.muted).toBe(false);
+  });
+
+  it("broken_twitch_user_unmute_in_iframe_switches_then_reverse", async () => {
+    const env = setupBrokenEnv();
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    const iframe = env.cells
+      .get("b")!
+      .$el.querySelector("iframe") as HTMLIFrameElement;
+    postTwitchUpdateState(iframe, { muted: true });
+    await env.cells.get("b")!.manualCheckMuted();
+    await flushMicrotasks();
+    // Expire settle so unmute edge can claim selection
+    await vi.advanceTimersByTimeAsync(1600);
+
+    const spy = env.postSpies.get("b")!;
+    spy.mockClear();
+    triggerIframeIntent(env.cells.get("b")!);
+    await vi.advanceTimersByTimeAsync(0);
+    postTwitchUpdateState(iframe, { muted: false });
+    for (let i = 0; i < 2; i++) {
+      await env.cells.get("a")!.manualCheckMuted();
+      await env.cells.get("b")!.manualCheckMuted();
+      await flushMicrotasks();
+      await vi.advanceTimersByTimeAsync(1000);
+    }
+    expect(handle.__getState().active?.key).toBe("b");
+    expect(env.store.state.multiview.layoutContent.a.muted).toBe(true);
+    expect(env.store.state.multiview.layoutContent.b.muted).toBe(false);
+    expect(spy.mock.calls.filter((c) => c[0]?.params === true).length).toBe(0);
+
+    const ev = createPanelEvent(true);
+    beginPanelDispatch(ev, true);
+    env.cells.get("a")!.setMuted(false);
+    endPanelDispatch(ev);
+    await flushMicrotasks();
+    for (let i = 0; i < 2; i++) {
+      await env.cells.get("b")!.manualCheckMuted();
+      await flushMicrotasks();
+      await vi.advanceTimersByTimeAsync(1000);
+    }
+    expect(
+      spy.mock.calls.filter((c) => c[0]?.params === true).length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(handle.__getState().active?.key).toBe("a");
+    expect(env.store.state.multiview.layoutContent.a.muted).toBe(false);
+    expect(env.store.state.multiview.layoutContent.b.muted).toBe(true);
+
+    const afterMute = spy.mock.calls.filter((c) => c[0]?.params === true)
+      .length;
+    postTwitchUpdateState(iframe, { muted: true });
+    for (let i = 0; i < 5; i++) {
+      await env.cells.get("b")!.manualCheckMuted();
+      await flushMicrotasks();
+      await vi.advanceTimersByTimeAsync(1000);
+    }
+    expect(spy.mock.calls.filter((c) => c[0]?.params === true).length).toBe(
+      afterMute,
+    );
+    expect(handle.__getState().mode).not.toBe("degraded");
+    expect(env.cells.get("b")!.nativeCheckCalls).toBe(0);
+
+    // Negative: unmuted without intent → re-mute, active unchanged
+    handle.__setState({
+      ...handle.__getState(),
+      active: handle.__lastBindings.get("a")!.identity,
+      intent: null,
+    });
+    spy.mockClear();
+    postTwitchUpdateState(iframe, { muted: false });
+    await env.cells.get("b")!.manualCheckMuted();
+    await flushMicrotasks();
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(
+      spy.mock.calls.filter((c) => c[0]?.params === true).length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(handle.__getState().active?.key).toBe("a");
+  });
+
+  it("twitch_missing_sdk_methods_never_falls_back_to_native", async () => {
+    const env = setupBrokenEnv({ missingMethods: true, twitchBroken: false });
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const mappedMuteOthers = env.cells.get("a")!.__orig!.muteOthers;
+    const muteOthersCallsBefore = env.cells.get("a")!.muteOthersCalls.length;
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    const patchedA = env.cells.get("a")!.manualCheckMuted;
+    const patchedB = env.cells.get("b")!.manualCheckMuted;
+    const patchedSetA = env.cells.get("a")!.setMuted;
+    const patchedSetB = env.cells.get("b")!.setMuted;
+    const patchedMOA = env.cells.get("a")!.muteOthers;
+    const patchedMOB = env.cells.get("b")!.muteOthers;
+    await pollSeconds(env, handle, 20);
+    expect(handle.__getState().mode).not.toBe("degraded");
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0]?.[1]).toMatchObject({
+      code: "twitch-sdk-contract-changed",
+    });
+    expect(env.cells.get("a")!.manualCheckMuted).toBe(patchedA);
+    expect(env.cells.get("b")!.manualCheckMuted).toBe(patchedB);
+    expect(env.cells.get("a")!.setMuted).toBe(patchedSetA);
+    expect(env.cells.get("b")!.setMuted).toBe(patchedSetB);
+    expect(env.cells.get("a")!.muteOthers).toBe(patchedMOA);
+    expect(env.cells.get("b")!.muteOthers).toBe(patchedMOB);
+    expect(env.cells.get("a")!.nativeCheckCalls).toBe(0);
+    expect(env.cells.get("b")!.nativeCheckCalls).toBe(0);
+    expect(env.cells.get("a")!.muteOthersCalls.length).toBe(
+      muteOthersCallsBefore,
+    );
+    expect(env.store.state.multiview.layoutContent.a.muted).toBe(false);
+    expect(
+      env.postSpies.get("b")!.mock.calls.filter((c) => c[0]?.params === true)
+        .length,
+    ).toBeGreaterThanOrEqual(1);
+    void mappedMuteOthers;
+    warn.mockRestore();
+  });
+
+  it("reverse_switch_panel_mutes_broken_twitch_within_2s", async () => {
+    const env = setupBrokenEnv();
+    env.store.state.multiview.layoutContent.a.muted = true;
+    env.store.state.multiview.layoutContent.b.muted = false;
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    handle.__setState({
+      ...handle.__getState(),
+      mode: "locked",
+      selection: "selected",
+      active: handle.__lastBindings.get("b")!.identity,
+      epoch: 1,
+    });
+    const spy = env.postSpies.get("b")!;
+    spy.mockClear();
+    const ev = createPanelEvent(true);
+    beginPanelDispatch(ev, true);
+    env.cells.get("a")!.setMuted(false);
+    endPanelDispatch(ev);
+    await flushMicrotasks();
+    for (let i = 0; i < 2; i++) {
+      await env.cells.get("b")!.manualCheckMuted();
+      await flushMicrotasks();
+      await vi.advanceTimersByTimeAsync(1000);
+    }
+    expect(
+      spy.mock.calls.filter((c) => c[0]?.params === true).length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(handle.__getState().active?.key).toBe("a");
+    expect(env.store.state.multiview.layoutContent.a.muted).toBe(false);
+    expect(env.store.state.multiview.layoutContent.b.muted).toBe(true);
+    expect(handle.__getState().mode).not.toBe("degraded");
+  });
+
+  it("reverse_switch_panel_mutes_healthy_twitch_within_2s", async () => {
+    const env = setupBrokenEnv({
+      healthyTwitch: true,
+      twitchMuted: false,
+      twitchBroken: false,
+    });
+    env.store.state.multiview.layoutContent.a.muted = true;
+    env.store.state.multiview.layoutContent.b.muted = false;
+    env.sdks.get("b")!.rawMuted = false;
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    handle.__setState({
+      ...handle.__getState(),
+      mode: "locked",
+      selection: "selected",
+      active: handle.__lastBindings.get("b")!.identity,
+      epoch: 1,
+    });
+    const ev = createPanelEvent(true);
+    beginPanelDispatch(ev, true);
+    env.cells.get("a")!.setMuted(false);
+    endPanelDispatch(ev);
+    await flushMicrotasks();
+    for (let i = 0; i < 2; i++) {
+      await env.cells.get("a")!.manualCheckMuted();
+      await env.cells.get("b")!.manualCheckMuted();
+      await flushMicrotasks();
+      await vi.advanceTimersByTimeAsync(1000);
+    }
+    expect(env.sdks.get("b")!.rawMuted).toBe(true);
+    expect(env.sdks.get("a")!.rawMuted).toBe(false);
+  });
+
+  it("reverse_switch_youtube_iframe_intent_mutes_twitch", async () => {
+    const env = setupBrokenEnv({
+      healthyTwitch: true,
+      twitchMuted: false,
+      twitchBroken: false,
+    });
+    env.store.state.multiview.layoutContent.a.muted = true;
+    env.store.state.multiview.layoutContent.b.muted = false;
+    env.sdks.get("b")!.rawMuted = false;
+    env.sdks.get("a")!.rawMuted = true;
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    handle.__setState({
+      ...handle.__getState(),
+      mode: "locked",
+      selection: "selected",
+      active: handle.__lastBindings.get("b")!.identity,
+      epoch: 1,
+    });
+    // Establish lastObservedMuted=true on YouTube while Twitch is active
+    env.sdks.get("a")!.rawMuted = true;
+    await env.cells.get("a")!.manualCheckMuted();
+    await flushMicrotasks();
+    await vi.advanceTimersByTimeAsync(1600);
+    triggerIframeIntent(env.cells.get("a")!);
+    await vi.advanceTimersByTimeAsync(0);
+    env.sdks.get("a")!.rawMuted = false;
+    for (let i = 0; i < 2; i++) {
+      await env.cells.get("a")!.manualCheckMuted();
+      await env.cells.get("b")!.manualCheckMuted();
+      await flushMicrotasks();
+      await vi.advanceTimersByTimeAsync(1000);
+    }
+    expect(handle.__getState().active?.key).toBe("a");
+    expect(env.sdks.get("b")!.rawMuted).toBe(true);
+  });
+
+  it("healthy_twitch_ignoring_mute_does_not_degrade", async () => {
+    const env = setupBrokenEnv({
+      healthyTwitch: true,
+      twitchMuted: false,
+      twitchIgnoreMute: true,
+      twitchBroken: false,
+    });
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    await pollSeconds(env, handle, 20);
+    expect(handle.__getState().mode).not.toBe("degraded");
+    expect(warn).toHaveBeenCalledTimes(0);
+    expect(env.store.state.multiview.layoutContent.a.muted).toBe(false);
+    expect(env.sdks.get("b")!.muteCalls).toBeGreaterThanOrEqual(3);
+    warn.mockRestore();
+  });
+});

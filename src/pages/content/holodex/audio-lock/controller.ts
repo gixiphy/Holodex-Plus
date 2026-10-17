@@ -5,7 +5,7 @@ import type {
   LockState,
   StoreSnapshot,
 } from "./contracts";
-import { TIMING, identityCore, sameIdentity } from "./contracts";
+import { TIMING, failuresDegrade, identityCore, sameIdentity } from "./contracts";
 import {
   createHolodexAdapter,
   type CellBinding,
@@ -260,9 +260,10 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
               type: "MUTE_SENT",
               now: now(),
               identity: effect.identity,
+              ok,
             });
             state = sent.state;
-            if (!ok) {
+            if (!ok && failuresDegrade(effect.identity)) {
               const key = effect.identity.key;
               const prev = state.cells[key]?.consecutiveFailures ?? 0;
               const failures = prev + 1;
@@ -401,6 +402,10 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       const entry = ports.get(identity.key);
       if (!entry) return;
       const read = await entry.port.readMuted();
+      if (read.kind === "unavailable" && read.reason === "untrusted") {
+        await restoreGrant(state.selectionGrant.grant);
+        return;
+      }
       if (read.kind !== "known") return;
       if (!sameIdentity(state.active, identity)) return;
       if (!state.selectionGrant || state.selectionGrant.consumed) return;
@@ -513,9 +518,28 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
       },
       onContractMismatch: () => {
         const current = lastBindings.get(key);
-        if (current && sameIdentity(current.identity, binding.identity)) {
-          failSession("cell-contract-changed");
+        if (!current || !sameIdentity(current.identity, binding.identity)) return;
+        if (!failuresDegrade(binding.identity)) {
+          if (!state.reportedCodes["twitch-sdk-contract-changed"]) {
+            state = {
+              ...state,
+              reportedCodes: {
+                ...state.reportedCodes,
+                "twitch-sdk-contract-changed": true,
+              },
+            };
+            try {
+              console.warn("[Holodex+ AudioLock]", {
+                code: "twitch-sdk-contract-changed",
+                adapterVersion: 1,
+              });
+            } catch {
+              /* ignore */
+            }
+          }
+          return;
         }
+        failSession("cell-contract-changed");
       },
     };
     const port = createPlayerPort(playerBinding);
@@ -536,6 +560,18 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
 
       if (read.kind === "unavailable") {
         if (read.reason === "not-ready") return;
+        if (read.reason === "untrusted") {
+          const result = transition(state, {
+            type: "UNTRUSTED_POLL",
+            now: t,
+            identity,
+            assignment: currentAssignment(key),
+          });
+          state = result.state;
+          await applyEffects(result.effects);
+          return;
+        }
+        if (!failuresDegrade(identity)) return;
         const prev = state.cells[key]?.consecutiveFailures ?? 0;
         const failures = prev + 1;
         state = {

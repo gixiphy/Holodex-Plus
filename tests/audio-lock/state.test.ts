@@ -709,21 +709,22 @@ describe("transition table", () => {
     });
     expect(during.effects).toEqual([]);
 
-    // three MUTE_SENT then still false → degrade
+    // three MUTE_SENT then still false → degrade (YouTube; Twitch never degrades)
+    const ytB = id("b", "youtube");
     state = enabledLocked(a);
     for (let i = 0; i < 3; i++) {
       state = transition(state, {
         type: "MUTE_SENT",
         now: 2000 + i * 2000,
-        identity: b,
+        identity: ytB,
       }).state;
       // expire settle between
       state = {
         ...state,
         cells: {
           ...state.cells,
-          [b.key]: {
-            ...state.cells[b.key]!,
+          [ytB.key]: {
+            ...state.cells[ytB.key]!,
             settleUntil: 0,
           },
         },
@@ -732,7 +733,7 @@ describe("transition table", () => {
     const deg = transition(state, {
       type: "OBSERVED_MUTED",
       now: 10_000,
-      identity: b,
+      identity: ytB,
       muted: false,
       assignment: true,
       origin: "poll",
@@ -1096,6 +1097,144 @@ describe("transition table", () => {
     });
     expect(fromOther.active).toEqual(withOther.active);
     expect(fromOther.cells[identity.key]).toEqual(emptyCellRuntime());
+  });
+
+  it("twitch_unsettled_mutes_do_not_degrade", () => {
+    const a = id("a", "youtube");
+    const b = id("b", "twitch");
+    let state = enabledLocked(a);
+    for (let i = 0; i < 3; i++) {
+      state = transition(state, {
+        type: "MUTE_SENT",
+        now: 2000 + i * 2000,
+        identity: b,
+      }).state;
+      state = {
+        ...state,
+        cells: {
+          ...state.cells,
+          [b.key]: { ...state.cells[b.key]!, settleUntil: 0 },
+        },
+      };
+    }
+    const result = transition(state, {
+      type: "OBSERVED_MUTED",
+      now: 10_000,
+      identity: b,
+      muted: false,
+      assignment: true,
+      origin: "poll",
+    });
+    expect(result.state.mode).not.toBe("degraded");
+    expect(result.effects).toContainEqual({
+      type: "MUTE_PLAYER",
+      identity: b,
+      epoch: state.epoch,
+    });
+    expect(result.effects.find((e) => e.type === "REPORT_ONCE")).toBeUndefined();
+  });
+
+  it("untrusted_poll_mutes_once_per_epoch", () => {
+    const a = id("a", "youtube");
+    const b = id("b", "twitch");
+    let state = enabledLocked(a);
+    const first = transition(state, {
+      type: "UNTRUSTED_POLL",
+      now: 1000,
+      identity: b,
+      assignment: true,
+    });
+    expect(first.effects).toContainEqual({
+      type: "MUTE_PLAYER",
+      identity: b,
+      epoch: state.epoch,
+    });
+    state = transition(first.state, {
+      type: "MUTE_SENT",
+      now: 1000,
+      identity: b,
+      ok: true,
+    }).state;
+    const again = transition(state, {
+      type: "UNTRUSTED_POLL",
+      now: 2000,
+      identity: b,
+      assignment: true,
+    });
+    expect(again.effects).toEqual([]);
+    state = { ...again.state, epoch: again.state.epoch + 1 };
+    const nextEpoch = transition(state, {
+      type: "UNTRUSTED_POLL",
+      now: 3000,
+      identity: b,
+      assignment: true,
+    });
+    expect(nextEpoch.effects).toContainEqual({
+      type: "MUTE_PLAYER",
+      identity: b,
+      epoch: state.epoch,
+    });
+  });
+
+  it("mute_sent_failure_keeps_epoch_retryable", () => {
+    const a = id("a", "youtube");
+    const b = id("b", "twitch");
+    let state = enabledLocked(a);
+    state = transition(state, {
+      type: "MUTE_SENT",
+      now: 1000,
+      identity: b,
+      ok: false,
+    }).state;
+    expect(state.cells[b.key]?.lastMuteEpoch).toBe(null);
+    expect(state.cells[b.key]?.settleUntil).toBe(0);
+    expect(state.cells[b.key]?.unsettledMuteCount).toBe(0);
+    expect(state.cells[b.key]?.lastMuteAt).toBe(1000);
+    const again = transition(state, {
+      type: "UNTRUSTED_POLL",
+      now: 2000,
+      identity: b,
+      assignment: true,
+    });
+    expect(again.effects).toContainEqual({
+      type: "MUTE_PLAYER",
+      identity: b,
+      epoch: state.epoch,
+    });
+  });
+
+  it("untrusted_poll_never_mutes_active_or_unassigned", () => {
+    const a = id("a", "youtube");
+    const b = id("b", "twitch");
+    const asActive = transition(enabledLocked(b), {
+      type: "UNTRUSTED_POLL",
+      now: 1,
+      identity: b,
+      assignment: false,
+    });
+    expect(asActive.effects).toEqual([]);
+
+    for (const assignment of [undefined, false] as const) {
+      const boot = transition(enabledBootstrap(), {
+        type: "UNTRUSTED_POLL",
+        now: 1,
+        identity: b,
+        assignment,
+      });
+      expect(boot.effects).toEqual([]);
+    }
+
+    const disabled = transition(
+      { ...enabledLocked(a), extensionEnabled: false },
+      { type: "UNTRUSTED_POLL", now: 1, identity: b, assignment: true },
+    );
+    expect(disabled.effects).toEqual([]);
+
+    const degraded = transition(
+      { ...enabledLocked(a), mode: "degraded" },
+      { type: "UNTRUSTED_POLL", now: 1, identity: b, assignment: true },
+    );
+    expect(degraded.effects).toEqual([]);
   });
 });
 

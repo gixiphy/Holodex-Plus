@@ -12,6 +12,7 @@ import {
   type StoreSnapshot,
   TIMING,
   encodeAssignment,
+  failuresDegrade,
   identityCore,
   sameIdentity,
 } from "./contracts";
@@ -27,6 +28,7 @@ export function emptyCellRuntime(): CellRuntime {
     ownMuteGeneration: null,
     lastObservedMuted: null,
     unsettledMuteCount: 0,
+    lastMuteEpoch: null,
   };
 }
 
@@ -596,15 +598,43 @@ export function transition(
 
     case "MUTE_SENT": {
       const runtime = state.cells[event.identity.key] ?? emptyCellRuntime();
+      if (event.ok === false) {
+        return {
+          state: patchCell(state, event.identity.key, {
+            lastMuteAt: event.now,
+          }),
+          effects,
+        };
+      }
       return {
         state: patchCell(state, event.identity.key, {
           lastMuteAt: event.now,
           settleUntil: event.now + TIMING.SETTLE_MS,
           ownMuteGeneration: event.identity.generation,
           unsettledMuteCount: runtime.unsettledMuteCount + 1,
+          lastMuteEpoch: state.epoch,
         }),
         effects,
       };
+    }
+
+    case "UNTRUSTED_POLL": {
+      if (!state.extensionEnabled || !state.muteOthers) {
+        return { state, effects };
+      }
+      if (state.mode === "degraded" || state.mode === "disabled") {
+        return { state, effects };
+      }
+      const want = desiredMute(state, event.assignment, event.identity);
+      if (want !== "muted") return { state, effects };
+      const runtime = state.cells[event.identity.key] ?? emptyCellRuntime();
+      if (runtime.lastMuteEpoch === state.epoch) return { state, effects };
+      effects.push({
+        type: "MUTE_PLAYER",
+        identity: event.identity,
+        epoch: state.epoch,
+      });
+      return { state, effects };
     }
 
     case "OBSERVED_MUTED": {
@@ -679,7 +709,10 @@ export function transition(
         if (runtime.settleUntil > event.now) {
           return { state: next, effects };
         }
-        if (runtime.unsettledMuteCount >= TIMING.MAX_CONSECUTIVE_FAILURES) {
+        if (
+          failuresDegrade(event.identity) &&
+          runtime.unsettledMuteCount >= TIMING.MAX_CONSECUTIVE_FAILURES
+        ) {
           const code = "player-mute-did-not-settle";
           const already = next.reportedCodes[code];
           const degraded: LockState = {
