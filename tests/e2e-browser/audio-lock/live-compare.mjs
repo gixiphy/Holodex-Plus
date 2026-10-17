@@ -36,6 +36,15 @@ const rows = files.map((f) => {
     twitchCommandsReceived: j.twitchCommandsReceived,
     updateStateMessages: j.updateStateMessages,
     centerClickSwitch: j.scenarios?.bPrime?.centerClickSwitch,
+    scenarioErrors: (j.scenarioErrors || []).length,
+    hostExceptions: (j.hostExceptions || []).length,
+    extensionExceptions: (j.extensionExceptions || []).length,
+    cMeta: c.map((r) => ({
+      round: r.round,
+      precondition: r.precondition,
+      switchedInMs: r.switchedInMs,
+      pass: r.pass,
+    })),
   };
 });
 
@@ -56,6 +65,9 @@ console.log(
     'vIsRef',
     'observed',
     'ytMuted',
+    'scenarioErr',
+    'hostEx',
+    'extEx',
   ].join('\t'),
 );
 for (const r of rows) {
@@ -76,10 +88,21 @@ for (const r of rows) {
       r.vIsRefErrors,
       r.twitchObserved,
       r.ytMutedSamples,
+      r.scenarioErrors,
+      r.hostExceptions,
+      r.extensionExceptions,
     ].join('\t'),
   );
   if (r.centerClickSwitch) {
     console.log('  centerClickSwitch', JSON.stringify(r.centerClickSwitch));
+  }
+  for (const cm of r.cMeta) {
+    console.log(
+      '  c' + cm.round,
+      'precondition=' + cm.precondition,
+      'switchedInMs=' + cm.switchedInMs,
+      'pass=' + cm.pass,
+    );
   }
   console.log(
     '  cmds',

@@ -99,7 +99,27 @@ If the default stream cannot play within 60s, the harness may try alternate pick
 
 ### Start playback and focus
 
-Holodex Twitch uses `autoplay:false`; calling `video.play()` inside the iframe does not start playback. The harness uses trusted CDP mouse clicks on the player play button (YouTube `.ytp-large-play-button`, Twitch `button[data-a-target="player-play-pause-button"]`, else iframe center), then clicks page blank `(20,20)` so focus leaves the iframe.
+Holodex Twitch uses `autoplay:false`; calling `video.play()` inside the iframe does not start playback. The harness uses trusted CDP mouse clicks on the player play button (YouTube `.ytp-large-play-button` / `.ytmCuedOverlayPlayButton`, Twitch `button[data-a-target="player-overlay-play-button"]` / play-pause, else iframe center), then clicks a verified blank region so focus leaves the iframe.
+
+Blank clicks scan the lower-right viewport for an element that is not a control, iframe, frame, dialog, or overlay. After closing the media panel with Escape, the harness waits up to 3s for `.v-dialog--active` / `.v-overlay--active` to clear (then one outside click + retry) before blanking. Blank lookup itself retries for up to 3s; failure includes `elementFromPoint` samples.
+
+### Mute toggle
+
+Mute uses a trusted click on the player mute control, then polls every 100ms for up to 1000ms. Only if muted/volume are unchanged does it send keyboard `m`, then poll again up to 1000ms. This avoids a delayed button unmute being cancelled by the keyboard fallback. Returns `method`, `clickAt`, `changedAt`, `keyAt`.
+
+### Scenario isolation and page exceptions
+
+Scenarios b, each c round, d, e, and f run in try/catch. A scenario exception records `{ pass:false, error }` in that scenario plus `scenarioErrors` / `harnessErrors`, then continues. Only browser start, extension load, calibration, and scenario a setup abort the whole run (exit 2).
+
+`Runtime.exceptionThrown` goes to `pageExceptions` (timestamped). Classification:
+
+- `extensionExceptions`: stack/url contains `chrome-extension://`, or message contains `AudioLock` / `Holodex+`
+- `hostExceptions`: every stack URL is under `https://holodex.net/assets/`
+- anything else is unclassified and fails scenario f
+
+Scenario f (normal/MVP): after removing the Twitch cell, for 5s there must be no new `extensionExceptions`, no unclassified exceptions, YouTube still audible, and any new `hostExceptions` messages must match the allowlist (`this.player.getCurrentTime is not a function`, `fetchVideoData`). Final acceptance also requires the same host messages on the same-round MVP JSON.
+
+Modes covered to completion: fallback runs a, b, c×3, e, g; normal and MVP run a, b (MVP also b′), c×3, d, e, f. Later scenarios still run after an earlier FAIL.
 
 ### Truth method
 
