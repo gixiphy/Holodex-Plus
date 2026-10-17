@@ -962,6 +962,141 @@ describe("transition table", () => {
     ]);
     expect(storeConverged(bad, a, new Set())).toBe(false);
   });
+
+  it("rebound_remount_replaces_active_and_bumps_epoch", () => {
+    const gen1 = id("a", "youtube", "yt1", 1);
+    const gen3 = id("a", "youtube", "yt1", 3);
+    const prev = enabledLocked(gen1);
+    const { state: next, effects } = transition(prev, {
+      type: "BINDING_REBOUND",
+      now: 0,
+      previous: gen1,
+      identity: gen3,
+      reason: "remount",
+    });
+    expect(next.active).toEqual(gen3);
+    expect(next.epoch).toBe(prev.epoch + 1);
+    expect(next.selection).toBe("selected");
+    expect(next.mode).toBe("locked");
+    expect(effects).toEqual([]);
+  });
+
+  it("rebound_clears_grant_and_intent_for_same_key", () => {
+    const gen1 = id("a", "youtube", "yt1", 1);
+    const gen3 = id("a", "youtube", "yt1", 3);
+    const b = id("b", "twitch", "tw1", 1);
+    let state = enabledLocked(gen1);
+    state = {
+      ...state,
+      selectionGrant: {
+        grant: { identity: gen1, epoch: 1, source: "explicit" },
+        consumed: false,
+      },
+      intent: {
+        identity: gen1,
+        source: "panel",
+        expiresAt: 5000,
+        consumed: false,
+      },
+    };
+    const { state: next } = transition(state, {
+      type: "BINDING_REBOUND",
+      now: 0,
+      previous: gen1,
+      identity: gen3,
+      reason: "remount",
+    });
+    expect(next.selectionGrant).toBeNull();
+    expect(next.intent).toBeNull();
+
+    let withB = enabledLocked(gen1);
+    withB = {
+      ...withB,
+      intent: {
+        identity: b,
+        source: "iframe",
+        expiresAt: 5000,
+        consumed: false,
+      },
+    };
+    const { state: kept } = transition(withB, {
+      type: "BINDING_REBOUND",
+      now: 0,
+      previous: gen1,
+      identity: gen3,
+      reason: "remount",
+    });
+    expect(kept.intent).toEqual(withB.intent);
+  });
+
+  it("rebound_late_bind_ignores_guessed_provider", () => {
+    const previous = id("b", "youtube", "tw1", 1);
+    const identity = id("b", "twitch", "tw1", 2);
+    const prev = enabledLocked(previous);
+    const { state: next } = transition(prev, {
+      type: "BINDING_REBOUND",
+      now: 0,
+      previous,
+      identity,
+      reason: "late-bind",
+    });
+    expect(next.active).toEqual(identity);
+  });
+
+  it("rebound_ignores_content_change", () => {
+    const gen1 = id("a", "youtube", "yt1", 1);
+    const other = id("a", "youtube", "yt2", 2);
+    const prev = enabledLocked(gen1);
+    const { state: next } = transition(prev, {
+      type: "BINDING_REBOUND",
+      now: 0,
+      previous: gen1,
+      identity: other,
+      reason: "remount",
+    });
+    expect(next.active).toEqual(prev.active);
+    expect(next.epoch).toBe(prev.epoch);
+  });
+
+  it("rebound_without_matching_active_only_resets_runtime", () => {
+    const identity = id("a", "youtube", "yt1", 2);
+    const patched = {
+      ...emptyCellRuntime(),
+      lastObservedMuted: false,
+      settleUntil: 99,
+    };
+
+    const noActive: LockState = {
+      ...createInitialState(),
+      extensionEnabled: true,
+      muteOthers: true,
+      cells: { a: patched },
+    };
+    const { state: fromNull } = transition(noActive, {
+      type: "BINDING_REBOUND",
+      now: 0,
+      previous: identity,
+      identity,
+      reason: "late-bind",
+    });
+    expect(fromNull.active).toEqual(noActive.active);
+    expect(fromNull.cells[identity.key]).toEqual(emptyCellRuntime());
+
+    const other = id("b", "twitch", "tw1", 1);
+    const withOther = {
+      ...enabledLocked(other),
+      cells: { a: patched, b: emptyCellRuntime() },
+    };
+    const { state: fromOther } = transition(withOther, {
+      type: "BINDING_REBOUND",
+      now: 0,
+      previous: identity,
+      identity,
+      reason: "late-bind",
+    });
+    expect(fromOther.active).toEqual(withOther.active);
+    expect(fromOther.cells[identity.key]).toEqual(emptyCellRuntime());
+  });
 });
 
 function patchObserved(

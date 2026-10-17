@@ -799,6 +799,38 @@ export function transition(
       return { state: { ...state, cells: rest }, effects };
     }
 
+    case "BINDING_REBOUND": {
+      if (!state.extensionEnabled) return { state, effects: [] };
+      let next: LockState = {
+        ...state,
+        cells: {
+          ...state.cells,
+          [event.identity.key]: emptyCellRuntime(),
+        },
+      };
+      const active = state.active;
+      const canReplace =
+        active !== null &&
+        active.key === event.identity.key &&
+        active.contentId === event.identity.contentId &&
+        !sameIdentity(active, event.identity) &&
+        sameIdentity(active, event.previous) &&
+        (event.reason === "late-bind" ||
+          identityCore(event.previous) === identityCore(event.identity));
+      if (!canReplace) {
+        return { state: next, effects: [] };
+      }
+      next = bumpEpoch(next);
+      next = { ...next, active: event.identity };
+      if (next.selectionGrant?.grant.identity.key === event.identity.key) {
+        next = { ...next, selectionGrant: null };
+      }
+      if (next.intent?.identity.key === event.identity.key) {
+        next = { ...next, intent: null };
+      }
+      return { state: next, effects: [] };
+    }
+
     case "TOKEN_EXPIRED": {
       if (!state.intent) return { state, effects };
       if (state.intent.expiresAt <= event.now) {

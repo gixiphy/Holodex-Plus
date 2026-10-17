@@ -147,6 +147,13 @@ export type LockEvent =
   | { type: "RESET_DEGRADED"; now: number }
   | { type: "STORE_SNAPSHOT"; now: number; snapshot: StoreSnapshot }
   | { type: "CELL_REMOVED"; now: number; identity: CellIdentity }
+  | {
+      type: "BINDING_REBOUND";
+      now: number;
+      previous: CellIdentity;
+      identity: CellIdentity;
+      reason: "remount" | "late-bind";
+    }
   | { type: "CONTRACT_FAILED"; now: number; code: string }
   | { type: "TOKEN_EXPIRED"; now: number }
   | { type: "SETTLE_EXPIRED"; now: number; identity: CellIdentity; stillMuted: boolean }
