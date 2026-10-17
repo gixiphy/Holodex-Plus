@@ -314,6 +314,10 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
           } finally {
             authDepth.value -= 1;
           }
+          if (state.active && sameIdentity(state.active, effect.identity)) {
+            armStoreSettle(state.active);
+            armSelectionSettle(state.active);
+          }
           void maybeRestoreGrant(effect.identity);
           break;
         }
@@ -340,6 +344,14 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
             }
           } finally {
             authDepth.value -= 1;
+          }
+          if (
+            effect.muted === false &&
+            state.active &&
+            sameIdentity(state.active, effect.identity)
+          ) {
+            armStoreSettle(state.active);
+            armSelectionSettle(state.active);
           }
           void maybeRestoreGrant(effect.identity);
           break;

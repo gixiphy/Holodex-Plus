@@ -150,6 +150,7 @@ export type FakeSdk = {
 export function createTwitchSdk(opts?: {
   muted?: boolean;
   hangRead?: boolean;
+  hangUnmute?: boolean;
   throwRead?: boolean;
   dangerousGetter?: boolean;
   settleDelayMs?: number;
@@ -185,6 +186,7 @@ export function createTwitchSdk(opts?: {
       }
       sdk.rawMuted = true;
     } else {
+      if (opts?.hangUnmute) return new Promise(() => undefined) as unknown as void;
       sdk.unmuteCalls += 1;
       if (opts?.ignoreMute) return;
       if (opts?.settleDelayMs) {

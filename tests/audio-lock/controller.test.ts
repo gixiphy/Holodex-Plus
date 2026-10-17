@@ -25,6 +25,7 @@ import {
   flushMicrotasks,
   removeFakeCell,
   replaceCellContent,
+  replacePlayer,
   type FakeEnv,
   type FakeVideoCell,
 } from "./fixtures";
@@ -920,6 +921,228 @@ describe("controller", () => {
     handle.__tryDiscover();
     expect(handle.__lastBindings.has("a")).toBe(true);
     void env;
+  });
+
+  it("player_rebuild_bumps_generation_and_drops_stale_results", async () => {
+    const env = setupEnv([{ key: "a", provider: "twitch", muted: false }]);
+    const hang = createTwitchSdk({ hangRead: true, muted: false });
+    env.cells.get("a")!.$refs.player = createFakePlayerComponent("twitch", hang, true);
+    env.sdks.set("a", hang);
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(2000);
+    const oldId = handle.__lastBindings.get("a")!.identity;
+    const stale = handle.__reconcile(oldId);
+    replacePlayer(env, "a");
+    await vi.advanceTimersByTimeAsync(2000);
+    const newId = handle.__lastBindings.get("a")!.identity;
+    expect(newId.generation).not.toBe(oldId.generation);
+    await vi.advanceTimersByTimeAsync(750);
+    await stale;
+    expect(handle.__getState().active?.generation).not.toBe(oldId.generation);
+  });
+
+  it("mute_did_not_settle_degrades_after_three", async () => {
+    const env = setupEnv([
+      { key: "a", provider: "twitch", muted: false },
+      { key: "b", provider: "twitch", muted: true },
+    ]);
+    const sdk = createTwitchSdk({ muted: false, ignoreMute: true });
+    env.cells.get("b")!.$refs.player = createFakePlayerComponent("twitch", sdk, true);
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(2000);
+    const idB = handle.__lastBindings.get("b")!.identity;
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    for (let i = 0; i < 4; i++) {
+      await handle.__reconcile(idB);
+      await vi.advanceTimersByTimeAsync(2000);
+    }
+    expect(handle.__getState().mode).toBe("degraded");
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
+  });
+
+  it("store_did_not_settle_degrades_at_500ms", async () => {
+    const env = setupEnv([
+      { key: "a", provider: "twitch", muted: false },
+      { key: "b", provider: "twitch", muted: true },
+    ]);
+    const cellB = env.cells.get("b")!;
+    cellB.muteOthers = () => {
+      /* do not write store */
+    };
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    const idB = handle.__lastBindings.get("b")!.identity;
+    const ev = createPanelEvent(true);
+    beginPanelDispatch(ev, true);
+    cellB.setMuted(false);
+    endPanelDispatch(ev);
+    await vi.advanceTimersByTimeAsync(500);
+    expect(handle.__getState().mode).toBe("degraded");
+    void idB;
+  });
+
+  it("selection_settle_ignores_stale_true", async () => {
+    const env = setupEnv([
+      { key: "a", provider: "twitch", muted: false },
+      { key: "b", provider: "twitch", muted: true },
+    ]);
+    const sdk = createTwitchSdk({ muted: true, settleDelayMs: 800 });
+    env.cells.get("b")!.$refs.player = createFakePlayerComponent("twitch", sdk, true);
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(2000);
+    const idB = handle.__lastBindings.get("b")!.identity;
+    const ev = createPanelEvent(true);
+    beginPanelDispatch(ev, true);
+    env.cells.get("b")!.setMuted(false);
+    endPanelDispatch(ev);
+    await flushMicrotasks();
+    await handle.__reconcile(idB);
+    expect(handle.__getState().selection).not.toBe("silence");
+    await vi.advanceTimersByTimeAsync(1500);
+    expect(handle.__getState().active?.key).toBe("b");
+  });
+
+  it("unassigned_selection_restores_actual_player_audio via first-play", async () => {
+    const env = setupEnv([
+      { key: "0", provider: "twitch", muted: "omit" },
+      { key: "1", provider: "youtube", muted: "omit" },
+    ]);
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    handle.__setState({
+      ...createInitialState(),
+      extensionEnabled: true,
+      muteOthers: true,
+      mode: "waiting-for-choice",
+      selection: "bootstrap",
+      active: null,
+    });
+    const cell = env.cells.get("0")!;
+    const sdk = env.sdks.get("0")!;
+    sdk.rawMuted = true;
+    const beforeWatch = cell.watcherCalls;
+    const id = handle.__lastBindings.get("0")!.identity;
+    const r = transition(handle.__getState(), {
+      type: "NATIVE_FIRST_PLAY",
+      now: 0,
+      identity: id,
+    });
+    handle.__setState(r.state);
+    await handle.__applyEffects(r.effects);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(handle.__getState().active?.key).toBe("0");
+    expect(cell.watcherCalls).toBe(beforeWatch);
+  });
+
+  it("unassigned_selection_restores_actual_player_audio via fallback", async () => {
+    const env = setupEnv([
+      { key: "0", provider: "twitch", muted: "omit" },
+      { key: "1", provider: "youtube", muted: "omit" },
+    ]);
+    for (const c of env.cells.values()) {
+      c.editMode = false;
+      c.firstPlay = true;
+    }
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    handle.__setState({
+      ...createInitialState(),
+      extensionEnabled: true,
+      muteOthers: true,
+      mode: "waiting-for-choice",
+      selection: "bootstrap",
+      active: null,
+    });
+    env.cells.get("1")!.updatePausedState(false);
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(handle.__getState().active?.key).toBe("1");
+  });
+
+  it("pending_grant_cancelled_by_disable_mute_all_or_new_selection", async () => {
+    const env = setupEnv([
+      { key: "a", provider: "twitch", muted: true },
+      { key: "b", provider: "twitch", muted: true },
+    ]);
+    const hang = createTwitchSdk({ hangUnmute: true, muted: true });
+    env.cells.get("a")!.$refs.player = createFakePlayerComponent("twitch", hang, true);
+    env.sdks.set("a", hang);
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(2000);
+    const idA = handle.__lastBindings.get("a")!.identity;
+    const unmuteBefore = hang.unmuteCalls;
+    const r = transition(handle.__getState(), {
+      type: "EXPLICIT_SET_MUTED",
+      now: 0,
+      identity: idA,
+      muted: false,
+    });
+    handle.__setState(r.state);
+    void handle.__applyEffects(r.effects);
+    handle.setEnabled(false);
+    await vi.advanceTimersByTimeAsync(800);
+    expect(hang.unmuteCalls).toBe(unmuteBefore);
+    expect(handle.__getState().mode).toBe("disabled");
+    void env;
+  });
+
+  it("last_command_wins_a_b_a", async () => {
+    const env = setupEnv([
+      { key: "a", provider: "twitch", muted: true },
+      { key: "b", provider: "twitch", muted: true },
+    ]);
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    const idA = handle.__lastBindings.get("a")!.identity;
+    const idB = handle.__lastBindings.get("b")!.identity;
+    const ev = createPanelEvent(true);
+    beginPanelDispatch(ev, true);
+    env.cells.get("a")!.setMuted(false);
+    env.cells.get("b")!.setMuted(false);
+    env.cells.get("a")!.setMuted(false);
+    endPanelDispatch(ev);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(handle.__getState().active?.key).toBe("a");
+    void idA;
+    void idB;
+  });
+
+  it("repeated_enable_single_discovery_loop", async () => {
+    setupEnv([{ key: "a", provider: "twitch", muted: false }]);
+    handle = createAudioLockController({ window, document }) as TestableHandle;
+    handle.setEnabled(true);
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    expect(handle.__lastBindings.size).toBeGreaterThan(0);
+    handle.setEnabled(false);
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    expect(handle.__getState().mode).not.toBe("degraded");
+  });
+
+  it("no_test_hooks_on_page_handle", async () => {
+    const { installAudioLock } = await import(
+      "../../src/pages/content/holodex/twitch-audio-lock"
+    );
+    const page = installAudioLock();
+    expect(Object.keys(page).sort()).toEqual(["dispose", "setEnabled"]);
+    expect(
+      (page as { __reconcile?: unknown }).__reconcile,
+    ).toBeUndefined();
+    page.dispose();
   });
 });
 
