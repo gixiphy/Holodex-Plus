@@ -93,6 +93,8 @@ const result = {
   verdict: 'FAIL',
   errors: [],
   clickPoints: {},
+  toggleLog: [],
+  focusEvents: [],
 };
 
 const classifyPageException = (entry) => {
@@ -232,7 +234,7 @@ try {
   }
 
   await send('Page.addScriptToEvaluateOnNewDocument', {
-    source: `window.__hplusUpdates=[];window.addEventListener('message',e=>{const d=e.data;if(e.origin!=='https://player.twitch.tv'||d?.namespace!=='twitch-embed-player-proxy'||d.eventName!=='UPDATE_STATE')return;if(![...document.querySelectorAll('iframe')].some(f=>f.contentWindow===e.source))return;window.__hplusUpdates.push({t:Date.now(),muted:d.params?.muted});});`,
+    source: `window.__hplusFocusEvents=[];(()=>{let last='';const read=type=>{const e=document.activeElement;const active=e?.tagName==='IFRAME'?e.src:e?.tagName; if(type==='active-change'&&active===last)return;last=active;window.__hplusFocusEvents.push({t:Date.now(),type,active,hasFocus:document.hasFocus()});};for(const type of ['blur','focus','focusin'])window.addEventListener(type,()=>setTimeout(()=>read(type),0));setInterval(()=>read('active-change'),50);})();window.__hplusUpdates=[];window.addEventListener('message',e=>{const d=e.data;if(e.origin!=='https://player.twitch.tv'||d?.namespace!=='twitch-embed-player-proxy'||d.eventName!=='UPDATE_STATE')return;if(![...document.querySelectorAll('iframe')].some(f=>f.contentWindow===e.source))return;window.__hplusUpdates.push({t:Date.now(),muted:d.params?.muted});});`,
   }, S);
 
   const E = async (expr, sessionId = S) => {
@@ -395,7 +397,8 @@ try {
   // Wait up to 1000ms for the click to take effect before sending m, so delayed unmute
   // is not cancelled by a second keyboard toggle.
   const muteChanged = (before, after) => !!(after && before && (after.muted !== before.muted || Math.abs(after.volume - before.volume) > 0.01));
-  const toggleMute = async which => {
+  const toggleMute = async (which, { keepFocus = false } = {}) => {
+    const focusBefore = await E('document.activeElement?.src||document.activeElement?.tagName');
     const before = await readVideo(which);
     const pt = await controlPoint(which, which === 'youtube' ? ['.ytp-mute-button', '.ytdVolumeControlsMuteIconButton'] : ['button[data-a-target="player-mute-unmute-button"]']);
     result.lastToggleDiagnostics={which,before,point:pt,location:await E('location.href',await waitSession(which))};
@@ -430,11 +433,14 @@ try {
       await waitChange(1000);
     }
     if(after?.paused){await clickPlay(which);await waitPlaying(which,5000);after=await readVideo(which);}
-    await blank();
-    return { before, after, method, t: Date.now(), clickAt: clickAtMs, changedAt, keyAt };
+    const focusAfterInput = await E('document.activeElement?.src||document.activeElement?.tagName');
+    if (!keepFocus) await blank();
+    const toggle = { which, before, after, method, t: Date.now(), clickAt: clickAtMs, changedAt, keyAt, focusBefore, focusAfterInput, keepFocus };
+    result.toggleLog.push(toggle);
+    return toggle;
   };
   const sampleOnce = async () => {
-    const [yt, tw, store] = await Promise.all([readVideo('youtube'), readVideo('twitch'), E(`(()=>{const s=document.querySelector('#app').__vue__.$store.state.multiview;return{a:s.layoutContent.a?.muted,b:s.layoutContent.b?.muted,muteOthers:s.muteOthers};})()`)]);
+    const [yt, tw, store] = await Promise.all([readVideo('youtube'), readVideo('twitch'), E(`(()=>{const s=document.querySelector('#app').__vue__.$store.state.multiview;return{a:s.layoutContent.a?.muted,b:s.layoutContent.b?.muted,muteOthers:s.muteOthers,activeElement:document.activeElement?.src||document.activeElement?.tagName};})()`)]);
     return { t: Date.now(), yt, tw, store, ytAudible: audible(yt), twAudible: audible(tw), ytMutedVideo: yt?.muted === true };
   };
   const sampleFor = async ms => {
@@ -445,6 +451,7 @@ try {
   const observed = () => E(`(()=>{let found=null;function walk(v){if(v.$options?.name==='TwitchPlayer'&&v.player)found=v.player;for(const c of v.$children||[])walk(c)}walk(document.querySelector('#app').__vue__.$root);return found?Object.prototype.hasOwnProperty.call(found,'__ob__'):null})()`);
   const refreshCounters = async () => {
     const updates = await E('window.__hplusUpdates||[]');
+    result.focusEvents = await E('window.__hplusFocusEvents||[]');
     result.updateStateMessages = updates.length;
     result.updateStates = updates;
     const sid = iframeSessions.get('twitch');
@@ -539,7 +546,7 @@ try {
   const switchToTwitch = async () => {
     const before = await sampleOnce();
     let toggle = null;
-    if (!before.twAudible) toggle = await toggleMute('twitch');
+    if (!before.twAudible) toggle = await toggleMute('twitch', { keepFocus: true });
     const samples = await sampleFor(3000);const hold=await sampleFor(3000);
     await refreshCounters();
     const updates = result.updateStates || [];
@@ -588,6 +595,8 @@ try {
     if (!opener) throw new Error('media controls toolbar button not found');
     result.clickPoints.panelOpen=opener;await clickAt(opener.x,opener.y);
     await waitFor(`!!document.querySelector('.v-dialog--active .media-controls-list')`,5000,'media dialog');
+    await waitFor(`!!document.querySelector('.v-dialog--active .media-controls-list .v-list-item__title,.v-dialog--active .media-controls-list .v-list-item-title')`,5000,'media rows rendered');
+    await sleep(400); // Let Vuetify's scale transition settle before measuring click coordinates.
     // Per-cell mute is the last icon button on the YouTube row (MediaControls.vue).
     // Match by title text, seeded "YT", or first titled row. Always close on failure.
     let pt = null;
@@ -595,18 +604,18 @@ try {
       pt = await E(`(()=>{
         const list=document.querySelector('.v-dialog--active .media-controls-list');
         if(!list)return {error:'no-list'};
-        const titled=[...list.querySelectorAll('.v-list-item')].filter(r=>r.querySelector('.v-list-item-title,button'));
-        const row=titled.find(r=>/YT|YouTube/i.test(r.textContent||''))||titled.find(r=>r.querySelector('.v-list-item-title'))||titled[1]||titled[0];
-        if(!row)return {error:'no-row',itemCount:list.querySelectorAll('.v-list-item').length};
+        const titled=[...list.querySelectorAll('.v-list-item')].filter(r=>r.querySelector('.v-list-item__title,.v-list-item-title,button'));
+        const row=titled.find(r=>/YT|YouTube/i.test(r.textContent||''))||titled.find(r=>r.querySelector('.v-list-item__title,.v-list-item-title'))||titled[1]||titled[0];
+        if(!row)return {error:'no-row',itemCount:list.querySelectorAll('.v-list-item').length,html:list.outerHTML.slice(0,8000)};
         const buttons=[...row.querySelectorAll('button')];
         const b=buttons[buttons.length-1];
         if(!b)return {error:'no-button',text:(row.textContent||'').slice(0,60)};
         b.scrollIntoView({block:'center',inline:'center'});
         const r=b.getBoundingClientRect();
         const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
-        return {x:r.left+r.width/2,y:r.top+r.height/2,text:(row.querySelector('.v-list-item-title')?.textContent||row.textContent||'').slice(0,40),buttonCount:buttons.length,hitTag:hit?.tagName||null,hitCls:typeof hit?.className==='string'?hit.className.slice(0,80):null};
+        return {x:r.left+r.width/2,y:r.top+r.height/2,text:(row.querySelector('.v-list-item__title,.v-list-item-title')?.textContent||row.textContent||'').slice(0,40),buttonCount:buttons.length,hitIsButton:hit?.closest('button')===b,rowHtml:row.outerHTML.slice(0,6000),hitTag:hit?.tagName||null,hitCls:typeof hit?.className==='string'?hit.className.slice(0,80):null};
       })()`);
-      if (!pt || !Number.isFinite(pt.x) || !Number.isFinite(pt.y)) {
+      if (!pt || !Number.isFinite(pt.x) || !Number.isFinite(pt.y) || !pt.hitIsButton) {
         result.clickPoints.panelYoutube = pt;
         throw new Error('YouTube panel row mute button missing: ' + JSON.stringify(pt).slice(0, 300));
       }
@@ -640,12 +649,17 @@ try {
     }
     const cResult = await runScenario(`c${round}`, async () => {
       const before=await sampleOnce();await refreshCounters();const muteBefore=result.twitchCommandsReceived.mute;
-      let t=Date.now(),close=async()=>{};
-      if(round===2){await toggleMute('youtube');}else{const panel=await panelUnmuteYoutube();t=panel.t;close=panel.close;}
-      const samples=[];let switchedInMs=null;
-      while(Date.now()-t<2000){const s=await sampleOnce();samples.push(s);if(s.ytAudible&&s.tw?.muted===true){switchedInMs=Date.now()-t;break;}await sleep(100);}
+      let t=Date.now(),close=async()=>{},toggle=null;
+      const samples=[];let collecting=true;
+      const collector=(async()=>{while(collecting){samples.push(await sampleOnce());await sleep(50);}})();
+      try {
+        if(round===2){toggle=await toggleMute('youtube',{keepFocus:true});t=toggle.clickAt;}else{const panel=await panelUnmuteYoutube();t=panel.t;close=panel.close;}
+        await sleep(Math.max(0,2000-(Date.now()-t)));
+      } finally {collecting=false;await collector;}
+      const switched=samples.find(s=>s.t>=t&&s.t-t<=2000&&s.ytAudible&&s.tw?.muted===true);
+      const switchedInMs=switched?switched.t-t:null;
       await close();const hold=await sampleFor(5000);await refreshCounters();const muteDelta=result.twitchCommandsReceived.mute-muteBefore;
-      return {round,method:round===2?'youtube-player-mute':'trusted-media-controls-list',precondition:!!b.pass&&before.twAudible&&before.yt?.muted===true,
+      return {round,method:round===2?'youtube-player-mute':'trusted-media-controls-list',precondition:!!b.pass&&before.twAudible&&before.yt?.muted===true,toggle,inputAt:t,
         pass:!!b.pass&&before.twAudible&&switchedInMs!==null&&hold.every(s=>s.ytAudible&&s.tw?.muted===true)&&(mode!=='fallback'||muteDelta>0),switchedInMs,muteDelta,b,samples,hold};
     });
     result.scenarios.c.push(cResult);
@@ -653,6 +667,10 @@ try {
   if(mode==='normal' || isMvp){
     progress('d');
     result.scenarios.d = await runScenario('d', async () => {
+      const inherited=await sampleOnce();
+      if(!inherited.ytAudible){const panel=await panelUnmuteYoutube();await panel.close();await sleep(3000);}
+      const preReload=await sampleOnce();
+      result.preReload={inherited,preReload,focusEvents:await E('window.__hplusFocusEvents||[]')};
       await E('window.__hplusBeforeReviewReload=true');
       iframeSessions.clear();await send('Page.reload',{},S);
       await waitFor(`!window.__hplusBeforeReviewReload && !!document.querySelector('#app')?.__vue__?.$store`,60000,'new document reload store');
@@ -661,7 +679,7 @@ try {
       const y=await waitPlaying('youtube',30000);const tw=await waitPlaying('twitch',30000);
       const samples=await sampleFor(20000);
       await refreshCounters();
-      return {pass:!!y&&!!tw&&samples.every(s=>s.ytAudible&&s.store.a!==true)&&samples.filter(s=>s.twAudible).length<=4&&samples.some(s=>s.store.b===true),samples};
+      return {precondition:preReload.ytAudible&&preReload.tw?.muted===true,preReload,pass:preReload.ytAudible&&preReload.tw?.muted===true&&!!y&&!!tw&&samples.every(s=>s.ytAudible&&s.store.a!==true)&&samples.filter(s=>s.twAudible).length<=4&&samples.some(s=>s.store.b===true),samples};
     });
     progress('f');
     result.scenarios.f = await runScenario('f', async () => {
