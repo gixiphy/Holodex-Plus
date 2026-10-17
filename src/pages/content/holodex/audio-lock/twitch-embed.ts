@@ -6,7 +6,7 @@
  * - SetMuted enum value is `10`
  * - `_handleResponses` accepts `eventName: "UPDATE_STATE"` and merges `params`
  *
- * Verified against fix-5 live scenario g on a real player.twitch.tv iframe.
+ * Not yet verified on a live player.twitch.tv iframe; live scenario g results are recorded in the fix-5 reports.
  */
 
 export const TWITCH_PLAYER_ORIGIN = "https://player.twitch.tv";

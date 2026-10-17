@@ -842,3 +842,24 @@ export function createPanelEvent(trusted: boolean): Event {
   };
   return event as unknown as Event;
 }
+
+/**
+ * Simulate a cross-origin iframe click: activeElement becomes the iframe and
+ * the top-level window receives blur. Prefer iframe.focus(); if jsdom does not
+ * stick focus (or it would fire focusin), spy document.activeElement instead.
+ */
+export function focusIframeAndBlurWindow(iframe: HTMLIFrameElement): void {
+  // Always spy: jsdom focus on iframe is unreliable and may dispatch focusin.
+  vi.spyOn(document, "activeElement", "get").mockReturnValue(iframe);
+  window.dispatchEvent(new Event("blur"));
+}
+
+/**
+ * Simulate clicking a non-focusable blank region: activeElement returns to body
+ * and only window focus fires (no focusin). Avoid element.focus()/blur() because
+ * jsdom may dispatch focusin for those; only spy activeElement + window focus.
+ */
+export function returnFocusToPageWithoutFocusIn(): void {
+  vi.spyOn(document, "activeElement", "get").mockReturnValue(document.body);
+  window.dispatchEvent(new Event("focus"));
+}

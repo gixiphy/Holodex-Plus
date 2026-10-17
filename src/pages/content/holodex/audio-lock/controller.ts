@@ -1201,15 +1201,12 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
     }
   };
 
-  let lastIframe: Element | null = null;
   const onBlur = () => {
     schedule(() => {
       if (!enabled) return;
       if (doc.visibilityState === "hidden") return;
       const active = doc.activeElement;
       if (!active || active.tagName !== "IFRAME") return;
-      if (active === lastIframe) return;
-      lastIframe = active;
       for (const [, binding] of lastBindings) {
         const el = (binding.cell as { $el?: Element }).$el;
         if (el && el.contains(active)) {
@@ -1229,7 +1226,6 @@ export function createAudioLockController(deps: ControllerDeps): AudioLockHandle
   const onFocusIn = () => {
     schedule(() => {
       if (doc.activeElement && doc.activeElement.tagName !== "IFRAME") {
-        lastIframe = null;
         if (state.intent?.source === "iframe") {
           state = { ...state, intent: null };
         }

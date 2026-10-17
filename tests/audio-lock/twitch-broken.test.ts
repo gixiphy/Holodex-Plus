@@ -14,7 +14,9 @@ import {
   createTwitchSdk,
   createYoutubeSdk,
   flushMicrotasks,
+  focusIframeAndBlurWindow,
   postTwitchUpdateState,
+  returnFocusToPageWithoutFocusIn,
   type FakeEnv,
   type FakeSdk,
   type FakeVideoCell,
@@ -675,5 +677,147 @@ describe("twitch broken SDK / no-degrade", () => {
     expect(env.store.state.multiview.layoutContent.a.muted).toBe(false);
     expect(env.sdks.get("b")!.muteCalls).toBeGreaterThanOrEqual(3);
     warn.mockRestore();
+  });
+
+  it("same_iframe_second_click_after_blank_click_switches_to_twitch", async () => {
+    const env = setupBrokenEnv({ healthyTwitch: true, twitchBroken: false, twitchMuted: true });
+    env.sdks.get("b")!.rawMuted = true;
+    let focusInCount = 0;
+    const onFocusIn = () => {
+      focusInCount += 1;
+    };
+    window.addEventListener("focusin", onFocusIn);
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    handle.__setState({
+      ...handle.__getState(),
+      mode: "locked",
+      selection: "selected",
+      active: handle.__lastBindings.get("a")!.identity,
+      epoch: 1,
+      intent: null,
+    });
+    const iframe = env.cells
+      .get("b")!
+      .$el.querySelector("iframe") as HTMLIFrameElement;
+    postTwitchUpdateState(iframe, { muted: true });
+    await env.cells.get("b")!.manualCheckMuted();
+    await flushMicrotasks();
+
+    focusIframeAndBlurWindow(iframe);
+    await vi.advanceTimersByTimeAsync(0);
+    returnFocusToPageWithoutFocusIn();
+    expect(focusInCount).toBe(0);
+    await vi.advanceTimersByTimeAsync(3000);
+
+    const spy = env.postSpies.get("b")!;
+    spy.mockClear();
+    const muteCallsBefore = env.sdks.get("b")!.muteCalls;
+    focusIframeAndBlurWindow(iframe);
+    await vi.advanceTimersByTimeAsync(0);
+    env.sdks.get("b")!.rawMuted = false;
+    postTwitchUpdateState(iframe, { muted: false });
+    await pollSeconds(env, handle, 2);
+
+    expect(handle.__getState().active?.key).toBe("b");
+    expect(env.store.state.multiview.layoutContent.a.muted).toBe(true);
+    expect(env.store.state.multiview.layoutContent.b.muted).toBe(false);
+    expect(spy.mock.calls.filter((c) => c[0]?.params === true).length).toBe(0);
+    expect(env.sdks.get("b")!.muteCalls).toBe(muteCallsBefore);
+    expect(focusInCount).toBe(0);
+    window.removeEventListener("focusin", onFocusIn);
+  });
+
+  it("same_iframe_second_click_broken_twitch_switches", async () => {
+    const env = setupBrokenEnv();
+    let focusInCount = 0;
+    const onFocusIn = () => {
+      focusInCount += 1;
+    };
+    window.addEventListener("focusin", onFocusIn);
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    handle.__setState({
+      ...handle.__getState(),
+      mode: "locked",
+      selection: "selected",
+      active: handle.__lastBindings.get("a")!.identity,
+      epoch: 1,
+      intent: null,
+    });
+    const iframe = env.cells
+      .get("b")!
+      .$el.querySelector("iframe") as HTMLIFrameElement;
+    postTwitchUpdateState(iframe, { muted: true });
+    await env.cells.get("b")!.manualCheckMuted();
+    await flushMicrotasks();
+
+    focusIframeAndBlurWindow(iframe);
+    await vi.advanceTimersByTimeAsync(0);
+    returnFocusToPageWithoutFocusIn();
+    expect(focusInCount).toBe(0);
+    await vi.advanceTimersByTimeAsync(3000);
+
+    const spy = env.postSpies.get("b")!;
+    spy.mockClear();
+    focusIframeAndBlurWindow(iframe);
+    await vi.advanceTimersByTimeAsync(0);
+    postTwitchUpdateState(iframe, { muted: false });
+    await pollSeconds(env, handle, 2);
+
+    expect(handle.__getState().active?.key).toBe("b");
+    expect(env.store.state.multiview.layoutContent.a.muted).toBe(true);
+    expect(env.store.state.multiview.layoutContent.b.muted).toBe(false);
+    expect(spy.mock.calls.filter((c) => c[0]?.params === true).length).toBe(0);
+    expect(focusInCount).toBe(0);
+    window.removeEventListener("focusin", onFocusIn);
+  });
+
+  it("repeated_blur_intent_still_expires_after_2500ms", async () => {
+    const env = setupBrokenEnv({ healthyTwitch: true, twitchBroken: false, twitchMuted: true });
+    env.sdks.get("b")!.rawMuted = true;
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    handle.__setState({
+      ...handle.__getState(),
+      mode: "locked",
+      selection: "selected",
+      active: handle.__lastBindings.get("a")!.identity,
+      epoch: 1,
+      intent: null,
+    });
+    const iframe = env.cells
+      .get("b")!
+      .$el.querySelector("iframe") as HTMLIFrameElement;
+    postTwitchUpdateState(iframe, { muted: true });
+    await env.cells.get("b")!.manualCheckMuted();
+    await flushMicrotasks();
+
+    focusIframeAndBlurWindow(iframe);
+    await vi.advanceTimersByTimeAsync(0);
+    returnFocusToPageWithoutFocusIn();
+    focusIframeAndBlurWindow(iframe);
+    await vi.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(2600);
+
+    const spy = env.postSpies.get("b")!;
+    spy.mockClear();
+    const muteCallsBefore = env.sdks.get("b")!.muteCalls;
+    env.sdks.get("b")!.rawMuted = false;
+    postTwitchUpdateState(iframe, { muted: false });
+    await pollSeconds(env, handle, 2);
+
+    expect(handle.__getState().active?.key).toBe("a");
+    expect(env.store.state.multiview.layoutContent.a.muted).not.toBe(true);
+    const remuteViaPost =
+      spy.mock.calls.filter((c) => c[0]?.params === true).length;
+    const remuteViaSdk = env.sdks.get("b")!.muteCalls - muteCallsBefore;
+    expect(remuteViaPost + remuteViaSdk).toBeGreaterThanOrEqual(1);
   });
 });
