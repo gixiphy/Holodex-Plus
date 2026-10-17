@@ -4,13 +4,15 @@
 
 日期：2026-10-17。擴充功能基準：`gixiphy/twitch-audio-lock`，`eda5b52`。Holodex 參考基準：`HolodexNet/Holodex` dev 的 `8c6d0dacbe93f89cd788963e2a63a095b6d3a715`，Vue `^2.7.8`、Vuex `^3.6.2`。線上版本是否相同必須以執行期契約檢查確認，不能僅憑研究筆記認定。
 
-第 2 版依 `docs/plans/reviews/twitch-audio-lock-verify-1.md` 修訂；該報告基準為 `d33360b`，本輪修訂前 HEAD 為 `6015f17`。文末逐項回應驗收發現；報告本身不修改。
+第 2 版依 `docs/plans/reviews/twitch-audio-lock-verify-1.md` 修訂（報告基準 `d33360b`），修訂提交為 `0ab5af5`。第 3 版依 `DISPATCH-2610171451093196` 增加獨立上游 PR 範圍與打包；文末保留逐項驗收回應，報告本身不修改。
 
 **目標：** Holodex multiview 開啟 Mute Others 時，Twitch 自行取消靜音、初始化或重連不得搶走使用者選定的聲音；使用者仍能明確切換或全部靜音。
 
 **架構：** 保留現有 content script → page script 注入途徑。將純狀態機、Vue 2 相容層、播放器 API、意圖追蹤與設定橋接分開；Vuex 保留 Holodex 的畫面狀態，狀態機保存短期使用者意圖與非同步操作世代。
 
-**技術：** 既有 Vite 7.1.11、TypeScript、`webextension-polyfill`、原生 DOM；options 目前是 TypeScript 動態產生表單，並非 React 元件。自動測試採 Vitest 3.2.6 與 jsdom 26.1.0，另用 Vue 2.7.16 作為僅限測試的相容性 fixture。
+**技術：** 既有 Vite 7.1.11、TypeScript、`webextension-polyfill`、原生 DOM；options 目前是 TypeScript 動態產生表單，並非 React 元件。第一個 PR 建議只加 Vitest 3.2.6 與 jsdom 26.1.0 作 feature 測試；使用局部假 Vue/store/player fixture，不加 Vue runtime、coverage、瀏覽器自動化或通用測試基礎建設。Fi 可在題 8 改選不新增測試框架的方案。
+
+**交付定位：** 本 worktree 的 `gixiphy/twitch-audio-lock` 是含原型、計畫、prompts、reviews 的工作分支，不能直接送上游。最終產品從 `upstream/dev` 的 `709e96319bc93965509f83e5f2a897b5d2dc37c7` 整理成乾淨 `fi/twitch-audio-lock`，方向為 `gixiphy/Holodex-Plus:fi/twitch-audio-lock` → `HolodexNet/Holodex-Plus:dev`。這是未來交付規格，**本輪禁止建立／切換分支、push、開 PR 或 merge**；具體白名單與未來打包門檻見「上游 PR 打包」。
 
 ## 背景與目標
 
@@ -36,12 +38,43 @@ Fi 已在 M1 Vivaldi 用 unpacked 原型確認功能有效。約 6800 次 Securi
 
 ### 全域限制
 
-- 禁止 push、開 PR、merge 到 remote、公證與 sudo。不得自動發佈或安裝到瀏覽器。
+- 禁止 push、開 PR、merge、公證與 sudo；本輪不建立或切換任何分支。不得自動發佈或安裝到瀏覽器。「上游 PR 打包」只記錄後續交付流程，不授權現在執行這些動作。
 - 本輪修訂只修改並提交 `docs/plans/twitch-audio-lock.md`；不修改 `src/`、`.ref/`、prompt、審查報告、依賴或 lockfile，不提交建置產物。下文產品改動均屬下一輪實作。
 - 所有產品、文件、工具快取與測試輸出只放目前 worktree；不修改 iCloud 主 checkout、家目錄或 `.ref/`，不刪除 worktree 外的內容。
 - 這個 worktree 的 `.git` 指到 `~/Documents/Code/私人專案/Holodex-Plus/.git/worktrees/twitch-audio-lock`。協調者已於 `DISPATCH-2610171431178858` 明確允許 commit 必要的 Git metadata（含主 checkout `.git` 的物件與 refs），視為本 worktree 範圍；可以在目前分支 stage/commit，不得切分支或 push。此例外不允許修改主 checkout 的產品檔案或其他家目錄內容。Git 唯讀檢查設定 `GIT_OPTIONAL_LOCKS=0`。
 - 目前 worktree 不在 `~/Documents`；快取直接放此 worktree 的 `.cache/`、`node_modules/`、`dist_chrome/`、`dist_firefox/`。不建立指向 `~/Library/Caches` 或 iCloud 的 symlink，不使用 `.nosync`。如後續換到 Documents 下，先解決寫入限制，不能照搬這份命令去寫家目錄。
 - 保留 MIT 授權；不複製 Holodex 元件實作進本 repo，不記錄帳號、token、完整 Vue store 或 player 物件。
+
+### 第一個 PR 的範圍
+
+第一個 PR 僅解決「Mute Others 下非使用者選擇的 Twitch 取消靜音搶聲」，並帶上使它可安全使用的選項、相容性降級與必要回歸測試。這是一個功能 PR，三波／五任務是同一 PR 的實作順序，不拆出必須先合併的 framework/helper PR。
+
+- 包含：三態 muted 初始化／新增格／preset、輪詢與 manualRefresh 與首播攔截、可靠面板選聲、短期一次性 iframe 意圖、late-bind API 錯誤邊界、清理與熱切換；不犧牲第 2 版修正的兩個 high 項目來縮小行數。
+- 包含：`twitchAudioLock` schema/description 的小幅新增、既有 flags 旁的單一安裝入口、feature 專用測試/config/scripts、必要 lockfile 及缺失 lint parser/plugin 的最小補齊。零新 runtime dependency、零新權限、零通用 helper。
+- 保留目前細分模組，但所有新碼／測試只屬 audio lock，不為 auto-multiview-layout 抽共用 root finder、storage bus、Vue adapter 或事件工具。每個新模組都有本 PR 內的直接使用者。
+
+### 之後再說的範圍
+
+真實 Vue 2 runtime fixture、coverage/benchmark、Playwright 或真瀏覽器自動化平台、全站 lint 修復／ESLint flat config／Prettier 導入、Node/CI 升級、Vue 3/React adapter、跨功能 Vue/store/helper 抽象、狀態 UI/overlay、舊設定遷移，以及站方 SecurityError 修復均不進第一個 PR。第一個 PR 仍須完成真瀏覽器人工清單；未完成不能用「日後會補 E2E」代替驗收。
+
+auto-multiview-layout 是另一個獨立 PR，不屬於上述後續相依工作。兩個 PR 各自從同一指定上游基準成立，不能等待或借用對方的產品 commit、測試 setup、新模組或 helper；最終新增 commit 集合不相交（共用既有 upstream 祖先是正常的）。
+
+### 上游程式風格與工具基準
+
+以下已對本機 `upstream/dev@709e963` 與目前未改動的設定逐項查閱；Cursor 實作前重讀它們，不從另一個任務或個人偏好搬設定：
+
+| 既有檔案／現況 | 本 PR 規則 |
+| --- | --- |
+| `.eslintrc` | ESLint 8 legacy config，extends eslint/recommended、React recommended、TypeScript recommended；parser/plugin 指向 @typescript-eslint，no-explicit-any 為 warn。沿用此設定，不遷移 flat config、不降低 rules、不加整檔 eslint-disable。頁面邊界用 unknown＋窄介面／type guard，避免沿用原型整檔 any 禁用。 |
+| `.vscode/settings.json` | insertSpaces=true、tabSize=2，TS/JS/JSON editor formatter 指向 Prettier extension。新增 TypeScript 用 2 spaces、雙引號、分號，遵循鄰近 src/utils/options.ts 與 holodex-inject.ts；不批次重排既有格式。 |
+| 沒有 `.prettierrc*`、prettier.config、Prettier CLI dependency/script | eslint-config-prettier 雖已安裝，.eslintrc 沒有 extends 它，不能宣稱 repo 強制 Prettier。此 PR 不加 Prettier，也不跑 npx prettier --write 全專案；以鄰近檔案習慣與 diff --check 檢查新增行。 |
+| `tsconfig.json` | strict、noEmit、ESM、DOM libs，@utils/@assets/@pages 等既有 alias。產品 tsconfig 不改；測試專用 tsconfig 延伸它。新型別／constants 用明確命名與具體型別，不把 Window 擴充成全域 any。 |
+| `src/pages/content/holodex/`、`src/utils/options.ts` | 區域模組用相對 import，跨既有 utility 用 @utils；page-context 新模組只相對 import 純 TS，防止 barrel 拉入 extension API。檔名採 audio-lock 既有 kebab-case 系列，函式 camelCase、型別 PascalCase。不新增泛用 utils export。 |
+| `src/pages/options/index.ts` | schema-driven 原生 DOM 表單，新增 schema/description 就自動有開關。第一個 PR 不改 options UI、HTML/CSS 或改成 React。 |
+| `src/pages/content/holodex/holodex-inject.ts` | 既有 ARCHIVE_CHAT_OVERRIDE、HOLODEX_PLUS_INSTALLED、HOLODEX_PLUS_INSTALLED_V3 flags 保留值與時序；只加 audio-lock 相對 import／install 呼叫。不得順便改其他旗標或新增全站 audio flag。 |
+| `package.json`、`.nvmrc`、`.github/workflows/ci.yml` | 無 lint/test script；.nvmrc 是 18.17.1，手動 CI 用 Node 18，但既有 Vite 7 需要較新 Node。這是 baseline 工具鏈落差，第一 PR 不改 CI/.nvmrc；用 Node 22.12+ 做本機驗證，PR 草稿如實註記，不能宣稱舊 CI 已通過。 |
+
+缺失的 `@typescript-eslint/parser`／`@typescript-eslint/eslint-plugin` 是現有 config 的依賴缺口，不是導入新 lint 規則。建議第一個 PR 補兩者相同的 v8 相容版本（`^8.0.0`，實作安裝時確認兩者解析相同版本且 peer 同時接受 ESLint 8.57、TypeScript 5.6、Node 22，精確結果留 yarn.lock）。官方仍列出 [legacy config](https://typescript-eslint.io/users/configs/) 與 [dependency ranges](https://typescript-eslint.io/users/dependency-versions/)；不要因文件預設展示新版 flat config 就升級本 repo 的 ESLint。若上游拒絕額外 lint 套件，另用不改產品依賴的外部驗證環境處理並記錄；不能跳過 lint 或假稱通過。
 
 ## 設計
 
@@ -230,28 +263,36 @@ extension 設定更新應在同頁約 1 秒內套用（前景、已收到 storag
 | 修改 `src/pages/content/holodex/holodex-inject.ts` | 保留既有 flags 與 `installAudioLock()` 入口，不引入 extension API。 |
 | 修改 `src/utils/options.ts` | 新 schema key 與文案；不為這個功能改掉其他選項的 storage 行為。 |
 | 新增 `tests/audio-lock/state.test.ts` | 純狀態機與時序表。 |
-| 新增 `tests/audio-lock/adapter.test.ts` | jsdom／Vue 2 fixture、undefined 合法、契約失配、wrapper restore、firstPlay／@mute／deferred store。 |
+| 新增 `tests/audio-lock/adapter.test.ts` | jsdom／最小假 Vue/store fixture、undefined 合法、契約失配、wrapper restore、firstPlay／@mute／deferred store；第一 PR 不加 Vue runtime。 |
 | 新增 `tests/audio-lock/players.test.ts` | SDK fake、throwing getter、Promise timeout、late-bind；assert Twitch global/constructor 完全未改。 |
 | 新增 `tests/audio-lock/controller.test.ts` | 整合 fake store/player/clock；poll、非同步世代、清理、intent。 |
 | 新增 `tests/audio-lock/settings.test.ts` | mock webextension-polyfill、bridge race/message validation、既有 options 表單。 |
 | 新增 `tests/audio-lock/fixtures.ts` | 最小 store/cell/player 工廠，忠實模擬 trailing debounce 與 READY/manualRefresh；不讀／複製 `.ref` 原始碼。 |
-| 新增 `vitest.config.ts`、`tsconfig.tests.json`、修改 `package.json` | 獨立 Vitest config（含實際 options import 的 aliases）、產品與測試 typecheck、scripts、devDependency；不載入 CRXJS build plugins。 |
+| 新增 `vitest.audio-lock.config.ts`、`tsconfig.audio-lock.tests.json`、修改 `package.json` | audio-lock 專用 Vitest config（含實際 options aliases）、typecheck／lint／test scripts；只加兩個測試 devDependency 與補齊兩個既有 lint devDependency；不載入 CRXJS plugins。 |
 | 實作回合更新 `yarn.lock`；`.gitignore` 不改 | 現有 `.cache` 原名規則（`:136`）已涵蓋 `.cache/vitest` 等工具輸出；不產生 `.vitest`，無須再加規則。本規劃回合不改 lockfile。 |
 
 `src/pages/options/index.ts` 原則上只由測試覆蓋，不必為一個新選項改 UI；若目前表單的錯誤處理妨礙此功能，限制修正範圍並在實作記錄解釋。`src/global.d.ts` 不必加大量 any global，將 page handle 型別留在入口的局部 Window 型別。
 
 ## 步驟
 
+### 任務 0：鎖定第一個 PR 與 commit 邊界
+
+- [ ] 實作前閱讀「第一個 PR 的範圍」「上游程式風格」「上游 PR 打包」及 Fi 題 8；沒有另選時照最小 Vitest 方案。核對工作分支仍是 gixiphy/twitch-audio-lock、upstream/dev 本機基準為完整 709e963 hash；此任務不建立／切換分支。
+- [ ] 從 upstream/dev 的 options／contentScript／flags 邊界比對，不把另一個 auto-multiview-layout 分支的 helpers、commits 或 scripts 搬進來。所有新增檔案限定 audio-lock 命名空間；不要改 @utils barrel。
+- [ ] `twitch-audio-lock.ts` 依本計畫**重寫取代** eda5b52 的原型，不疊上其全域 mixin／constructor trap／localStorage patch。保留的入口檔名與 install 呼叫不是保留原型架構；正式 PR 不帶 eda5b52 作祖先 commit。
+- [ ] 後續每個產品 commit 只 stage 本功能產品／測試／必要工具配套白名單，文件修改另作 docs commit；記錄有序產品 SHA，禁止 git add -A 或把工作分支所有 commits 直接 rebase/merge 到 PR 分支。打包時需補上原型路徑前提，方式見打包段，不能只 cherry-pick 依賴 eda 的後續 delta。
+
 ### 波次一：狀態規格與測試基礎（任務 1）
 
 **交付：** 能獨立執行且無 DOM／SDK 的狀態機；尚不接到頁面。
 
 - [ ] 確認基準 diff、Node、Yarn 與輸出位置；不覆蓋原有未提交檔案。後續安裝／build 只用本 worktree 的 cache，不將新檔指向 `.ref`。
-- [ ] 在 `package.json` 加 devDependency `vitest: "3.2.6"`、`jsdom: "26.1.0"`、`vue: "2.7.16"`（僅 fixture）；新增 `test: "vitest run --config vitest.config.ts"`、`test:watch: "vitest --config vitest.config.ts"`、`typecheck: "tsc --noEmit && tsc --noEmit -p tsconfig.tests.json"`。不加 coverage、React Testing Library 或 Vue Test Utils，現階段不需要。
-- [ ] 新增 `tsconfig.tests.json`，`extends: './tsconfig.json'`、`include: ['tests/**/*.ts', 'vitest.config.ts']`，覆寫 `compilerOptions.moduleResolution: 'bundler'`，保留 esnext module、noEmit、strict、paths 與 types。tests 都顯式 import Vitest API，不靠全域型別。這個 config 加上原 tsc 指令，涵蓋產品、tests、fixture 與 Vitest config，不修改原產品 tsconfig。
-- [ ] `vitest.config.ts` 用 `defineConfig` from `vitest/config`，`test.include: ['tests/audio-lock/**/*.test.ts']`、`environment: 'jsdom'`、`environmentOptions.jsdom.url: 'https://holodex.net/multiview'`、`css: false`、`testTimeout: 5000`、`hookTimeout: 5000`、`teardownTimeout: 5000`、`restoreMocks: true`；cacheDir 指 worktree `.cache/vitest`。不載入 CRXJS config。
+- [ ] 在 `package.json` 加測試 devDependency `vitest: "3.2.6"`、`jsdom: "26.1.0"`，不加 vue；補既有 config 缺失的 @typescript-eslint/parser 與 eslint-plugin 相同相容 v8，確認 peer ranges 並保留 lockfile。新增 `test:audio-lock` = `vitest run --config vitest.audio-lock.config.ts`、`test:audio-lock:watch` = `vitest --config vitest.audio-lock.config.ts`、`typecheck:audio-lock` = `tsc --noEmit && tsc --noEmit -p tsconfig.audio-lock.tests.json`。不新增通用 test/typecheck script，避免與另一 PR 搶命名。
+- [ ] 新增 `lint:audio-lock` script：`eslint --max-warnings 0 --ext .ts src/pages/content/holodex/audio-lock src/pages/content/holodex/twitch-audio-lock.ts src/pages/content/holodex/audio-lock-protocol.ts src/pages/content/holodex/audio-lock-settings.ts tests/audio-lock vitest.audio-lock.config.ts`。只驗證新增功能碼與測試的零警告；既有整合檔的 lint 另依打包段與 709e963 比 baseline，不把 baseline 錯誤藏起來。
+- [ ] 新增 `tsconfig.audio-lock.tests.json`，`extends: './tsconfig.json'`、`include: ['tests/audio-lock/**/*.ts', 'vitest.audio-lock.config.ts']`，覆寫 `compilerOptions.moduleResolution: 'bundler'`，保留 esnext module、noEmit、strict、paths 與 types。tests 都顯式 import Vitest API，不靠全域型別。這個 config 加上原 tsc 指令涵蓋本功能產品／tests／fixture／config，不引用另一 PR 的測試 setup，也不修改原產品 tsconfig。
+- [ ] `vitest.audio-lock.config.ts` 用 `defineConfig` from `vitest/config`，`test.include: ['tests/audio-lock/**/*.test.ts']`、`environment: 'jsdom'`、`environmentOptions.jsdom.url: 'https://holodex.net/multiview'`、`css: false`、`testTimeout: 5000`、`hookTimeout: 5000`、`teardownTimeout: 5000`、`restoreMocks: true`；cacheDir 指 worktree `.cache/vitest`。不載入 CRXJS config。
 - [ ] 同一個 Vitest config 必須加 `resolve.alias`，用 `fileURLToPath(new URL(relativePath, import.meta.url))` 建絕對路徑：`@utils` → `./src/utils/index.ts`、`@assets` → `./src/assets`、`@src` → `./src`、`@pages` → `./src/pages`、`@locales` → `./src/locales`。即使測試本身用相對 import，實際 options entry 的 `@utils` 與 `@assets/styles/tailwind.css` 仍需解析；CSS 內容在測試中略過，alias 解析不可略過。沿用既有 aliases，不新增 dependency。
-- [ ] 先寫 state 測試，至少用表格 assert：disabled 無 effects；locked A 下未授權 B false 只產生 MUTE_PLAYER(B)；有 token B false 只產生一次 CALL_ORIGINAL_SET_MUTED(B,false)；token 在 2500ms 後無效；全部靜音 active=null、selection=silence；過期 epoch 不產生 effects；四格全 U 為 bootstrap、第一個 NATIVE_FIRST_PLAY 才產生一次 CALL_ORIGINAL_MUTE_OTHERS，第二個在 debounce 前即被擋。執行 `yarn test tests/audio-lock/state.test.ts` 確認尚未實作時 FAIL。
+- [ ] 先寫 state 測試，至少用表格 assert：disabled 無 effects；locked A 下未授權 B false 只產生 MUTE_PLAYER(B)；有 token B false 只產生一次 CALL_ORIGINAL_SET_MUTED(B,false)；token 在 2500ms 後無效；全部靜音 active=null、selection=silence；過期 epoch 不產生 effects；四格全 U 為 bootstrap、第一個 NATIVE_FIRST_PLAY 才產生一次 CALL_ORIGINAL_MUTE_OTHERS，第二個在 debounce 前即被擋。執行 `yarn test:audio-lock tests/audio-lock/state.test.ts` 確認尚未實作時 FAIL。
 - [ ] 建立 `types.ts`、`state.ts`，完成上列介面與完整轉移表，再跑同一命令預期 PASS。用明確常數表達 2500／750／1500／1000／500／5000ms，不散落魔術數。
 - [ ] review 決策與型別是否一致，將此獨立任務留在本機功能 commit（僅在當輪已允許 Git 中繼資料寫入時）；不 push。
 
@@ -263,8 +304,8 @@ extension 設定更新應在同頁約 1 秒內套用（前景、已收到 storag
 
 - [ ] 先在 `adapter.test.ts` 寫 root 名稱改掉仍成功、muted 欄位省略／undefined 仍成功、null／錯型才降級、假 VideoCell 名稱但形狀錯誤不動作、無 root 在 120 秒停止、cyclic children 有界、readonly method 安裝回滾、未知 provider 整組降級等失敗測試。新 cell 的 pending-port 不卸載原 active wrappers。
 - [ ] 在 `players.test.ts` 寫 SDK public methods 假物件；`_embedWindow` 設成一讀就 throw 的 getter，assert 未被讀過；ready 前回 not-ready，不取 SDK 初始 false；`getMuted` throw／reject／750ms 不 resolve 時 read 回 unavailable，沒有 unhandled rejection。保存 `window.Twitch`、Player、static、prototype 的 identity／descriptor，assert 安裝到 dispose 全程都未改動，也沒有新增 getter/setter trap。
-- [ ] 執行 `yarn test tests/audio-lock/adapter.test.ts tests/audio-lock/players.test.ts` 確認 FAIL，再實作兩個模組。所有存取限白名單欄位，不用全域 mixin 或 generic 深搜。
-- [ ] 用實際 Vue 2.7.16 `Vue.extend`／Vuex-like fake store 建最小 fixture，元件 name 隨機、初始 content 不宣告 muted；驗證 `Vue.set` 式新增欄位後三態 snapshot 會更新。player 為帶危險 getter 的假物件，測試不主動深度觀察此危險物件，assert 是我們的 late-bind/read 沒有觸碰它，不能把 fixture 自己觸發的 getter 算成擴充功能行為；ports 不被加進 reactive state，也不把 `__ob__` 當 raw 解包。
+- [ ] 執行 `yarn test:audio-lock tests/audio-lock/adapter.test.ts tests/audio-lock/players.test.ts` 確認 FAIL，再實作兩個模組。所有存取限白名單欄位，不用全域 mixin 或 generic 深搜。
+- [ ] 以本 feature 內的假 Vue instance／store 建 fixture：元件 name 隨機、$children/$refs/ready hooks 及原 mapped method 呼叫存在，初始 content 不宣告 muted；模擬 setLayoutContentWithKey 新增 key 後通知 watch，驗證三態 snapshot 會更新。player 帶危險 getter，assert late-bind/read 未觸碰它、不把 ports 塞入假 reactive state。這是契約測試，不能宣稱驗證真 Vue observer；真 Vue 相容性依人工頁面測試，Vue runtime fixture 延後。
 - [ ] 重跑兩組測試及 state 測試預期全 PASS；fake timers 有界 advance，不可對持續 scheduler 用無限制 `runAllTimers()`。還原後 cell 方法 strictEqual 原值，SDK globals 始終 strictEqual 原值。
 
 #### 任務 3：意圖、controller、初始化與四條攔截路徑
@@ -279,7 +320,7 @@ extension 設定更新應在同頁約 1 秒內套用（前景、已收到 storag
 - [ ] 明確測試原 `setMuted(false)` 在 muted=undefined／false 時提前返回，effect executor 仍補原 mapped muteOthers **恰一次**；在 muted=true 時原方法已呼叫，不能補第二次。Bootstrap 所呼叫的 mapped method 也只能一次。all-mute 後新增 U／first play 不能重新啟動 bootstrap。
 - [ ] 明確測試 store trailing timer 尚未執行時 B 已是 active、A→B→A 最後命令獲勝、舊 read 晚回不改 active、500ms 未收斂降級、iframe hover 30 秒仍無授權、焦點 token 不重複使用、現成 iframe focus 不每秒續期。
 - [ ] 測試開關關閉、換路由、BFCache、重排、同 key 換片、player 重建、root 替換；assert dispose 後已配對 ports/listener/observer/timer 回到初始數量，pending Promise 返回不再寫 player/store。
-- [ ] `yarn test` 預期全部 PASS；以 fake count 驗證每格一個 in-flight、每 1000ms 寫入上限、1500ms settle 與 3 次失敗降級，debug 預設不印每次修正。
+- [ ] `yarn test:audio-lock` 預期全部 PASS；以 fake count 驗證每格一個 in-flight、每 1000ms 寫入上限、1500ms settle 與 3 次失敗降級，debug 預設不印每次修正。
 
 ### 波次三：設定、雙瀏覽器建置與實測（任務 4、5）
 
@@ -289,12 +330,12 @@ extension 設定更新應在同頁約 1 秒內套用（前景、已收到 storag
 
 - [ ] `settings.test.ts` 先 mock `webextension-polyfill` 的 storage.local／onChanged 與 runtime.getURL，不 mock 整個 `@utils`。以 `vi.resetModules()` 後動態 import 真正 `src/pages/options/index.ts`；觸發 DOMContentLoaded，等待 schema 表單生成，assert 所有原有選項與新 checkbox 都存在且可 set(false)。這個 smoke test 需實際解析 `@utils`／`@assets/styles/tailwind.css`，避免只測假表單漏掉 alias 錯誤；清理本測試登記的 DOMContentLoaded listener。
 - [ ] 同檔測試預設 true、false 保存、reload、刪 key 回預設、錯型 disabled；協定測 ready 早於／晚於 storage read、page listener 早於單次 ready、storage change 早於 get resolve/reject、storage rejection、5000ms 讀取逾時、BFCache pageshow 新讀取。foreign source/origin、錯型 enabled、未知 channel/type、合成 storage-write 訊息均被忽略；不寫不存在的 revision／重試測試。
-- [ ] 執行 `yarn test tests/audio-lock/settings.test.ts` 確認 FAIL，再改 schema、新增 protocol/settings bridge，接 `contentScript.ts`、page 入口。其他既有 flags 不受設定等待影響。
+- [ ] 執行 `yarn test:audio-lock tests/audio-lock/settings.test.ts` 確認 FAIL，再改 schema、新增 protocol/settings bridge，接 `contentScript.ts`、page 入口。其他既有 flags 不受設定等待影響。
 - [ ] 保護開啟／關閉連續 10 次，確認無重複 listener／wrapper／port；Mute Others 關閉期間即使 extension 開啟也完全原生；跑全測試 PASS。
 
 #### 任務 5：建置與人工驗證
 
-- [ ] 依下一節指令跑 typecheck、全部 tests、Chrome／Firefox build。任何 pre-existing 失敗須記錄命令、錯誤與 baseline；不能以「Vite 成功」替代 TypeScript 或真實播放器驗證。
+- [ ] 依下一節指令跑 scoped lint、既有整合檔 baseline lint、typecheck、全部 audio-lock tests、Chrome／Firefox build。任何 pre-existing 失敗須記錄命令、錯誤與 baseline；不能以「Vite 成功」替代 TypeScript 或真實播放器驗證。
 - [ ] 檢查輸出 manifest、options entry、page script/chunks、web_accessible_resources、沒有新增權限；檢查 page bundle 沒有 storage/polyfill 呼叫，兩瀏覽器輸出內無測試 fixture、`.ref` 或 Vue 測試 runtime。
 - [ ] 由 Fi 或有瀏覽器測試授權的人執行下節人工清單；填日期／瀏覽器與版本／結果／console reason／觀察時間。記錄實際廣告與重連測試；未遇到廣告寫未覆蓋，不填 PASS。
 - [ ] 全部必要驗收通過才稱正式版完成；只有模擬測試及 build 時稱「可交付實測」，不可宣稱已驗證真實 Twitch。本機小 commit 依序保留，不 push、不 PR、不 merge、不公證。
@@ -311,9 +352,9 @@ extension 設定更新應在同頁約 1 秒內套用（前景、已收到 storag
 | controller | first-play 與 bootstrap 例外、self-unmute、manualRefresh；URL 四 U、locked 新增 U、preset 取代／合併／silence；1000ms fallback 不選 paused；兩 provider 的首播政策；setMuted 提前返回仍只呼叫 mapped mutation 一次；capture → flush microtasks → target → window bubble 成功，stopPropagation／timer／untrusted nested click 清理；debounce、stale API、settle、冷卻與卸載。 |
 | settings | 真實 options entry 經 aliases 及 CSS import 可載入、原有及新選項都呈現；沿用 Options local schema；預設／持久／熱更新；單次 ready 與讀取期間 change/reject race；5000ms timeout；設定停用時 pending read 零副作用；page 訊息不能修改 storage。 |
 
-所有單元測試與 hook 各 5000ms，teardown 5000ms；timer 情境用 fake clock 推進，read timeout 750ms，root discovery 120 秒用 fake time，不實際等 2 分鐘。每個 test finally/afterEach dispose、清 timers、回 real timers、清 DOM。測試與 typecheck process 各有 **120 秒 wall-clock 上限**，避免卡住 runner／fake clock；build 各 **180 秒**，install **300 秒**。逾時要非零 exit，不能把 SIGTERM 當通過。
+所有單元測試與 hook 各 5000ms，teardown 5000ms；timer 情境用 fake clock 推進，read timeout 750ms，root discovery 120 秒用 fake time，不實際等 2 分鐘。每個 test finally/afterEach dispose、清 timers、回 real timers、清 DOM。測試、typecheck 與 lint process 各有 **120 秒 wall-clock 上限**，避免卡住 runner／fake clock；build 各 **180 秒**，install **300 秒**。逾時要非零 exit，不能把 SIGTERM 當通過。
 
-整合 fixture 必須模擬真正的 trailing 0ms muteOthers；若 fake store 同步改 state，會漏掉這次研究發現的競態。Vue 2 fixture 只驗證 adapter 互動，不能模擬 Twitch iframe 的廣告、瀏覽器 cross-origin WindowProxy 或 isTrusted。
+整合 fixture 必須模擬真正的 trailing 0ms muteOthers；若 fake store 同步改 state，會漏掉這次研究發現的競態。第一 PR 的假 Vue 契約 fixture 不等於真 Vue observer，也不能模擬 Twitch 廣告、cross-origin WindowProxy 或 isTrusted；真瀏覽器人工清單仍是必要門檻。
 
 ### 驗證指令與預期產出
 
@@ -331,21 +372,23 @@ mkdir -p "$TMPDIR"
 
 # 初次實作更新 yarn.lock；之後重現使用 yarn install --frozen-lockfile。
 yarn install --non-interactive --cache-folder "$YARN_CACHE_FOLDER"
-yarn typecheck
-yarn test
+yarn lint:audio-lock
+yarn typecheck:audio-lock
+yarn test:audio-lock
 yarn build:chrome
 yarn build:firefox
 ```
 
-執行前將每個 install/test/build 命令交給執行環境的 wall-clock timeout；macOS 沒有預裝 GNU timeout 時，用 Python 標準函式庫 `subprocess.Popen(..., start_new_session=True)`、`communicate(timeout=秒數)`，逾時用 `os.killpg` 結束這次建立的 process group 並 exit 124，不留 Vite/Yarn 子行程。不為 timeout 安裝系統套件，也不以縮短 testTimeout 取代整個 process 的上限。若需要把此 wrapper 保存成檔案，限本 worktree 的 `.cache/`，不得提交。
+執行前將每個 install/lint/typecheck/test/build 命令交給執行環境的 wall-clock timeout；macOS 沒有預裝 GNU timeout 時，用 Python 標準函式庫 `subprocess.Popen(..., start_new_session=True)`、`communicate(timeout=秒數)`，逾時用 `os.killpg` 結束這次建立的 process group 並 exit 124，不留 Vite/Yarn 子行程。不為 timeout 安裝系統套件，也不以縮短 testTimeout 取代整個 process 的上限。若需要把此 wrapper 保存成檔案，限本 worktree 的 `.cache/`，不得提交。
 
-- `yarn typecheck`：exit 0，依序跑 `tsc --noEmit` 與 `tsc --noEmit -p tsconfig.tests.json`，兩者都要過。可用 `yarn exec tsc --noEmit -p tsconfig.tests.json --listFilesOnly` 核對清單含 tests、fixtures 及 vitest.config.ts；不能把 Vitest/Vite transpile 當作完整 TS 檢查。
-- `yarn test`：exit 0、全部預定測試 PASS、沒有 unhandled rejection、teardown 殘留或無限制重試。
+- `yarn lint:audio-lock`：exit 0、限定功能檔案零 error／warning；另跑打包段的三個既有整合檔 lint 並比 baseline，不能把 scoped pass 說成全倉 pass。
+- `yarn typecheck:audio-lock`：exit 0，依序跑 `tsc --noEmit` 與 `tsc --noEmit -p tsconfig.audio-lock.tests.json`，兩者都要過。可用 `yarn exec tsc --noEmit -p tsconfig.audio-lock.tests.json --listFilesOnly` 核對清單含 tests、fixtures 及 vitest.audio-lock.config.ts；不能把 Vitest/Vite transpile 當作完整 TS 檢查。
+- `yarn test:audio-lock`：exit 0、全部預定測試 PASS、沒有 unhandled rejection、teardown 殘留或無限制重試。
 - `yarn build:chrome`：exit 0；產生 `dist_chrome/manifest.json`、`dist_chrome/src/pages/options/index.html` 與帶 hash 的 assets/page 注入 script；Chrome background 為 service_worker。資源名稱以生成 manifest／HTML 引用為準，不寫死 hash。
 - `yarn build:firefox`：exit 0；產生 `dist_firefox/manifest.json`、`dist_firefox/src/pages/options/index.html` 與其引用 chunks；background scripts 由現有 Firefox config／CRXJS 生成。
 - 兩個輸出的 manifest 權限集合與基準相同；引用檔案全部存在。build 會清理各自 outDir，執行前確認 outDir 不是 worktree 外的 symlink，裡面沒有使用者需保留資料。
-- 既有 ESLint 設定的研究記錄提到缺少 `@typescript-eslint` 套件，package 也無 lint script；若未修復，不列為已通過。不要把全面 ESLint 修復擴進這個計畫。
-- 正式實作可依當輪授權提交 `package.json`／`yarn.lock` 等必要產品改動；本輪第 2 版修訂只 stage `docs/plans/twitch-audio-lock.md`。prompt 與審查報告保持原樣，不提交其他檔案或產物。
+- 既有 lint 依賴缺口只做上述最小補齊；不修整個 repo。對既有旗標的 @ts-ignore 等診斷先實跑比較 baseline，不預填錯誤次數，也不為 lint 改寫無關 flags。
+- 正式實作可依當輪授權提交 `package.json`／`yarn.lock` 等必要產品改動；本輪第 3 版修訂只 stage `docs/plans/twitch-audio-lock.md`。prompt 與審查報告保持原樣，不提交其他檔案或產物。
 
 ### 人工測試清單（Chrome／M1 Vivaldi／Firefox）
 
@@ -368,6 +411,104 @@ yarn build:firefox
 | 不相容頁 | 測試 fixture 移除必要方法或 store 欄位、沒有 Vue root、元件改名 | 改名但契約相同繼續運作；契約缺失只 warn 一次且不改 store/player，其他 Holodex 功能正常。不要在正式網站手動破壞元件。 |
 | SecurityError 對照 | 同一瀏覽器/profile/layout，停用及啟用各觀察 3 分鐘；保留來源 stack 並依腳本來源分類 | 無 AudioLock 自己的 uncaught／unhandled rejection；沒有我們每次 poll 多一次危險 getter 的 stack。站方錯誤波動列 warning；無可比較基準就記未判定，不能捏造降低百分比。 |
 
+## 上游 PR 打包
+
+### 目標、工作分支與原型的關係
+
+| 項目 | 確定值 |
+| --- | --- |
+| fork／head remote | `origin` = `https://github.com/gixiphy/Holodex-Plus.git`；最終 head `gixiphy:fi/twitch-audio-lock` |
+| upstream／base remote | `upstream` = `https://github.com/HolodexNet/Holodex-Plus`；PR base `HolodexNet/Holodex-Plus:dev` |
+| 乾淨產品起點 | `upstream/dev` 指定基準 `709e96319bc93965509f83e5f2a897b5d2dc37c7`（本輪只讀本機 ref 確認，沒有 fetch 或更動 remote） |
+| 目前工作分支 | `gixiphy/twitch-audio-lock`；含原型、docs/plans、reviews、prompts，不能直接當 PR head |
+| 同名舊產品分支 | 本機 `fi/twitch-audio-lock` 目前是 `eda5b52c02744978564b927263230a3545c40d86`，不是乾淨正式版；本輪不移動它 |
+| 原型處置 | 正式版重寫取代原型；保留問題案例與 install 入口，不保留 localStorage、Vue.mixin、Twitch trap、10 秒／hover 實作或原型 commit 作最終祖先 |
+
+「產品重寫取代」與「在工作分支以 delta commit 實作」不矛盾：工作分支可以保留 eda 做歷史參考，最終 PR 則從 709e963 重新組出完整產品變更。不能直接把工作分支 merge 到 fi，也不能僅 cherry-pick 依賴原型檔案已存在的後續 commit，否則乾淨基準會缺入口或發生 modify/delete 衝突。
+
+### 產品白名單與絕不進 PR 的資料
+
+第一個 PR 只允許以下範圍；若 Fi 題 8 改選，先更新這份白名單和測試步驟。`tests`／設定檔只為 audio lock，不建立另一 PR 可依賴的新模組。
+
+- `src/pages/content/holodex/twitch-audio-lock.ts`
+- `src/pages/content/holodex/audio-lock/` 下本計畫列出的六個模組：types、state、holodex-adapter、players、intent、controller。
+- `src/pages/content/holodex/audio-lock-protocol.ts`、`audio-lock-settings.ts`。
+- `src/pages/content/holodex/contentScript.ts`、`holodex-inject.ts` 的最小整合 hunk。
+- `src/utils/options.ts` 的一個 schema key 與其 name/description；不重排其他選項。
+- `tests/audio-lock/` 的五個測試檔與 fixtures.ts；`vitest.audio-lock.config.ts`、`tsconfig.audio-lock.tests.json`。
+- `package.json` 僅 audio-lock scripts、Vitest/jsdom 與既有 lint 缺失套件；`yarn.lock` 僅必要的依賴解析。不得順便 upgrade 現有 runtime/build dependencies、套不同 package manager 或生成 package-lock.json。
+
+**一律排除：** `docs/plans/`（含本計畫、`docs/plans/reviews/`、`docs/plans/prompts/`）、`.ref/`、`.cache/`、node_modules、dist_chrome、dist_firefox、zip、console dump、profile、個人 agent 設定與 auto-multiview-layout 的全部新碼／測試／文件。這些工作資料可留在目前工作分支，不進產品 commit。`.eslintrc`、tsconfig.json、manifest.json.ts、options HTML/CSS、CI/.nvmrc、src/utils/index.ts／misc.ts 預期不改；需要例外時先修改範圍說明，不自行擴大 PR。
+
+### 與 auto-multiview-layout 的可能衝突及避免方式
+
+| 可能重疊的既有檔案 | 本 PR 的最小改法／獨立性檢查 |
+| --- | --- |
+| `src/utils/options.ts` | 只追加獨立 `twitchAudioLock` schema/description。另一任務可追加自己的 key；不排序整個 schema、不改 Options.get/set、不新增共用 subscribe helper。rebase 只保留兩個獨立條目，不把對方條目或 commit 搬入尚未合併的本 PR。 |
+| `src/pages/options/index.ts`、index.html、index.css | 本 PR 不改，自動 schema 表單已足夠；測試只驗證本選項及原有選項存在，不寫「表單總共恰好四個」等會因另一 PR 新選項而失效的斷言。 |
+| `src/pages/content/holodex/holodex-inject.ts` | 只加相對 import＋installAudioLock() 呼叫，保留既有 flags。兩功能各自初始化，不建立共同 installFeatures()、不等另一功能 ready；同一插入點的衝突只需保留各自 import/呼叫，單獨打包時不得夾帶另一項。 |
+| `src/pages/content/holodex/contentScript.ts` | 只啟動本功能的 settings bridge，既有 inject 呼叫仍只執行一次；不包成 layout 專用 controller、不等待 layout 設定或 store、不改另一功能注入順序。 |
+| `package.json`／`yarn.lock` | scripts 使用 :audio-lock 命名空間；每個 PR 各自宣告所需 devDependencies、各有獨立產品 commit，不依賴另一 PR 先加套件。可能同時新增相同既有工具依賴，之後 rebase 可合併相同 key，但不可共用一個未合併的 setup commit。lockfile 在各自基準重裝生成，不複製另一分支整份 lockfile。 |
+| `tsconfig.json`／Vite configs／新測試 config | 不改產品 config；使用 vitest.audio-lock.config.ts 與 tsconfig.audio-lock.tests.json，include 僅 tests/audio-lock，不爭用 vitest.config.ts／通用 tests/setup.ts。 |
+| `src/utils/index.ts`／misc.ts、Vue root/store 探索 | 本 PR 不改這些 utility；audio-lock/holodex-adapter.ts 為內部模組，不匯出給 layout、不 import 對方 helper，也不共用新 module。兩邊可各自有小型、有界發現邏輯，日後兩 PR 都合併再另案評估抽象。 |
+
+獨立性實測必須在「僅 709e963 ＋ 本 PR 產品變更」的 tree 執行完整驗證，不以兩功能同在工作分支時測過代替。單純重疊既有檔案不等於產品相依；任何對方的新 import、全域 flag、setting key、測試 fixture 或 commit 相依都不允許。
+
+### 未來整理產品分支的操作順序（本輪不執行）
+
+以下會建立／移動／切換分支，只能等另行明確授權後執行；這份計畫不包含 push 或開 PR 的可執行命令。本輪到文件 commit 與 r3 DONE 即停止。
+
+1. 在工作分支完成前述五任務，保留各任務的**純產品 commit** 與有序 SHA 清單；docs commit 另列，不混 stage。先用 `git show --stat`／`git show --name-only` 逐一確認每個候選產品 commit 均在白名單；不能以整個 709e963..工作分支範圍直接 cherry-pick。
+2. 檢查 worktree 狀態與 `git worktree list --porcelain`，處理既有 fi/twitch-audio-lock 名稱占用前保留 eda 原型參考。若該分支被別的 worktree 使用，不修改別的 worktree，也不 force-reset 它；交由協調者安排名稱／保存方式。只有獲准整理後才以 709e963 為起點建立乾淨 fi/twitch-audio-lock，不能從目前 docs 工作 HEAD 開分支。
+3. 推薦以 `git cherry-pick --no-commit` 先重放 eda5b52（只為建立其兩個產品檔案前提），再按序重放**已核對的產品 SHA**；全程不建立中途 commit，不重放任何 docs／review／prompt commit。eda 的原型內容會被正式重寫產品 commit 覆蓋。最後 staged tree 必須符合白名單，並與已驗證工作 tree 的相同白名單檔案一致，再建立**一個正式產品 commit**。其 parent 為 709e963，eda 本身不是祖先，不會把原型架構當第二套實作交付。
+4. 任一產品 commit 的前提不符合或重放衝突，先停在本地修正白名單內的 hunk；不得以 cherry-pick docs／另一任務來「補前提」，不得 merge。必要時用工作分支相對 709e963 的**白名單限定最終 patch** 重建 staged tree，結果仍須是同一個可獨立驗證的產品 tree。
+5. 只讀檢查 `git diff --name-only 709e963...fi/twitch-audio-lock`，逐檔對白名單；`git diff 709e963...fi/twitch-audio-lock -- docs/plans .ref` 預期完全空。`git merge-base 709e963 fi/twitch-audio-lock` 預期完整 709e963 hash；推薦 squash 方案的 `git rev-list --count 709e963..fi/twitch-audio-lock` 預期 1，且新增 commit 不等於任何工作 docs 或另一任務產品 SHA。
+6. 在乾淨產品 tree 重新安裝 frozen lockfile 並跑下列驗證，不引用 .ref 的 fixture；補英文草稿的實際結果。若 upstream/dev 後來移動，先報告與原指定基準的差異，再安排 rebase／重驗，不默默合入另一項功能；共用已合併 upstream 祖先是正常的，但兩項未合併新增 commit 必須仍各自獨立。
+7. 產出供協調者 review 的本機產品 commit、差異檔案清單、驗證結果及英文 PR 草稿。未取得解除硬性禁令的明確授權前，仍不 push、不開 PR、不 merge；方向資訊不是操作授權。
+
+### PR 前 lint／typecheck／測試／雙 build
+
+在乾淨產品 tree、Node 22.12+、本地 cache 環境與既有逾時 wrapper 下執行：
+
+```sh
+yarn install --frozen-lockfile --non-interactive --cache-folder "$YARN_CACHE_FOLDER"
+yarn lint:audio-lock
+yarn exec eslint src/utils/options.ts src/pages/content/holodex/contentScript.ts src/pages/content/holodex/holodex-inject.ts --format json
+yarn typecheck:audio-lock
+yarn test:audio-lock
+yarn build:chrome
+yarn build:firefox
+git diff --check 709e963...fi/twitch-audio-lock
+```
+
+scope lint、typecheck、tests 與兩 build 預期 exit 0。三個既有整合檔的 ESLint 要用**相同安裝版本／相同 .eslintrc** 對 709e963 原檔重跑 baseline（只用 git show 複製到 worktree 的 `.cache/lint-baseline/`，加 `--no-ignore --config "$PWD/.eslintrc"`）；若原生 flags 的既有 @ts-ignore 等報錯，記錄實際 rule/message/source，修改後不得增加診斷或改壞既有行。新 hunk 的診斷必須修正；不能以 baseline 為藉口保留新增問題、關 rule、改無關 flags，或把 exit 1 記為全倉 lint 通過。報告明確區分「新增功能 scoped lint 通過」與「既有檔 baseline 問題」，不預先捏造其數量。
+
+重點檢查：產物仍為 dist_chrome 與 dist_firefox、manifest 權限不變、資源引用存在，且產品 bundles 無 Vue 測試 runtime、工作文件或 .ref。`.nvmrc`／手動 CI Node 18 是既有不相容項，這個 PR 不以未跑過的舊 CI 宣稱綠燈，也不混入工具鏈遷移。人工清單的廣告／重連／首次真點擊結果填入 PR，未遇到的廣告寫未覆蓋，不能預先勾選。
+
+### 英文 PR 標題與描述草稿
+
+Title: **fix: prevent Twitch players from taking over multiview audio**
+
+以下描述是待填結果的草稿；送出前改成實際最終行為與實測結果，不帶本地 planning/review 路徑，不宣稱已做未執行的測試：
+
+```markdown
+With Holodex Mute Others enabled, a Twitch embed can report itself as unmuted after startup or recovery. Holodex treats that report as a new audio selection and mutes the stream the user was listening to.
+
+This change keeps the selected multiview audio until another selection is made. It guards polling, refresh and first-play paths, handles newly added cells without an assigned mute state, and adds an extension option that only applies while Mute Others is enabled. Media controls remain the reliable way to select audio; iframe focus grants a short, single-use intent window. Unsupported Holodex structures disable the guard with one warning. No additional permissions or runtime dependencies are required.
+
+Validation (replace with actual results before submitting):
+- [ ] Scoped ESLint and touched-file baseline comparison
+- [ ] Product and audio-lock test/config type checks
+- [ ] Audio-lock regression tests, including unassigned cells and microtasks between event listeners
+- [ ] Chrome and Firefox builds
+- [ ] Chrome/Vivaldi/Firefox checks: first panel click, mixed players, new cells, presets, reconnects and setting changes
+- [ ] Real Twitch ad break observed; otherwise report this as not covered
+
+Limitations: iframe interactions cannot be identified precisely across origins, and polling may allow brief audio leakage. The guard catches its own API failures but does not repair Holodex's Vue observation errors. A confirmed mute of the active player leaves audio silent until it is selected again. New first-play audio is reserved for initialization; later starts preserve the selected cell.
+
+This PR is independent of auto-multiview-layout and can be reviewed and merged on its own. It includes only the audio-lock implementation, focused tests and the tooling needed to run them.
+```
+
 ## 驗收條件
 
 - [ ] 產生可用的 Chrome 與 Firefox build，既有 options、注入 flags、YouTube 相關功能無退化；權限及 host 範圍不變。
@@ -378,7 +519,10 @@ yarn build:firefox
 - [ ] 不靠元件名稱才能找得到；必要契約缺失則整組不動作、一次 warn、頁面可繼續用；不留下 mixin 或半套 wrapper。
 - [ ] 原始 SDK 參考與 methods 存在 closure；不碰跨網域 window、不嘗試偽 raw 解包、不修改 Vue observer／SDK 可擴充性；無本功能產生的 uncaught SecurityError 或 Promise rejection。
 - [ ] 第一版沒有 Twitch constructor Proxy、assignment trap 或未配對 SDK registry；原 global descriptor／constructor identity 全程未改，晚綁 ready 後才讀寫 API。
-- [ ] Vitest config 可解析真 options entry 的 `@utils` 與 `@assets` import，無 CRXJS plugins；`yarn typecheck` 同時涵蓋產品、tests、fixture、vitest.config.ts；`.cache` 沿用原 ignore，不引入無需的 ignore 改動。
+- [ ] Vitest config 可解析真 options entry 的 `@utils` 與 `@assets` import，無 CRXJS plugins；`yarn typecheck:audio-lock` 同時涵蓋產品、tests、fixture、vitest.audio-lock.config.ts；`.cache` 沿用原 ignore，不引入無需的 ignore 改動。
+- [ ] 第一個 PR 的新增模組／helpers／測試與 auto-multiview-layout 完全獨立；沒有引用對方 setting/flag、未合併 commit 或 test setup。相同既有檔案只保留本功能的最小 hunk，沒有通用 utils/config 重構。
+- [ ] PR 產品 tree 由指定 upstream/dev@709e963 準備，正式 head 為 fi/twitch-audio-lock；重寫取代 eda5b52，最終產品 commit 不包含 eda 或 docs 工作 commit 作祖先，亦不包含 docs/plans、reviews、prompts、.ref 或產物。實際整理分支與發佈須另行授權，本輪僅驗收計畫。
+- [ ] scoped lint、既有整合檔 baseline 比較、typecheck、回歸測試、Chrome/Firefox build 都在僅上游基準＋本 PR 的 tree 重跑；英文 PR 草稿填入實際結果／限制，不把尚未執行的項目預勾。產品 commit 與本地文件 commit 各自分開。
 - [ ] options 的 `twitchAudioLock` 預設 true、持久化、同頁熱切換；只有配合 Holodex Mute Others 才生效，沒有 localStorage 秘密第二開關。
 - [ ] 人工測試有瀏覽器版本與結果，真實廣告／重連不能用 fake 或 build 成功代替；未覆蓋項目明列 warning。必要真實場景尚未通過時，只可交付候選版實測。
 - [ ] 關閉／重複安裝／離開頁面釋放所有音訊相關資源；pending effects 不得在停用後改頁面。
@@ -396,7 +540,7 @@ yarn build:firefox
 
 ### 規模與分波估計
 
-估計約 12 個產品檔案（其中 8 個為新模組）、5 個測試檔＋fixture、Vitest config／測試 tsconfig／package／lock 少量配套，`.gitignore` 不需改。產品碼約 600–950 行、測試約 550–900 行；移除 SDK 全域攔截，新增三態初始化／真事件順序測試。這是工作拆分估計，不是量測或硬性配額，不為達行數增加抽象。
+第一 PR 估計約 12 個產品檔案（其中 8 個為新模組）、5 個測試檔＋一個局部 fixture、兩個 feature 專用 config、package／lock 配套；約 22 個檔案，`.gitignore`／CI／產品 tsconfig 不改。產品碼約 600–950 行，最小假物件／DOM 測試約 450–700 行，另計必要 lockfile 差異；這是單一功能的 review 範圍估計，不是實測或硬性配額。若維護者不接受此測試依賴成本，Fi 題 8 提供第一 PR 無框架方案；不得把核心安全修正拆成依賴另一 PR 的半套產品。
 
 波次一（狀態機＋測試基礎）約 0.5–1 工作日；波次二（adapter、PlayerPort、競態與意圖）約 1.5–3 工作日；波次三（options、雙 build、瀏覽器實測）約 1–2 工作日，另計等待真實廣告與無法即時重現的情境。各任務以測試與可撤銷整合為邊界，先留本機小 commit，不自動合併或發佈。
 
@@ -426,12 +570,15 @@ Fi 可直接回答「1A、2A、3A……」或只回想改的題號。以下 A �
 7. **是否把修 Holodex 自身 SecurityError 納入這版？**
    - **A（建議預設）：** 不納入；只限制本功能存取與捕捉自身錯誤，不改 observer／SDK。
    - **B：** 另行授權隔離實驗研究 markRaw 等方案；實驗不得阻塞或偷偷擴入本候選版。
+8. **第一個上游 PR 要帶哪種自動測試配套？**
+   - **A（建議預設）：** 帶最小 Vitest 3.2.6＋jsdom 26.1.0、feature 專用 configs/scripts 與必要回歸測試；不加 Vue runtime、coverage 或通用 setup。另補現有 ESLint config 缺少的 parser/plugin，合計四個 devDependency、零 runtime dependency。能在同一 PR 保住兩個 high 發現與真 options entry 的自動回歸，維護者不用先合併另一個測試基礎 PR。
+   - **B：** 第一 PR 不加 Vitest/jsdom；先把本計畫的測試步驟改成既有 TypeScript 編譯＋Node 原生 runner 的 state/fake API 測試，DOM/options/可信事件依人工清單驗證，通用測試框架另開後續獨立 PR。仍需既有 lint parser/plugin 或等效外部 lint 驗證，不能宣稱既有 Vitest 步驟已執行，也不能等待 auto-multiview-layout 帶入其測試設定。若改選 B，先補確切 runner/config/指令與等價斷言再實作。
 
-Git metadata 寫入已在 `DISPATCH-2610171431178858` 核准必要例外，本輪 `DISPATCH-2610171439178433` 延續允許；只提交此計畫檔。其餘寫入限制與禁止 remote 動作維持不變。
+Git metadata 寫入已在 `DISPATCH-2610171431178858` 核准必要例外，本輪 `DISPATCH-2610171451093196` 延續允許；只提交此計畫檔，不建立／切換分支。未來 fork→upstream 的 PR 方向不解除目前禁止 push、開 PR、merge 的規則。
 
 ## 驗收回應（第 2 版）
 
-對應唯讀報告 `docs/plans/reviews/twitch-audio-lock-verify-1.md` 的第 1–8 項；下列 path:行號皆為原始碼證據，不是引用已變動的計畫行號。Holodex 證據為前述 `8c6d0da` 副本；本 repo 證據以受驗版 `d33360b` 為準。本輪只核對文件與原始碼，未安裝依賴或執行產品測試／build。
+對應唯讀報告 `docs/plans/reviews/twitch-audio-lock-verify-1.md` 的第 1–8 項；下列 path:行號皆為原始碼證據，不是引用已變動的計畫行號。Holodex 證據為前述 `8c6d0da` 副本；本 repo 證據以受驗版 `d33360b` 為準。本輪只核對文件與原始碼，未安裝依賴或執行產品測試／build。第 3 版將測試 config/script 改為 audio-lock 專用名稱、將真 Vue runtime fixture 延後，但本段處置的三態、事件順序、aliases 與 typecheck 修正仍在第一 PR 內，不依賴另一功能。
 
 | 發現 | 回應 | 證據與具體修訂／驗證 |
 | --- | --- | --- |
@@ -440,7 +587,7 @@ Git metadata 寫入已在 `DISPATCH-2610171431178858` 核准必要例外，本�
 | 3 medium：YouTube 新首播政策 | **接受** | `.ref/holodex/src/components/multiview/VideoCell.vue:192` 的原生首次播放不限 provider；`src/pages/content/holodex/twitch-audio-lock.ts:198` 原型只抑制 Twitch。新設計不再全擋初始化；Fi 題 1 明列 A 已有選擇才鎖兩者／B 只鎖 Twitch／C 全部自動選聲禁用，建議 A，題 2 另決定 preset。設計、步驟、測試與驗收均明寫所採預設的行為改變。 |
 | 4 medium：SDK 全域攔截無實益 | **接受** | `.ref/holodex/src/components/player/TwitchPlayer.vue:86` 把建構回傳的同一 instance 放進 player，`:116`、`:120` 只需其公開 methods。刪除 constructor Proxy、assignment trap、未配對 registry 與還原流程；players.ts 唯一途徑為 ready 後 late-bind。測試改為 globals／constructor／descriptor 全程未變，而非測如何包裝它們。仍明示 late-bind 不會撤銷 Vue 2 getter。 |
 | 5 medium：options aliases 缺失 | **接受** | `src/pages/options/index.ts:1`、`:2` 用 @utils 與 @assets CSS；`tsconfig.json:19` 的 TS paths 不會自動套入獨立 Vitest config。步驟列明五個 resolve.alias 絕對映射及 css:false，測試需載入真 options entry、mock polyfill 而不 mock @utils，確保實際 import 路徑通過。 |
-| 6 low：測試未 typecheck | **接受** | `tsconfig.json:27` 的 include 沒有 tests 或 vitest.config.ts。新增 tsconfig.tests.json 與雙 tsc 的 typecheck script；步驟、驗證命令與驗收條件同步要求涵蓋 fixture／tests／config。 |
+| 6 low：測試未 typecheck | **接受** | `tsconfig.json:27` 的 include 沒有 tests 或 vitest.audio-lock.config.ts。新增 tsconfig.audio-lock.tests.json 與雙 tsc 的 typecheck script；步驟、驗證命令與驗收條件同步要求涵蓋 fixture／tests／config。 |
 | 7 low：布林橋接過重 | **部分接受** | `src/utils/options.ts:48` 是非同步 local.get，`:63` 記載獨立 onChanged 事件，因此讀取期間變更保護仍有必要。已刪除 ready 重試、訊息 revision 與跨 context 讀取世代，改單次 ready＋單一 in-flight read 的 changedDuringRead boolean；保留 5000ms timeout 以符合有界等待要求。晚到 resolve/reject 不覆蓋已收到的新值，相關測試同步簡化。 |
 | 8 low：重複 ignore | **接受** | `.gitignore:136` 已有不帶尾斜線的 .cache，`:148` 另有舊規則。本版統一輸出到 .cache，不產生 .vitest；檔案表與規模估計改為不修改 .gitignore，也不改審查報告。 |
 
