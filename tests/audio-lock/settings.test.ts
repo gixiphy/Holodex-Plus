@@ -234,6 +234,256 @@ describe("startAudioLockSettingsBridge", () => {
     ).toBe(true);
     stop();
   });
+
+  it("storage_change_before_get_resolves_wins", async () => {
+    let resolveGet!: (v: Record<string, unknown>) => void;
+    const poly = await import("webextension-polyfill");
+    vi.spyOn(poly.storage.local, "get").mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveGet = resolve;
+        }),
+    );
+    const { startAudioLockSettingsBridge } = await import(
+      "../../src/pages/content/holodex/audio-lock-settings"
+    );
+    const posted: unknown[] = [];
+    vi.spyOn(window, "postMessage").mockImplementation((data: unknown) => {
+      posted.push(data);
+    });
+    const stop = startAudioLockSettingsBridge(window);
+    for (const cb of changeListeners) {
+      cb({ twitchAudioLock: { newValue: false } }, "local");
+    }
+    expect(
+      posted.filter((p) => parseAudioLockMessage(p)?.type === "config").at(-1),
+    ).toMatchObject({ enabled: false });
+    const before = posted.length;
+    resolveGet({ twitchAudioLock: true });
+    await Promise.resolve();
+    await Promise.resolve();
+    const configs = posted
+      .slice(before)
+      .map((p) => parseAudioLockMessage(p))
+      .filter((m) => m?.type === "config");
+    expect(configs.every((m) => m && m.type === "config" && m.enabled === false)).toBe(
+      true,
+    );
+    stop();
+  });
+
+  it("storage_change_before_get_rejects_wins", async () => {
+    let rejectGet!: (e: Error) => void;
+    const poly = await import("webextension-polyfill");
+    vi.spyOn(poly.storage.local, "get").mockImplementation(
+      () =>
+        new Promise((_res, rej) => {
+          rejectGet = rej;
+        }),
+    );
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const { startAudioLockSettingsBridge } = await import(
+      "../../src/pages/content/holodex/audio-lock-settings"
+    );
+    const posted: unknown[] = [];
+    vi.spyOn(window, "postMessage").mockImplementation((data: unknown) => {
+      posted.push(data);
+    });
+    const stop = startAudioLockSettingsBridge(window);
+    for (const cb of changeListeners) {
+      cb({ twitchAudioLock: { newValue: false } }, "local");
+    }
+    rejectGet(new Error("boom"));
+    await Promise.resolve();
+    expect(warn).not.toHaveBeenCalled();
+    expect(
+      posted.filter((p) => {
+        const m = parseAudioLockMessage(p);
+        return m?.type === "config" && m.enabled === false;
+      }).length,
+    ).toBeGreaterThanOrEqual(1);
+    stop();
+    warn.mockRestore();
+  });
+
+  it("storage_rejection_disables_and_warns_once", async () => {
+    const poly = await import("webextension-polyfill");
+    vi.spyOn(poly.storage.local, "get").mockRejectedValue(new Error("nope"));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const { startAudioLockSettingsBridge } = await import(
+      "../../src/pages/content/holodex/audio-lock-settings"
+    );
+    const posted: unknown[] = [];
+    vi.spyOn(window, "postMessage").mockImplementation((data: unknown) => {
+      posted.push(data);
+    });
+    const stop = startAudioLockSettingsBridge(window);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(
+      posted.some((p) => {
+        const m = parseAudioLockMessage(p);
+        return m?.type === "config" && m.enabled === false;
+      }),
+    ).toBe(true);
+    expect(warn).toHaveBeenCalledTimes(1);
+    stop();
+    warn.mockRestore();
+  });
+
+  it("ready_before_and_after_storage_read", async () => {
+    storageLocal.set("twitchAudioLock", true);
+    const { startAudioLockSettingsBridge } = await import(
+      "../../src/pages/content/holodex/audio-lock-settings"
+    );
+    const posted: unknown[] = [];
+    vi.spyOn(window, "postMessage").mockImplementation((data: unknown) => {
+      posted.push(data);
+    });
+    const stop = startAudioLockSettingsBridge(window);
+    // ready while possibly in flight
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        data: {
+          channel: AUDIO_LOCK_CHANNEL,
+          version: AUDIO_LOCK_VERSION,
+          type: "ready",
+        },
+        origin: window.location.origin,
+        source: window,
+      }),
+    );
+    await Promise.resolve();
+    await Promise.resolve();
+    const configs = posted
+      .map((p) => parseAudioLockMessage(p))
+      .filter((m) => m?.type === "config");
+    const last = configs.at(-1);
+    expect(last && last.type === "config" && last.enabled).toBe(true);
+
+    // ready after read
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        data: {
+          channel: AUDIO_LOCK_CHANNEL,
+          version: AUDIO_LOCK_VERSION,
+          type: "ready",
+        },
+        origin: window.location.origin,
+        source: window,
+      }),
+    );
+    expect(
+      posted
+        .map((p) => parseAudioLockMessage(p))
+        .filter((m) => m?.type === "config")
+        .at(-1),
+    ).toMatchObject({ enabled: true });
+    stop();
+  });
+
+  it("ready_waits_for_storage_read", async () => {
+    let resolveGet!: (v: Record<string, unknown>) => void;
+    const poly = await import("webextension-polyfill");
+    vi.spyOn(poly.storage.local, "get").mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveGet = resolve;
+        }),
+    );
+    const { startAudioLockSettingsBridge } = await import(
+      "../../src/pages/content/holodex/audio-lock-settings"
+    );
+    const posted: unknown[] = [];
+    vi.spyOn(window, "postMessage").mockImplementation((data: unknown) => {
+      posted.push(data);
+    });
+    const stop = startAudioLockSettingsBridge(window);
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        data: {
+          channel: AUDIO_LOCK_CHANNEL,
+          version: AUDIO_LOCK_VERSION,
+          type: "ready",
+        },
+        origin: window.location.origin,
+        source: window,
+      }),
+    );
+    expect(posted.filter((p) => parseAudioLockMessage(p)?.type === "config")).toHaveLength(
+      0,
+    );
+    resolveGet({ twitchAudioLock: false });
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(
+      posted.some((p) => {
+        const m = parseAudioLockMessage(p);
+        return m?.type === "config" && m.enabled === false;
+      }),
+    ).toBe(true);
+    stop();
+  });
+
+  it("pageshow_starts_new_read_after_timeout", async () => {
+    vi.useFakeTimers();
+    const poly = await import("webextension-polyfill");
+    let call = 0;
+    vi.spyOn(poly.storage.local, "get").mockImplementation(() => {
+      call += 1;
+      if (call === 1) return new Promise(() => undefined);
+      return Promise.resolve({ twitchAudioLock: true });
+    });
+    const { startAudioLockSettingsBridge } = await import(
+      "../../src/pages/content/holodex/audio-lock-settings"
+    );
+    const posted: unknown[] = [];
+    vi.spyOn(window, "postMessage").mockImplementation((data: unknown) => {
+      posted.push(data);
+    });
+    const stop = startAudioLockSettingsBridge(window);
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(
+      posted.some((p) => {
+        const m = parseAudioLockMessage(p);
+        return m?.type === "config" && m.enabled === false;
+      }),
+    ).toBe(true);
+    window.dispatchEvent(new Event("pageshow"));
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(
+      posted.some((p) => {
+        const m = parseAudioLockMessage(p);
+        return m?.type === "config" && m.enabled === true;
+      }),
+    ).toBe(true);
+    stop();
+  });
+
+  it("page_messages_cannot_write_storage", async () => {
+    const poly = await import("webextension-polyfill");
+    const setSpy = vi.spyOn(poly.storage.local, "set");
+    const { startAudioLockSettingsBridge } = await import(
+      "../../src/pages/content/holodex/audio-lock-settings"
+    );
+    const stop = startAudioLockSettingsBridge(window);
+    for (const data of [
+      { channel: AUDIO_LOCK_CHANNEL, version: AUDIO_LOCK_VERSION, type: "config", enabled: false },
+      { channel: AUDIO_LOCK_CHANNEL, version: AUDIO_LOCK_VERSION, type: "set", enabled: true },
+      { type: "unknown" },
+    ]) {
+      window.dispatchEvent(
+        new MessageEvent("message", {
+          data,
+          origin: window.location.origin,
+          source: window,
+        }),
+      );
+    }
+    expect(setSpy).toHaveBeenCalledTimes(0);
+    stop();
+  });
 });
 
 describe("options page form", () => {

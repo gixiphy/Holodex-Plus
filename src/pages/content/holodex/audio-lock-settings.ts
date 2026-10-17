@@ -93,10 +93,10 @@ export function startAudioLockSettingsBridge(win: Window): () => void {
     if (event.origin !== win.location.origin) return;
     const msg = parseAudioLockMessage(event.data);
     if (!msg || msg.type !== "ready") return;
+    // L1: if initial storage read is still in flight, wait for it to post once
+    if (inFlight) return;
     postConfig(latestEnabled);
-    if (!inFlight) {
-      void readStorage();
-    }
+    void readStorage();
   };
 
   const onChanged = (
