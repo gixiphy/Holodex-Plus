@@ -165,7 +165,6 @@ try {
 
   await send('Runtime.enable', {}, S);
   await send('Page.enable', {}, S);
-  await send('Input.enable', {}, S);
   await send('Target.setAutoAttach', { autoAttach: true, waitForDebuggerOnStart: true, flatten: true }, S);
 
   // Disable service worker
