@@ -2,7 +2,7 @@ VERDICT: PASS
 
 # Twitch audio lock 實作驗收第 3 輪
 
-階段 2 紀錄：五個上一輪問題已重驗解決，尚待新增問題審查完成；最終判定以後續更新為準。
+已依序完成：實跑驗證、上一輪五項重驗、新增問題與產物審查。本輪未發現 high／medium／low。
 受驗 HEAD：`04000118bfac3f9b5b9b4d65bfee8017c73dbcd0`（不含審查報告提交）。範圍：`5613891..04000118bfac3f9b5b9b4d65bfee8017c73dbcd0`，已用 git log 確認。根目錄沒有 AGENTS.md／CLAUDE.md，採 dispatch 規則。
 
 ## 測試／build 實跑結果
@@ -12,7 +12,7 @@ VERDICT: PASS
 | 指令 | 逾時 | 結束碼 | 數量／結果 |
 | --- | --- | --- | --- |
 | `yarn install --frozen-lockfile --non-interactive` | 300s | 0 | 依賴已就緒 |
-| `yarn test:audio-lock` | 120s | 0 | 5 files、117 tests passed |
+| `yarn test:audio-lock` | 120s | 0 | 5 files、117 tests passed（state 28、adapter 13、players 14、settings 14、controller 48） |
 | `yarn typecheck:audio-lock` | 120s | 0 | 產品與測試兩段 tsc 通過 |
 | `node .cache/audio-lock-lint/run.cjs` | 120s | 0 | scoped 0 error、0 warning |
 | 同 lint wrapper，options.ts／contentScript.ts／holodex-inject.ts，`--format json` | 120s | 1 | 3 errors、0 warning；ban-ts-comment，仍為整合 lint blocker |
@@ -21,12 +21,14 @@ VERDICT: PASS
 | 同 lint wrapper，`git show 709e963` 三個整合檔的 worktree 暫存副本 | 120s | 1 | 同樣 3 errors、0 warning；ban-ts-comment，無新增 |
 | `yarn vitest run --config .cache/review3-vitest.config.ts` | 120s | 0 | 獨立 probe：1 file、15 tests passed |
 | `git diff --check 5613891 0400011 -- src tests` | — | 0 | 無空白錯誤 |
+| `python3 .cache/review3-artifacts.py`（經 timeout wrapper） | 30s | 0 | 每個 dist：24 個 manifest 引用、23 個 JS／HTML 靜態引用，缺檔 0 |
+| fix-2 readiness shape grep（Python 等價 regex，保留 cell 賦值例外） | — | 0 | 命中 0 |
 
 JSON lint formatter 用於保留可核對診斷；與計畫 unix formatter 檢查相同檔案和規則。build 與 scoped lint 成功不代表全倉 lint 通過。
 
 ## 發現清單
 
-目前無確認的 high／medium／low；新增問題審查待完成。
+No issues found. Checked for bugs and AGENTS.md compliance.
 
 ## 第 2 輪五項問題及 fix-2 驗收逐條核對
 
@@ -53,6 +55,15 @@ fixture 檔頭已引用上游來源；player component 無 ready／twPlayer／yt
 
 正式測試新增 16 個；實作報告記錄了拿掉修正時的失敗摘要，本輪以獨立行為 probe 驗證結果，不將歷史 TDD 敘述當成本輪實跑證據。
 
+## 新增問題、範圍及產物審查
+
+- 已用 `git log --format='%H %s' --name-only 5613891..0400011` 與 `git diff 5613891 0400011` 核對全部 7 個 commit／10 個檔案：5 個產品 commit 僅修改 fix-2 白名單中的 3 個產品模組與 5 個測試／fixture 檔，訊息皆英文且不夾 docs。另兩個 docs commit 分別為 fix-2 兩個標題更名（642d2ab）與 impl-3 報告（0400011），前者未變動計畫規格。
+- 禁改清單（package／lock／configs／整合入口／utils／settings／.ref）的 `git diff --stat 5613891 0400011` 為空。沒有新增模組、測試檔、依賴、權限或 options UI；沒有跨功能 helper、另一個 layout PR 的產品依賴或超出第一 PR 的改動。共享檔案與未來上游整理仍依主計畫；本輪無新增該類衝突點。
+- 新增程式逐 hunk 檢查未發現 placeholder／空實作／過度設計。事件路徑和 late-bind 仍綁定 Twitch 原 SDK、YouTube wrapper；沒有讀 SDK 私有欄位、iframe window、修改 SDK／Vue observer／全域 constructor。修正沒有改動 Fi 決定紀錄的選聲、grant、全靜音、2500ms 意圖或一次警告政策。
+- Chrome／Firefox 產物 manifest 可解析，MV3 必要基本欄位、版本格式及各自 background 入口存在；每份 24 個 manifest 資源引用和 23 個 JS／HTML 靜態傳遞引用均存在。page bundle 無 storage.local／webextension-polyfill 字串，manifest 來源與權限未改。這是 unpacked 結構的靜態檢查，沒有實際安裝到瀏覽器，不能據此宣稱真機載入與音訊人工清單完成。
+- 整合 lint 仍受 baseline 三則 ban-ts-comment 阻擋，沒有新增診斷；scoped lint 的 React version 提示與測試中的 Browserslist 過舊提示不是新產品缺陷。真瀏覽器人工清單與廣告／重連情境仍未實測，保留原計畫交付門檻，不將既有未完成項重報為本輪新增 bug。
+- 本輪只提交此報告，probe／工具／日誌在 worktree `.cache`，build 產物未提交；未改產品或計畫，未 push、開 PR、merge、執行公證或 sudo。
+
 ## 給 Fi 的摘要
 
-上一輪兩個 high、三個 medium 已逐條重驗解決。正式 117 tests 與獨立 15 個 probe 全通過，READY 和 fixture 均已對照真實上游。整合 lint 三則錯誤與 709e963 baseline 相同，仍列為 blocker。尚待新增問題與產物靜態引用審查完成。
+本輪判定 PASS：上一輪兩個 high、三個 medium 已逐條重驗解決，未發現新增問題。正式 117 tests、獨立 15 個 probe、typecheck、scoped lint 與兩個 build 均通過，READY 與 fixture 已對照真實上游。整合 lint 三則錯誤與上游 baseline 相同，仍列為 blocker。兩份產物的靜態引用完整，真瀏覽器載入與人工音訊驗收仍待完成。
