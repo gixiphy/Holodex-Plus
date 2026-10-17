@@ -30,6 +30,8 @@ function setupBrokenEnv(opts?: {
   twitchMuted?: boolean;
   missingMethods?: boolean;
   healthyTwitch?: boolean;
+  readyNever?: boolean;
+  twitchPlaceholder?: boolean;
 }): FakeEnv & { postSpies: Map<string, ReturnType<typeof vi.fn>> } {
   const store = createFakeStore({
     muteOthers: true,
@@ -58,7 +60,14 @@ function setupBrokenEnv(opts?: {
     });
   }
   const ytPlayer = createFakePlayerComponent("youtube", ytSdk);
-  const twPlayer = createFakePlayerComponent("twitch", twSdk);
+  const twPlayer = createFakePlayerComponent(
+    "twitch",
+    twSdk,
+    opts?.twitchPlaceholder ? { sdkLoaded: false } : undefined,
+  );
+  if (opts?.twitchPlaceholder && twPlayer.player && typeof twPlayer.player === "object") {
+    Object.defineProperty(twPlayer.player, "__ob__", { value: {} });
+  }
   const postSpies = new Map<string, ReturnType<typeof vi.fn>>();
   const twIframe = twPlayer.$el.querySelector("iframe") as HTMLIFrameElement;
   const spy = vi.fn();
@@ -82,6 +91,7 @@ function setupBrokenEnv(opts?: {
     provider: "twitch",
     player: twPlayer,
     nativeCheckMuted: true,
+    readyBeforeInstall: opts?.readyNever ? false : undefined,
   });
   if (opts?.missingMethods) {
     cellB.$refs.player!.player = twSdk;
@@ -822,6 +832,14 @@ describe("twitch broken SDK / no-degrade", () => {
     expect(remuteViaPost + remuteViaSdk).toBeGreaterThanOrEqual(1);
   });
 
+  const DEGRADED_CODES = [
+    "player-unavailable",
+    "player-mute-did-not-settle",
+    "store-did-not-settle",
+    "restore-failed",
+    "cell-contract-changed",
+  ];
+
   function lockOnTwitch(handle: TestableHandle): void {
     handle.__setState({
       ...handle.__getState(),
@@ -1017,5 +1035,41 @@ describe("twitch broken SDK / no-degrade", () => {
     await pollSeconds(preexisting, handle, 2);
     expect(handle.__getState().active?.key).toBe("b");
     expect(preexisting.sdks.get("a")!.rawMuted).toBe(true);
+  });
+
+  it("broken_twitch_without_ready_event_binds_via_iframe_channel", async () => {
+    const env = setupBrokenEnv({ readyNever: true, twitchMuted: false });
+    env.store.state.multiview.layoutContent.a.muted = false;
+    delete env.store.state.multiview.layoutContent.b.muted;
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    const twIframe = env.cells.get("b")!.$el.querySelector("iframe") as HTMLIFrameElement;
+    postTwitchUpdateState(twIframe, { muted: false });
+    await pollSeconds(env, handle, 3);
+    const spy = env.postSpies.get("b")!;
+    expect(spy.mock.calls.filter((c) => c[0]?.params === true).length).toBeGreaterThanOrEqual(1);
+    expect(handle.__getState().mode).not.toBe("degraded");
+    const warned = warn.mock.calls.map((call) => JSON.stringify(call));
+    expect(warned.some((text) => DEGRADED_CODES.some((code) => text.includes(code)))).toBe(false);
+    expect(env.store.state.multiview.layoutContent.a.muted).not.toBe(true);
+    warn.mockRestore();
+  });
+
+  it("twitch_placeholder_player_without_ready_is_not_bound", async () => {
+    const env = setupBrokenEnv({ readyNever: true, twitchPlaceholder: true });
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    handle = makeHandle();
+    handle.setEnabled(true);
+    handle.__tryDiscover();
+    await vi.advanceTimersByTimeAsync(0);
+    await pollSeconds(env, handle, 3);
+    const spy = env.postSpies.get("b")!;
+    expect(spy.mock.calls.filter((c) => c[0]?.params === true).length).toBe(0);
+    expect(handle.__getState().mode).not.toBe("degraded");
+    expect(warn).toHaveBeenCalledTimes(0);
+    warn.mockRestore();
   });
 });

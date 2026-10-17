@@ -10,6 +10,7 @@ import {
   isVueObserved,
   postTwitchSetMuted,
   readTwitchIframeState,
+  TWITCH_PLAYER_ORIGIN,
 } from "./twitch-embed";
 
 export type PlayerBinding = {
@@ -208,10 +209,32 @@ export function createPlayerPort(binding: PlayerBinding): BoundPlayerPort | null
     });
   };
 
+  const observedTwitchWithIframe = (): boolean => {
+    if (binding.provider !== "twitch") return false;
+    const instance = binding.playerComponent.player;
+    if (!instance || typeof instance !== "object") return false;
+    if (typeof (instance as { setMuted?: unknown }).setMuted !== "function") return false;
+    if (!isVueObserved(instance as object)) return false;
+    const iframe = twitchIframe(binding);
+    if (!iframe) return false;
+    try {
+      return new URL(iframe.src).origin === TWITCH_PLAYER_ORIGIN;
+    } catch {
+      return false;
+    }
+  };
+
   const tryBind = (): boolean => {
     if (disposed || mismatched) return false;
     if (methods || iframeChannel) return true;
-    if (!(readySignal || lateBindReady(binding))) return false;
+    if (!(readySignal || lateBindReady(binding))) {
+      if (!observedTwitchWithIframe()) return false;
+      const observed = binding.playerComponent.player;
+      iframeChannel = true;
+      boundInstance = observed as object;
+      fireOnReadyOnce();
+      return true;
+    }
     const instance = binding.playerComponent.player;
     if (!instance || typeof instance !== "object") return false;
 
