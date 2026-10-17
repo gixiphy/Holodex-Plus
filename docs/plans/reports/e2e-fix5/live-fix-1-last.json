@@ -1,0 +1,90 @@
+{
+ "label": "live-fix-1",
+ "mode": "normal",
+ "extDir": "/Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/dist_chrome",
+ "versions": {
+  "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "vue": "2.7.8"
+ },
+ "picks": {
+  "twitch": "eslcs",
+  "youtube": "1-LpQekNa9g",
+  "method": "default-env-or-plan"
+ },
+ "calibration": {
+  "youtubeUsedVideoMutedFallback": true,
+  "youtube": {
+   "ok": true,
+   "before": {
+    "muted": false,
+    "volume": 1,
+    "paused": false,
+    "readyState": 4,
+    "currentTime": 46790.241016,
+    "currentSrcEmpty": false,
+    "videoCount": 1
+   },
+   "after": {
+    "muted": true,
+    "volume": 1,
+    "paused": false,
+    "readyState": 4,
+    "currentTime": 46792.065094,
+    "currentSrcEmpty": false,
+    "videoCount": 1
+   }
+  }
+ },
+ "scenarios": {},
+ "twitchObserved": null,
+ "vIsRefErrors": 0,
+ "updateStateMessages": 0,
+ "twitchCommandsReceived": {
+  "mute": 0,
+  "unmute": 0
+ },
+ "audioLockWarnings": [
+  {
+   "t": 1792260102937,
+   "type": "log",
+   "text": "[Holodex+] Activated"
+  },
+  {
+   "t": 1792260104248,
+   "type": "log",
+   "text": "[Holodex+] yt-watch script loaded"
+  },
+  {
+   "t": 1792260104709,
+   "type": "log",
+   "text": "[Holodex+] yt-watch script loaded"
+  }
+ ],
+ "verdict": "FAIL",
+ "errors": [
+  [
+   "exception",
+   "{\"exceptionId\":1,\"text\":\"Uncaught (in promise)\",\"lineNumber\":14,\"columnNumber\":32229,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"lineNumber\":14,\"columnNumber\":32229},{\"functionName\":\"fetchVideoData\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/main.fbfbbe"
+  ],
+  "Error: timeout waiting twitch iframe\n    at waitFor (file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:200:11)\n    at async file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:443:3"
+ ],
+ "clickPoints": {
+  "blank": {
+   "x": 20,
+   "y": 20
+  },
+  "youtubePlay": [
+   {
+    "x": 756,
+    "y": 422,
+    "how": "center"
+   }
+  ],
+  "youtubeMute": {
+   "ok": false
+  }
+ },
+ "extensionId": "oomfamdacecpbodnlfojpkfhjcigldpc",
+ "stderr": "7:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/yj/9w2b892s44g0mq19rqnrrv_40000gn/T/): 86542802944B (80.599GiB) / 494332366848B (460.383GiB)\n[58632:21005044:1018/020201.093830:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log\n[58634:21005048:1018/020201.099718:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, ARM_64, command line: /Users/wuxianyou/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/wuxianyou/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=157.0.8089.0 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2\n[58634:21005048:1018/020201.100015:VERBOSE1:chrome/updater/updater.cc:378] OS version: 27.0.1, arch: arm64, System uptime (seconds): 298997, parent pid: 1\n[58634:21005048:1018/020201.100936:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/wuxianyou/Library/Application Support/Google/GoogleUpdater): 86542802944B (80.599GiB) / 494332366848B (460.383GiB)\n[58634:21005048:1018/020201.100954:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/yj/9w2b892s44g0mq19rqnrrv_40000gn/T/): 86542802944B (80.599GiB) / 494332366848B (460.383GiB)\n[58634:21005048:1018/020201.100991:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log\n[58632:21005044:1018/020201.101252:VERBOSE1:chrome/updater/crash_reporter.cc:123] Crash handler launched and ready.\n[58632:21005044:1018/020201.101640:VERBOSE1:chrome/updater/crash_client.cc:109] Found 0 completed crash reports\n[58632:21005044:1018/020201.101683:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports\n[58632:21005044:1018/020201.101730:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/wuxianyou/Library/Application Support/Google/RLZ/Crashpad/settings.dat: No such file or directory (2)\n[58632:21005044:1018/020201.101849:VERBOSE1:chrome/updater/updater.cc:107] Crash reporting initialized.\n[58632:21005044:1018/020201.101970:VERBOSE1:chrome/updater/ipc/update_service_internal_proxy_mojo.cc:61] Run\n[58203:21003199:1018/020205.209013:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\n[58632:21005044:1018/020218.249119:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0\n[58632:21005044:1018/020218.249485:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log\n[58632:21005044:1018/020218.249508:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--wake) returned 0.\n[58629:21005038:1018/020218.411405:VERBOSE1:chrome/updater/app/app_wakeall.cc:68] `/Users/wuxianyou/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake` exited 0\n[58629:21005025:1018/020218.411601:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0\n[58629:21005025:1018/020218.412381:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log\n[58629:21005025:1018/020218.412463:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--wake-all) returned 0.\n[58634:21005048:1018/020228.260429:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log\n[58634:21005048:1018/020228.260457:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--crash-handler) returned 0.\n[58631:21005029:1018/020228.261755:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log\n[58631:21005029:1018/020228.261937:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--crash-handler) returned 0.\n",
+ "failReason": "exception"
+}
