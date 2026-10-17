@@ -378,6 +378,7 @@ try {
     } else {
       const box = await iframeBox(which);
       if (!box) throw new Error('missing play iframe: ' + which);
+      result.clickPoints[which + 'Play'] = {x:box.x+box.w/2,y:box.y+box.h/2,selector:'iframe-center-fallback'};
       await clickAt(box.x + box.w / 2, box.y + box.h / 2);
     }
     await blank();
@@ -387,9 +388,12 @@ try {
     while (Date.now() - t0 < ms) {
       const v = await readVideo(which);
       if (playing(v)) return v;
-      if (Date.now() - t0 < 6000) await clickPlay(which);
+      await clickPlay(which);
       await sleep(500);
     }
+    const sid=await waitSession(which,1000);
+    result.playbackDiagnostics??={};
+    result.playbackDiagnostics[which]=sid?await E(`({url:location.href,ready:document.readyState,body:document.body.innerText.slice(0,4000),videos:document.querySelectorAll('video').length})`,sid).catch(e=>({error:String(e)})):null;
     return null;
   };
   // Trusted button click establishes iframe focus. If the control ignores that click,
