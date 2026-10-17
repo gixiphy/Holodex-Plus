@@ -1460,5 +1460,6 @@ function emptyRuntime() {
     ownMuteGeneration: null as number | null,
     lastObservedMuted: null as boolean | null,
     unsettledMuteCount: 0,
+    lastMuteEpoch: null as number | null,
   };
 }

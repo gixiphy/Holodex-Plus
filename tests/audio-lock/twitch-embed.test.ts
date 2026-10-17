@@ -70,10 +70,10 @@ describe("twitch-embed", () => {
     });
     installTwitchPlayerGuard(window, () => true);
     (window as TwitchWin).Twitch = { Player: FakeCtor };
-    const inst = new (window as TwitchWin & { Twitch: { Player: new (...a: unknown[]) => { opts: unknown } } }).Twitch.Player(
-      "el",
-      { channel: "c" },
-    );
+    const Twitch = (window as TwitchWin).Twitch as {
+      Player: new (...a: unknown[]) => { opts: unknown };
+    };
+    const inst = new Twitch.Player("el", { channel: "c" });
     expect(FakeCtor).toHaveBeenCalledTimes(1);
     expect(inst.opts).toEqual({ channel: "c", muted: true });
   });
@@ -130,7 +130,12 @@ describe("twitch-embed", () => {
     class Base {
       static READY = "ready";
     }
-    class P extends Base {}
+    class P extends Base {
+      // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+      constructor(..._args: unknown[]) {
+        super();
+      }
+    }
     installTwitchPlayerGuard(window, () => true);
     (window as TwitchWin).Twitch = { Player: P };
     const Twitch = (window as TwitchWin).Twitch as {
