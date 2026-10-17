@@ -582,44 +582,27 @@ try {
     if (!opener) throw new Error('media controls toolbar button not found');
     result.clickPoints.panelOpen=opener;await clickAt(opener.x,opener.y);
     await waitFor(`!!document.querySelector('.v-dialog--active .media-controls-list')`,5000,'media dialog');
-    // Collect candidate mute/volume buttons in the YT row (not only the last button).
-    const candidates = await E(`(()=>{
+    // Per-cell mute is the last icon button on the YouTube row (MediaControls.vue).
+    // Skip the global toolbar row (no channel title). Scroll into view, mouseMoved, then click once.
+    const pt = await E(`(()=>{
       const list=document.querySelector('.v-dialog--active .media-controls-list');
-      if(!list)return [];
-      const row=[...list.querySelectorAll('.v-list-item')].find(r=>/YT|YouTube/i.test(r.textContent||''));
-      if(!row)return [];
-      return [...row.querySelectorAll('button')].map((b,i)=>{
-        const r=b.getBoundingClientRect();
-        const label=((b.getAttribute('aria-label')||'')+' '+(b.title||'')+' '+(b.className||'')).trim();
-        return {i,x:r.left+r.width/2,y:r.top+r.height/2,w:r.width,h:r.height,label,text:(row.textContent||'').slice(0,40)};
-      }).filter(p=>p.w>0&&p.h>0);
+      if(!list)return null;
+      const rows=[...list.querySelectorAll('.v-list-item')].filter(r=>r.querySelector('.v-list-item-title'));
+      const row=rows.find(r=>/YT|YouTube/i.test(r.querySelector('.v-list-item-title')?.textContent||''))||rows[0];
+      if(!row)return null;
+      const buttons=[...row.querySelectorAll('button')];
+      const b=buttons[buttons.length-1];
+      if(!b)return null;
+      b.scrollIntoView({block:'center',inline:'center'});
+      const r=b.getBoundingClientRect();
+      const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+      return {x:r.left+r.width/2,y:r.top+r.height/2,text:(row.querySelector('.v-list-item-title')?.textContent||'').slice(0,40),buttonCount:buttons.length,hitTag:hit?.tagName||null,hitCls:typeof hit?.className==='string'?hit.className.slice(0,80):null};
     })()`);
-    if (!candidates.length) throw new Error('YouTube panel row mute button missing');
-    const preferred = [...candidates].sort((a, b) => {
-      const score = (p) => (/mute|volume|sound|speaker|unmute/i.test(p.label) ? 0 : 1) * 10 + (candidates.length - 1 - p.i);
-      return score(a) - score(b);
-    });
-    const t = Date.now();
-    let chosen = null;
-    for (const pt of preferred) {
-      await clickAt(pt.x, pt.y);
-      const t0 = Date.now();
-      let storeA = true;
-      while (Date.now() - t0 < 800) {
-        storeA = await E(`document.querySelector('#app').__vue__.$store.state.multiview.layoutContent.a?.muted`);
-        if (storeA === false) break;
-        await sleep(100);
-      }
-      if (storeA === false) {
-        chosen = { ...pt, storeA };
-        break;
-      }
-    }
-    if (!chosen) {
-      result.clickPoints.panelYoutube = { tried: preferred, storeA: true };
-      throw new Error('YouTube panel unmute did not clear store.a.muted');
-    }
-    result.clickPoints.panelYoutube = chosen;
+    if(!pt)throw new Error('YouTube panel row mute button missing');
+    result.clickPoints.panelYoutube=pt;
+    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: pt.x, y: pt.y }, S);
+    const t=Date.now();
+    await clickAt(pt.x,pt.y);
     return {t,close:async()=>{
       await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape',windowsVirtualKeyCode:27},S);
       await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape',windowsVirtualKeyCode:27},S);
