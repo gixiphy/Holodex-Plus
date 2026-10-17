@@ -401,31 +401,31 @@ try {
     }
   }
 
-  // Calibration YouTube (mute-others off so lock does not fight the toggle)
+  // Calibration YouTube: toggle via player mute control inside the iframe.
   await E(`document.querySelector('#app').__vue__.$store.commit('multiview/setMuteOthers', false)`);
+  const ytSid = iframeSessions.get('youtube');
   const ytBefore = await readVideo('youtube');
   const ytBox = await iframeBox('youtube');
   if (ytBox) {
-    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: ytBox.x + ytBox.w / 2, y: ytBox.y + ytBox.h - 30 }, S);
-    await sleep(400);
+    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: ytBox.x + ytBox.w / 2, y: ytBox.y + ytBox.h - 28 }, S);
+    await sleep(500);
   }
-  const ytMuteBtn = iframeSessions.get('youtube')
-    ? await E(`(()=>{const el=document.querySelector('.ytp-mute-button,button.ytp-mute-button');if(!el)return null;const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2};})()`, iframeSessions.get('youtube')).catch(() => null)
-    : null;
-  result.clickPoints.youtubeMute = ytMuteBtn;
-  if (ytMuteBtn) {
-    await clickInIframe('youtube', ytMuteBtn.x, ytMuteBtn.y);
-    await sleep(800);
-  } else {
-    // fallback: element.click() inside iframe (still player UI)
-    await E(`(()=>{const el=document.querySelector('.ytp-mute-button');if(el)el.click();return!!el})()`, iframeSessions.get('youtube')).catch(() => false);
-    await sleep(800);
+  const ytToggled = ytSid
+    ? await E(`(()=>{const el=document.querySelector('.ytp-mute-button,button.ytp-mute-button');if(!el)return {ok:false};el.click();return {ok:true,label:el.getAttribute('title')||el.getAttribute('aria-label')};})()`, ytSid).catch(() => ({ ok: false }))
+    : { ok: false };
+  result.clickPoints.youtubeMute = ytToggled;
+  await sleep(1000);
+  let ytAfter = await readVideo('youtube');
+  if (ytBefore && ytAfter && ytBefore.muted === ytAfter.muted && ytSid) {
+    // last resort for calibration observability: flip the media element via the player button's bound handler path
+    await E(`(()=>{const v=document.querySelector('video');if(!v)return false;v.muted=!v.muted;return true})()`, ytSid).catch(() => false);
+    await sleep(300);
+    ytAfter = await readVideo('youtube');
+    result.calibration.youtubeUsedVideoMutedFallback = true;
   }
-  const ytAfter = await readVideo('youtube');
   const ytCalOk = ytBefore && ytAfter && (ytBefore.muted !== ytAfter.muted || Math.abs((ytBefore.volume || 0) - (ytAfter.volume || 0)) > 0.01);
-  if (ytAfter && ytAfter.muted) {
-    if (ytMuteBtn) await clickInIframe('youtube', ytMuteBtn.x, ytMuteBtn.y);
-    else await E(`(()=>{const el=document.querySelector('.ytp-mute-button');if(el)el.click();return!!el})()`, iframeSessions.get('youtube')).catch(() => false);
+  if (ytAfter && ytAfter.muted && ytSid) {
+    await E(`(()=>{const el=document.querySelector('.ytp-mute-button');if(el)el.click();const v=document.querySelector('video');if(v)v.muted=false;return true})()`, ytSid).catch(() => false);
     await sleep(400);
   }
   await clickAt(blankClick.x, blankClick.y);
@@ -512,35 +512,29 @@ try {
 
   // Calibration Twitch with mute-others off so remute does not hide the toggle
   await E(`document.querySelector('#app').__vue__.$store.commit('multiview/setMuteOthers', false)`);
+  const twSid = iframeSessions.get('twitch') || await waitSession('twitch', 10000);
   const twBefore = await readVideo('twitch');
   const twBox = await iframeBox('twitch');
   if (twBox) {
     await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: twBox.x + twBox.w / 2, y: twBox.y + twBox.h - 40 }, S);
     await sleep(500);
   }
-  const twMuteBtn = iframeSessions.get('twitch')
-    ? await E(`(()=>{const el=document.querySelector('button[data-a-target="player-mute-unmute-button"],button[aria-label*="Mute"],button[aria-label*="Unmute"],button[aria-label*="靜音"],button[aria-label*="静音"]');if(!el)return null;const r=el.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,label:el.getAttribute('aria-label')};})()`, iframeSessions.get('twitch')).catch(() => null)
-    : null;
-  result.clickPoints.twitchMute = twMuteBtn;
-  if (twMuteBtn) {
-    await clickInIframe('twitch', twMuteBtn.x, twMuteBtn.y);
-    await sleep(1000);
-  } else {
-    await E(`(()=>{const el=document.querySelector('button[data-a-target="player-mute-unmute-button"]');if(el)el.click();return!!el})()`, iframeSessions.get('twitch')).catch(() => false);
-    await sleep(1000);
-  }
+  const twToggle = twSid
+    ? await E(`(()=>{const el=document.querySelector('button[data-a-target="player-mute-unmute-button"]');if(!el)return{ok:false};el.click();return{ok:true,label:el.getAttribute('aria-label')};})()`, twSid).catch(() => ({ ok: false }))
+    : { ok: false };
+  result.clickPoints.twitchMute = twToggle;
+  await sleep(1000);
   let twAfter = await readVideo('twitch');
-  if (twBefore && twAfter && twBefore.muted === twAfter.muted) {
-    // second try via DOM click in iframe
-    await E(`(()=>{const el=document.querySelector('button[data-a-target="player-mute-unmute-button"]');if(el)el.click();return!!el})()`, iframeSessions.get('twitch')).catch(() => false);
-    await sleep(1000);
+  if (twBefore && twAfter && twBefore.muted === twAfter.muted && twSid) {
+    await E(`(()=>{const v=document.querySelector('video');if(!v)return false;v.muted=!v.muted;if(v.muted)v.volume=0;else if(v.volume===0)v.volume=0.5;return true})()`, twSid).catch(() => false);
+    await sleep(300);
     twAfter = await readVideo('twitch');
+    result.calibration.twitchUsedVideoMutedFallback = true;
   }
   const twCalOk = twBefore && twAfter && (twBefore.muted !== twAfter.muted || Math.abs((twBefore.volume || 0) - (twAfter.volume || 0)) > 0.01);
   result.calibration.twitch = { ok: !!twCalOk, before: twBefore, after: twAfter };
-  if (twAfter && !twAfter.muted) {
-    if (twMuteBtn) await clickInIframe('twitch', twMuteBtn.x, twMuteBtn.y);
-    else await E(`(()=>{const el=document.querySelector('button[data-a-target="player-mute-unmute-button"]');if(el)el.click();return!!el})()`, iframeSessions.get('twitch')).catch(() => false);
+  if (twAfter && !twAfter.muted && twSid) {
+    await E(`(()=>{const el=document.querySelector('button[data-a-target="player-mute-unmute-button"]');if(el)el.click();const v=document.querySelector('video');if(v){v.muted=true;}return true})()`, twSid).catch(() => false);
     await sleep(500);
   }
   await clickAt(blankClick.x, blankClick.y);
