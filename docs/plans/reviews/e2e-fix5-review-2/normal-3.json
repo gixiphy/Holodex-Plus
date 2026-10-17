@@ -1,0 +1,359 @@
+{
+ "label": "review7-normal-3",
+ "mode": "normal",
+ "extDir": "/Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/dist_chrome",
+ "versions": {
+  "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "vue": "2.7.8"
+ },
+ "picks": {
+  "twitch": "eslcs",
+  "youtube": "1-LpQekNa9g",
+  "method": "default-env-or-plan"
+ },
+ "calibration": {},
+ "scenarios": {},
+ "twitchObserved": null,
+ "vIsRefErrors": 0,
+ "updateStateMessages": 0,
+ "twitchCommandsReceived": {
+  "mute": 0,
+  "unmute": 0
+ },
+ "twitchCommandLog": [],
+ "audioLockWarnings": [
+  {
+   "t": 1792265904501,
+   "type": "log",
+   "text": "[Holodex+] Activated"
+  },
+  {
+   "t": 1792265905019,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.login.twitterMsg.0' with 'en' locale."
+  },
+  {
+   "t": 1792265905020,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.home' with 'en' locale."
+  },
+  {
+   "t": 1792265905020,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.favorites' with 'en' locale."
+  },
+  {
+   "t": 1792265905020,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.channels' with 'en' locale."
+  },
+  {
+   "t": 1792265905020,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.playlist' with 'en' locale."
+  },
+  {
+   "t": 1792265905020,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.multiview' with 'en' locale."
+  },
+  {
+   "t": 1792265905020,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.about' with 'en' locale."
+  },
+  {
+   "t": 1792265905020,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.settings' with 'en' locale."
+  },
+  {
+   "t": 1792265905022,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.favorites' with 'en' locale."
+  },
+  {
+   "t": 1792265905022,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.favorites.manageFavorites' with 'en' locale."
+  },
+  {
+   "t": 1792265905028,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.favorites.showall' with 'en' locale."
+  },
+  {
+   "t": 1792265905028,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.channels.sortOptions.org' with 'en' locale."
+  },
+  {
+   "t": 1792265905029,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.search.searchLabel' with 'en' locale."
+  },
+  {
+   "t": 1792265905029,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  },
+  {
+   "t": 1792265905029,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.nowSupportsMultiOrg' with 'en' locale."
+  },
+  {
+   "t": 1792265905029,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.loginCallToAction' with 'en' locale."
+  },
+  {
+   "t": 1792265905031,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.search.searchLabel' with 'en' locale."
+  },
+  {
+   "t": 1792265905033,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath '$vuetify.noDataText' with 'en' locale."
+  },
+  {
+   "t": 1792265905035,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.reportDialog.success' with 'en' locale."
+  },
+  {
+   "t": 1792265905035,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  },
+  {
+   "t": 1792265905036,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.login.linkAcc' with 'en' locale."
+  },
+  {
+   "t": 1792265905036,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  },
+  {
+   "t": 1792265905319,
+   "type": "warning",
+   "text": "[vue-i18n] Value of key '$vuetify.noDataText' is not a string or function !"
+  },
+  {
+   "t": 1792265905319,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath '$vuetify.noDataText' with 'en' locale."
+  },
+  {
+   "t": 1792265905506,
+   "type": "error",
+   "text": "[Vue warn]: The computed property \"hidePlaceholder\" is already defined as a prop.\n\nfound in\n\n---> <VideoSelector> at src/components/multiview/VideoSelector.vue\n       <VToolbar>\n         <MultiviewToolbar> at src/components/multiview/MultiviewToolbar.vue\n           <MultiView> at src/views/MultiView.vue\n             <VMain>\n               <VApp>\n                 <App> at src/App.vue\n              "
+  },
+  {
+   "t": 1792265905717,
+   "type": "log",
+   "text": "[Holodex+] yt-watch script loaded"
+  },
+  {
+   "t": 1792265905781,
+   "type": "log",
+   "text": "[Holodex+] yt-watch script loaded"
+  }
+ ],
+ "pageExceptions": [
+  {
+   "t": 1792265905718,
+   "message": "TypeError: Cannot read properties of null (reading 'length')\n    at https://holodex.net/assets/main.fbfbbe9c.js:15:32230\n    at Array.map (<anonymous>)\n    at t.fetchVideoData (https://holodex.net/assets/main.fbfbbe9c.js:15:32168)",
+   "stackUrls": [
+    "https://holodex.net/assets/main.fbfbbe9c.js"
+   ],
+   "raw": "{\"exceptionId\":1,\"text\":\"Uncaught (in promise)\",\"lineNumber\":14,\"columnNumber\":32229,\"scriptId\":\"13\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"\",\"scriptId\":\"13\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"lineNumber\":14,\"columnNumber\":32229},{\"functionName\":\"fetchVideoData\",\"scriptId\":\"13\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"lineNumber\":14,\"columnNumber\":32167}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"TypeError\",\"description\":\"TypeError: Cannot read properties of null (reading 'length')\\n    at https://holodex.net/assets/main.fbfbbe9c.js:15:32230\\n    at Array.map (<anonymous>)\\n    at t.fetchVideoData (https://holodex.net/assets/main.fbfbbe9c.js:15:32168)\",\"objectId\":\"-2281276777048830989.2.3\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"TypeError: Cannot read properties of null (reading 'length')\\n    at https://holodex.net/assets/main.fbfbbe9c.js:15:32230\\n    at Array.map (<anonymous>)\\n    at t.fetchVideoData (https://holodex.net/assets/main.fbfbbe9c.js:15:32168)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"TypeError: Cannot read properties of null (reading…s://holodex.net/assets/main.fbfbbe9c.js:15:32168)\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Cannot read properties of null (reading 'length')\"}]}},\"executionContextId\":2}"
+  },
+  {
+   "t": 1792265907524,
+   "message": "TypeError: this.player.getCurrentTime is not a function\n    at o.getCurrentTime (https://holodex.net/assets/TwitchPlayer.56c23ec6.js:1:1568)\n    at https://holodex.net/assets/MultiView.8cbb4dab.js:7:31365",
+   "stackUrls": [
+    "https://holodex.net/assets/TwitchPlayer.56c23ec6.js",
+    "https://holodex.net/assets/MultiView.8cbb4dab.js"
+   ],
+   "raw": "{\"exceptionId\":2,\"text\":\"Uncaught (in promise)\",\"lineNumber\":0,\"columnNumber\":1567,\"scriptId\":\"33\",\"url\":\"https://holodex.net/assets/TwitchPlayer.56c23ec6.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"getCurrentTime\",\"scriptId\":\"33\",\"url\":\"https://holodex.net/assets/TwitchPlayer.56c23ec6.js\",\"lineNumber\":0,\"columnNumber\":1567},{\"functionName\":\"\",\"scriptId\":\"23\",\"url\":\"https://holodex.net/assets/MultiView.8cbb4dab.js\",\"lineNumber\":6,\"columnNumber\":31364}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"TypeError\",\"description\":\"TypeError: this.player.getCurrentTime is not a function\\n    at o.getCurrentTime (https://holodex.net/assets/TwitchPlayer.56c23ec6.js:1:1568)\\n    at https://holodex.net/assets/MultiView.8cbb4dab.js:7:31365\",\"objectId\":\"-2281276777048830989.2.4\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"TypeError: this.player.getCurrentTime is not a function\\n    at o.getCurrentTime (https://holodex.net/assets/TwitchPlayer.56c23ec6.js:1:1568)\\n    at https://holodex.net/assets/MultiView.8cbb4dab.js:7:31365\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"TypeError: this.player.getCurrentTime is not a fun…/holodex.net/assets/MultiView.8cbb4dab.js:7:31365\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"this.player.getCurrentTime is not a function\"}]}},\"executionContextId\":2}"
+  }
+ ],
+ "harnessErrors": [],
+ "hostExceptions": [
+  {
+   "t": 1792265905718,
+   "message": "TypeError: Cannot read properties of null (reading 'length')\n    at https://holodex.net/assets/main.fbfbbe9c.js:15:32230\n    at Array.map (<anonymous>)\n    at t.fetchVideoData (https://holodex.net/assets/main.fbfbbe9c.js:15:32168)",
+   "stackUrls": [
+    "https://holodex.net/assets/main.fbfbbe9c.js"
+   ],
+   "raw": "{\"exceptionId\":1,\"text\":\"Uncaught (in promise)\",\"lineNumber\":14,\"columnNumber\":32229,\"scriptId\":\"13\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"\",\"scriptId\":\"13\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"lineNumber\":14,\"columnNumber\":32229},{\"functionName\":\"fetchVideoData\",\"scriptId\":\"13\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"lineNumber\":14,\"columnNumber\":32167}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"TypeError\",\"description\":\"TypeError: Cannot read properties of null (reading 'length')\\n    at https://holodex.net/assets/main.fbfbbe9c.js:15:32230\\n    at Array.map (<anonymous>)\\n    at t.fetchVideoData (https://holodex.net/assets/main.fbfbbe9c.js:15:32168)\",\"objectId\":\"-2281276777048830989.2.3\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"TypeError: Cannot read properties of null (reading 'length')\\n    at https://holodex.net/assets/main.fbfbbe9c.js:15:32230\\n    at Array.map (<anonymous>)\\n    at t.fetchVideoData (https://holodex.net/assets/main.fbfbbe9c.js:15:32168)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"TypeError: Cannot read properties of null (reading…s://holodex.net/assets/main.fbfbbe9c.js:15:32168)\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Cannot read properties of null (reading 'length')\"}]}},\"executionContextId\":2}"
+  },
+  {
+   "t": 1792265907524,
+   "message": "TypeError: this.player.getCurrentTime is not a function\n    at o.getCurrentTime (https://holodex.net/assets/TwitchPlayer.56c23ec6.js:1:1568)\n    at https://holodex.net/assets/MultiView.8cbb4dab.js:7:31365",
+   "stackUrls": [
+    "https://holodex.net/assets/TwitchPlayer.56c23ec6.js",
+    "https://holodex.net/assets/MultiView.8cbb4dab.js"
+   ],
+   "raw": "{\"exceptionId\":2,\"text\":\"Uncaught (in promise)\",\"lineNumber\":0,\"columnNumber\":1567,\"scriptId\":\"33\",\"url\":\"https://holodex.net/assets/TwitchPlayer.56c23ec6.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"getCurrentTime\",\"scriptId\":\"33\",\"url\":\"https://holodex.net/assets/TwitchPlayer.56c23ec6.js\",\"lineNumber\":0,\"columnNumber\":1567},{\"functionName\":\"\",\"scriptId\":\"23\",\"url\":\"https://holodex.net/assets/MultiView.8cbb4dab.js\",\"lineNumber\":6,\"columnNumber\":31364}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"TypeError\",\"description\":\"TypeError: this.player.getCurrentTime is not a function\\n    at o.getCurrentTime (https://holodex.net/assets/TwitchPlayer.56c23ec6.js:1:1568)\\n    at https://holodex.net/assets/MultiView.8cbb4dab.js:7:31365\",\"objectId\":\"-2281276777048830989.2.4\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"TypeError: this.player.getCurrentTime is not a function\\n    at o.getCurrentTime (https://holodex.net/assets/TwitchPlayer.56c23ec6.js:1:1568)\\n    at https://holodex.net/assets/MultiView.8cbb4dab.js:7:31365\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"TypeError: this.player.getCurrentTime is not a fun…/holodex.net/assets/MultiView.8cbb4dab.js:7:31365\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"this.player.getCurrentTime is not a function\"}]}},\"executionContextId\":2}"
+  }
+ ],
+ "extensionExceptions": [],
+ "scenarioErrors": [],
+ "verdict": "SKIP",
+ "errors": [],
+ "clickPoints": {
+  "youtubePlay": {
+   "x": 756,
+   "y": 422,
+   "localX": 734,
+   "localY": 336,
+   "selector": ".ytmCuedOverlayPlayButton",
+   "sid": "54856BFCD2DC0D22E3E5AD30F4E44380"
+  },
+  "blank": {
+   "x": 1472,
+   "y": 789,
+   "tag": "DIV",
+   "cls": "mv-background",
+   "samples": [
+    {
+     "x": 1472,
+     "y": 789,
+     "tag": "DIV",
+     "cls": "mv-background"
+    }
+   ]
+  },
+  "twitchPlay": {
+   "x": 1134.5,
+   "y": 297.5,
+   "selector": "iframe-center-fallback"
+  }
+ },
+ "toggleLog": [],
+ "focusEvents": [],
+ "extensionId": "oomfamdacecpbodnlfojpkfhjcigldpc",
+ "step": "calibration-twitch-mounted",
+ "mountDiagnostics": {
+  "body": "HOLOLIVE\n82h\n12h\n4h\n3h\n2h\n1h\n2h\n12 x 16\n提示：你可以在這裡切換團體！\n登入以自訂您的收藏",
+  "iframe": "<iframe src=\"https://player.twitch.tv?autoplay=false&amp;channel=eslcs&amp;height=720&amp;muted=true&amp;parent=holodex.net&amp;playsinline=true&amp;referrer=https%3A%2F%2Fholodex.net%2Fmultiview&amp;width=1280\" allowfullscreen=\"\" scrolling=\"no\" frameborder=\"0\" allow=\"autoplay; fullscreen\" title=\"Twitch\" sandbox=\"allow-modals allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-storage-access-by-user-activation\" width=\"1280\" height=\"720\" data-gtm-yt-inspected-9=\"true\"></iframe>",
+  "box": {
+   "x": 778,
+   "y": 86,
+   "width": 713,
+   "height": 423,
+   "top": 86,
+   "right": 1491,
+   "bottom": 509,
+   "left": 778
+  }
+ },
+ "frameDiagnostics": {
+  "targets": [
+   {
+    "type": "service_worker",
+    "url": "chrome-extension://fignfifoniblkonapihmkfakmlgkbkcf/service_worker.js"
+   },
+   {
+    "type": "service_worker",
+    "url": "chrome-extension://oomfamdacecpbodnlfojpkfhjcigldpc/service-worker-loader.js"
+   },
+   {
+    "type": "service_worker",
+    "url": "chrome-extension://ghbmnnjooekpmoecnnnilnnbdlolhkhi/service_worker_bin_prod.js"
+   },
+   {
+    "type": "browser_ui",
+    "url": "chrome://omnibox-popup.top-chrome/omnibox_popup_aim.html"
+   },
+   {
+    "type": "page",
+    "url": "about:blank"
+   },
+   {
+    "type": "background_page",
+    "url": "chrome-extension://nkeimhogjdpnpccoofpliimaahmaaome/background.html"
+   },
+   {
+    "type": "background_page",
+    "url": "chrome-extension://nmmhkkegccagdldgiimedpiccmgmieda/_generated_background_page.html"
+   },
+   {
+    "type": "browser_ui",
+    "url": "chrome://omnibox-popup.top-chrome/"
+   },
+   {
+    "type": "page",
+    "url": "https://holodex.net/multiview"
+   },
+   {
+    "type": "iframe",
+    "url": "https://www.youtube.com/embed/1-LpQekNa9g?playsinline=1&cc_lang_pref=zh-Hant&hl=zh-Hant&enablejsapi=1&origin=https%3A%2F%2Fholodex.net&widgetid=1&forigin=https%3A%2F%2Fholodex.net%2Fmultiview&aoriginsup=1&vf=6"
+   }
+  ],
+  "frames": [
+   {
+    "id": "3217808634719DE36515AC769F0901E1",
+    "loaderId": "B26BF9FAC86599FA5D732EA215B7E3FC",
+    "url": "https://holodex.net/multiview",
+    "domainAndRegistry": "holodex.net",
+    "securityOrigin": "https://holodex.net",
+    "securityOriginDetails": {
+     "isLocalhost": false
+    },
+    "mimeType": "text/html",
+    "adFrameStatus": {
+     "adFrameType": "none"
+    },
+    "secureContextType": "Secure",
+    "crossOriginIsolatedContextType": "NotIsolated",
+    "gatedAPIFeatures": []
+   },
+   {
+    "id": "94E835F7D42DC1656995CE40340D6E1E",
+    "parentId": "3217808634719DE36515AC769F0901E1",
+    "loaderId": "4F327176A0DACED2EB67F2CAC909BE12",
+    "name": "",
+    "url": "",
+    "domainAndRegistry": "",
+    "securityOrigin": "://",
+    "securityOriginDetails": {
+     "isLocalhost": false
+    },
+    "mimeType": "text/html",
+    "adFrameStatus": {
+     "adFrameType": "none",
+     "explanations": []
+    },
+    "secureContextType": "Secure",
+    "crossOriginIsolatedContextType": "NotIsolated",
+    "gatedAPIFeatures": []
+   }
+  ]
+ },
+ "playbackDiagnostics": {
+  "twitch": {
+   "url": "https://player.twitch.tv/?autoplay=false&channel=eslcs&height=720&muted=true&parent=holodex.net&playsinline=true&referrer=https%3A%2F%2Fholodex.net%2Fmultiview&width=1280",
+   "ready": "interactive",
+   "body": "",
+   "videos": 0
+  }
+ },
+ "playback": {
+  "youtube": {
+   "muted": false,
+   "volume": 1,
+   "paused": false,
+   "readyState": 4,
+   "currentTime": 46836.901515,
+   "currentSrcEmpty": false
+  },
+  "twitch": null
+ },
+ "skipReason": "no-live-twitch"
+}
