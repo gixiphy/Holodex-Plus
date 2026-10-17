@@ -1,0 +1,58 @@
+{
+ "label": "review6-normal-1",
+ "mode": "normal",
+ "extDir": "/Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/dist_chrome",
+ "versions": {
+  "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "vue": "2.7.8"
+ },
+ "picks": {
+  "twitch": "eslcs",
+  "youtube": "1-LpQekNa9g",
+  "method": "default-env-or-plan"
+ },
+ "calibration": {},
+ "scenarios": {},
+ "twitchObserved": null,
+ "vIsRefErrors": 0,
+ "updateStateMessages": 0,
+ "twitchCommandsReceived": {
+  "mute": 0,
+  "unmute": 0
+ },
+ "audioLockWarnings": [
+  {
+   "t": 1792261064483,
+   "type": "log",
+   "text": "[Holodex+] Activated"
+  },
+  {
+   "t": 1792261067024,
+   "type": "log",
+   "text": "[Holodex+] yt-watch script loaded"
+  },
+  {
+   "t": 1792261067254,
+   "type": "log",
+   "text": "[Holodex+] yt-watch script loaded"
+  }
+ ],
+ "verdict": "FAIL",
+ "errors": [
+  [
+   "exception",
+   "{\"exceptionId\":1,\"text\":\"Uncaught (in promise)\",\"lineNumber\":14,\"columnNumber\":32229,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"lineNumber\":14,\"columnNumber\":32229},{\"functionName\":\"fetchVideoData\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"lineNumber\":14,\"columnNumber\":32167}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"TypeError\",\"description\":\"TypeError: Cannot read properties of null (reading 'length')\\n    at https://holodex.net/assets/main.fbfbbe9c.js:15:32230\\n    at Array.map (<anonymous>)\\n    at t.fetchVideoData (https://holodex.net/assets/main.fbfbbe9c.js:15:32168)\",\"objectId\":\"2470098867240499237.2.3\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"TypeError: Cannot read properties of null (reading 'length')\\n    at https://holodex.net/assets/main.fbfbbe9c.js:15:32230\\n    at Array.map (<anonymous>)\\n    at t.fetchVideoData (https://holodex.net/assets/main.fbfbbe9c.js:15:32168)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"TypeError: Cannot read properties of null (reading…s://holodex.net/assets/main.fbfbbe9c.js:15:32168)\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Cannot read properties of null (reading 'length')\"}]}},\"executionContextId\":2}"
+  ],
+  "Error: missing iframe/session: twitch\n    at controlPoint (file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:293:29)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async clickPlay (file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:304:16)\n    at async waitPlaying (file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:320:35)\n    at async file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:375:8"
+ ],
+ "clickPoints": {
+  "blank": {
+   "x": 20,
+   "y": 20
+  }
+ },
+ "extensionId": "oomfamdacecpbodnlfojpkfhjcigldpc",
+ "step": "calibration",
+ "stderr": "Trying to load the allocator multiple times. This is *not* supported.\n[78794:21064462:1018/021745.943331:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\nCreated TensorFlow Lite XNNPACK delegate for CPU.\n",
+ "failReason": "exception"
+}

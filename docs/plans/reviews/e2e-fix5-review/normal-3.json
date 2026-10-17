@@ -1,0 +1,237 @@
+{
+ "label": "review6-normal-3",
+ "mode": "normal",
+ "extDir": "/Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/dist_chrome",
+ "versions": {
+  "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "vue": "2.7.8"
+ },
+ "picks": {
+  "twitch": "eslcs",
+  "youtube": "1-LpQekNa9g",
+  "method": "default-env-or-plan"
+ },
+ "calibration": {},
+ "scenarios": {},
+ "twitchObserved": null,
+ "vIsRefErrors": 0,
+ "updateStateMessages": 0,
+ "twitchCommandsReceived": {
+  "mute": 0,
+  "unmute": 0
+ },
+ "audioLockWarnings": [
+  {
+   "t": 1792261211974,
+   "type": "log",
+   "text": "[Holodex+] Activated"
+  },
+  {
+   "t": 1792261212487,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.login.twitterMsg.0' with 'en' locale."
+  },
+  {
+   "t": 1792261212488,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.home' with 'en' locale."
+  },
+  {
+   "t": 1792261212488,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.favorites' with 'en' locale."
+  },
+  {
+   "t": 1792261212488,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.channels' with 'en' locale."
+  },
+  {
+   "t": 1792261212488,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.playlist' with 'en' locale."
+  },
+  {
+   "t": 1792261212488,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.multiview' with 'en' locale."
+  },
+  {
+   "t": 1792261212488,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.about' with 'en' locale."
+  },
+  {
+   "t": 1792261212488,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.settings' with 'en' locale."
+  },
+  {
+   "t": 1792261212490,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.favorites' with 'en' locale."
+  },
+  {
+   "t": 1792261212490,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.favorites.manageFavorites' with 'en' locale."
+  },
+  {
+   "t": 1792261212496,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.favorites.showall' with 'en' locale."
+  },
+  {
+   "t": 1792261212497,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.channels.sortOptions.org' with 'en' locale."
+  },
+  {
+   "t": 1792261212497,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.search.searchLabel' with 'en' locale."
+  },
+  {
+   "t": 1792261212497,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  },
+  {
+   "t": 1792261212497,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.nowSupportsMultiOrg' with 'en' locale."
+  },
+  {
+   "t": 1792261212498,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.loginCallToAction' with 'en' locale."
+  },
+  {
+   "t": 1792261212499,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.search.searchLabel' with 'en' locale."
+  },
+  {
+   "t": 1792261212501,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath '$vuetify.noDataText' with 'en' locale."
+  },
+  {
+   "t": 1792261212503,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.reportDialog.success' with 'en' locale."
+  },
+  {
+   "t": 1792261212504,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  },
+  {
+   "t": 1792261212504,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.login.linkAcc' with 'en' locale."
+  },
+  {
+   "t": 1792261212504,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  },
+  {
+   "t": 1792261212785,
+   "type": "warning",
+   "text": "[vue-i18n] Value of key '$vuetify.noDataText' is not a string or function !"
+  },
+  {
+   "t": 1792261212785,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath '$vuetify.noDataText' with 'en' locale."
+  },
+  {
+   "t": 1792261212994,
+   "type": "error",
+   "text": "[Vue warn]: The computed property \"hidePlaceholder\" is already defined as a prop.\n\nfound in\n\n---> <VideoSelector> at src/components/multiview/VideoSelector.vue\n       <VToolbar>\n         <MultiviewToolbar> at src/components/multiview/MultiviewToolbar.vue\n           <MultiView> at src/views/MultiView.vue\n             <VMain>\n               <VApp>\n                 <App> at src/App.vue\n              "
+  },
+  {
+   "t": 1792261213230,
+   "type": "log",
+   "text": "[Holodex+] yt-watch script loaded"
+  },
+  {
+   "t": 1792261213294,
+   "type": "log",
+   "text": "[Holodex+] yt-watch script loaded"
+  }
+ ],
+ "verdict": "FAIL",
+ "errors": [
+  [
+   "exception",
+   "{\"exceptionId\":1,\"text\":\"Uncaught (in promise)\",\"lineNumber\":14,\"columnNumber\":32229,\"scriptId\":\"13\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"\",\"scriptId\":\"13\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"lineNumber\":14,\"columnNumber\":32229},{\"functionName\":\"fetchVideoData\",\"scriptId\":\"13\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"lineNumber\":14,\"columnNumber\":32167}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"TypeError\",\"description\":\"TypeError: Cannot read properties of null (reading 'length')\\n    at https://holodex.net/assets/main.fbfbbe9c.js:15:32230\\n    at Array.map (<anonymous>)\\n    at t.fetchVideoData (https://holodex.net/assets/main.fbfbbe9c.js:15:32168)\",\"objectId\":\"-8940339455941203135.2.3\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"TypeError: Cannot read properties of null (reading 'length')\\n    at https://holodex.net/assets/main.fbfbbe9c.js:15:32230\\n    at Array.map (<anonymous>)\\n    at t.fetchVideoData (https://holodex.net/assets/main.fbfbbe9c.js:15:32168)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"TypeError: Cannot read properties of null (reading…s://holodex.net/assets/main.fbfbbe9c.js:15:32168)\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Cannot read properties of null (reading 'length')\"}]}},\"executionContextId\":2}"
+  ],
+  "Error: missing iframe/session: twitch\n    at controlPoint (file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:304:90)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async clickPlay (file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:315:16)\n    at async waitPlaying (file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:331:35)\n    at async file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:390:8"
+ ],
+ "clickPoints": {
+  "blank": {
+   "x": 20,
+   "y": 20
+  }
+ },
+ "extensionId": "oomfamdacecpbodnlfojpkfhjcigldpc",
+ "step": "calibration-twitch-mounted",
+ "mountDiagnostics": {
+  "body": "首頁\n我的收藏\n頻道列表\n播放清單\n多窗工具\nMusicdex\n關於本站\n網站設定\n我的收藏\n管理我的收藏\n\n\n© 2020 Holodex\n繁體中文\nHOLOLIVE\n80h\n10h\n10h\n5h\n2h\n1h\n19m\n12 x 12\n提示：你可以在這裡切換團體！\n登入以自訂您的收藏",
+  "iframe": "<iframe src=\"https://player.twitch.tv?autoplay=false&amp;channel=eslcs&amp;height=720&amp;muted=true&amp;parent=holodex.net&amp;playsinline=true&amp;referrer=https%3A%2F%2Fholodex.net%2Fmultiview&amp;width=1280\" allowfullscreen=\"\" scrolling=\"no\" frameborder=\"0\" allow=\"autoplay; fullscreen\" title=\"Twitch\" sandbox=\"allow-modals allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-storage-access-by-user-activation\" width=\"1280\" height=\"720\" data-gtm-yt-inspected-9=\"true\"></iframe>",
+  "box": {
+   "x": 778,
+   "y": 86,
+   "width": 713,
+   "height": 299,
+   "top": 86,
+   "right": 1491,
+   "bottom": 385,
+   "left": 778
+  }
+ },
+ "frameDiagnostics": {
+  "targets": [
+   {
+    "type": "browser_ui",
+    "url": "chrome://omnibox-popup.top-chrome/omnibox_popup_aim.html"
+   },
+   {
+    "type": "page",
+    "url": "about:blank"
+   },
+   {
+    "type": "browser_ui",
+    "url": "chrome://omnibox-popup.top-chrome/"
+   },
+   {
+    "type": "page",
+    "url": "https://holodex.net/"
+   }
+  ],
+  "frames": [
+   {
+    "id": "69C8E9957BBF0202986EBD058F81515E",
+    "loaderId": "C5EA6639F218017BA296455FC47791EF",
+    "url": "https://holodex.net/",
+    "domainAndRegistry": "holodex.net",
+    "securityOrigin": "https://holodex.net",
+    "securityOriginDetails": {
+     "isLocalhost": false
+    },
+    "mimeType": "text/html",
+    "adFrameStatus": {
+     "adFrameType": "none"
+    },
+    "secureContextType": "Secure",
+    "crossOriginIsolatedContextType": "NotIsolated",
+    "gatedAPIFeatures": []
+   }
+  ]
+ },
+ "missingFrameBody": "首頁\n我的收藏\n頻道列表\n播放清單\n多窗工具\nMusicdex\n關於本站\n網站設定\n我的收藏\n管理我的收藏\n\n\n© 2020 Holodex\n繁體中文\nHolodex\n搜尋\n實況中\n7\n／即將開始\n24\n存檔\n剪輯\n80:28:34\nFLOW GLOW Station\nhololive FLOW GLOW\n實況中 • 281 人正在觀看\nArk\n10:17:51\n【ARK / 公民館ARK 】 凄まじい速度で成長 w/ けっつん 卯埜らび 日向まる【 #奏手イヅル 】\nIzuru Ch. 奏手イヅル\n實況中 • 228 人正在觀看\nArk\n9:54:27\n【 公民館ARK￤DAY3 】ジジババが恐竜の世界に降り立ちます / 奏手イヅル・けっつん・日向まる【 卯埜らび￤ゆにれいど! 】\n卯埜らび / Rabi Uno\n實況中 • 197 人正在觀看\nLeague_of_Legends\n5:13:56\n#LTK 今日も剣を研ぎチームの為に頑張るマン。練習！👾✨…なシン...\nとおこ\n實況中\nArk\n2:20:07\n【 #ホロ鯖ARK 】DAY9│ド深夜ARKでめちゃでか拠点作り!【ホロライブ/アキロゼ】\nアキロゼCh。Vtuber/ホロライブ所属\n實況中 • 1.37万 人正在觀看\nPokemon\n1:16:29\nDon't Make Me Gamble【POKÉMON FIRE RED | PART 6】\nCrimzon Ruze Ch. HOLOSTARS-EN\n實況中 • 398 人正在觀看\nTomb_Raider\n19:47\n【GUERILLA】CAN WE WIN AND GET LARA TO A HOSPITAL!?!?!?\nCecilia Immergreen Ch. hololive\n實況中 • 4240 人正在觀看\nCrime_Scene_Cleaner\n【CRIME SCENE CLEANER】im da cleaner\nGigi Murin Ch. hololive\n將於 3 小時內 開始實況 (05:00)\nHololive_Dreams\n【#ホロドリ】朝活☀#スプボの時間だよ🎣【風真いろは/ホロライブ】\nIroha ch. 風真いろは - holoX -\n將於 4 小時內 開始實況 (06:00)\nAce_Combat\n【ACE COMBAT 8: WINGS OF THEVE】Callsign: Meteorite67\nKoseki Bijou Ch. hololive\n將於 5 小時內 開始實況 (07:00)\nMorning\n【朝活雑談】このあとホロライブ甲子園2026本戦!!ドキドキだけどさんまありまっする💪🔥【白銀ノエル/ホロライブ】\nNoel Ch. 白銀ノエル\n將於 7 小時內 開始實況 (09:00)\nZenless_Zone_Zero\nMy F-First Time👉👈..【ZENLESS ZONE ZERO】\nMachina X Flayon Ch. HOLOSTARS-EN\n將於 7 小時內 開始實況 (09:00)\nCamera_Stream\n【HANDCAM】SHOUT OUT TO ALL MY VIET BADDIES, IT'S TIME TO MAKE SOME PHO BABY 🇻🇳🍜✨【HAKKAFE SPECIAL】\nBanzoin Hakka Ch. HOLOSTARS-EN\n將於 8 小時內 開始實況 (10:00)\nFears_to_Fathom\n【EN】Picking Up Where I Left Off | Fears to Fathom: Ironbark Lookout【Hyakuto Kyoko/Hololive】\nKyoko Ch. 百灯キョーコ ‐ アソビ★まわり隊!\n將於 8 小時內 開始實況 (10:00)\nOutfit_Reveal\n≪NEW OUTFIT REVEAL≫ Put on your mask its time to PARTY + BIG ANNOUNCEMENT #PartyRat\nHakos Baelz Ch. hololive\n將於 8 小時內 開始實況 (10:00)\n【Cyan Heart】selfie pov horror?\nJosuiji Shinri Ch. HOLOSTARS-EN\n將於 8 小時內 開始實況 (10:00)\n#PromiseMasquerade\nhololive English\n將於 9 小時內 開始實況 (11:15)\nSuperchat_Reading\n【Supadonoreading】THANK YOU FOR THE SUPPORT ALWAYS! #shorts【hololive ID 2nd Gen | Anya Melfissa】\nAnya Melfissa Ch. hololive\n將於 9 小時內 開始實況 (11:30)\nDragon_Quest\n【#2】閲覧注意!初見トルネコやるしゅばあああああああああああ!!!!!：Torneko's Great Adventure: Mystery Dungeon【ネタバレあり】\nSubaru Ch. 大空スバル\n將於 10 小時內 開始實況 (12:00)\nPower_Pros\n【 #ホロ甲2026 】ホロライブ甲子園2026本戦DAY2⚾️3D✨トーナメント戦‼️ #ホロ甲2026DAY2 【大神ミオ・白銀ノエル・宝鐘マリン・尾丸ポルカ・博衣こより・響咲リオナ/ホロライブ】\nKoyori ch. 博衣こより - holoX -\n將於 13 小時內 開始實況 (15:00)\nPower_Pros\n【パワプロ2026】3年目の集大成、目指せ甲子園!!!【負けたら即終了】#ひなみ通信 #由比河ひなみ #ACHRORA\nACHRORA - mekPark\n將於 13 小時內 開始實況 (15:30)\nGears_of_War\nガチムチ達のプランBが帰ってきたぞ~っ!#02-Gear of War: E-Day【獅白ぼたん/ホロライブ】\nBotan Ch.獅白ぼたん\n將於 15 小時內 開始實況 (17:00)\nAnimation\n「ホロのぐらふぃてぃ」#388\nhololive ホロライブ - VTuber Group\n將於 15 小時內 開始實況 (17:00)\nHololive_Dreams\n【hololive Dreams ホロライブドリームス】Let's Train More!~【hololive holoro | Anya Melfissa】\nAnya Melfissa Ch. hololive\n將於 18 小時內 開始實況 (20:00)\nMembersonly\n【ZOMILY - FREETALK】 HOW'S OCTOBER FOR YOU GUYS?? 【Kureiji Ollie】\nKureiji Ollie Ch. hololive\n將於 19 小時內 開始實況 (21:00)\nUrban_Myth_Dissolution_Center\n#3 深まる謎も、全部解き明かすよーー!!! | 都市伝説解体センター ※ネタバレ注意【百灯キョーコ/ホロライブ/アソビ★まわり隊!】\nKyoko Ch. 百灯キョーコ ‐ アソビ★まわり隊!\n將於 19 小時內 開始實況 (21:30)\nJudgment\n【#5】LOST JUDGMENT：裁かれざる記憶 ※ネタバレ有【水宮枢/ホロライブ】\nSu Ch. 水宮枢 - FLOW GLOW\n將於 19 小時內 開始實況 (21:30)\nBirthday\n【3D BIRTHDAY LIVE】GIGI ROOM PARTY!! YOU'RE INVITED!! #GGROOMPARTY\nGigi Murin Ch. hololive\n將於 2026/10/19 開始實況 (09:00)\nSinging\n【VISUAL NOVEL KARAOKE】Part 1 | Cuz There's So Many\nMachina X Flayon Ch. HOLOSTARS-EN\n將於 2026/10/19 開始實況 (09:00)\nSinging\n【 #歌うまスンギ歌枠リレー】HELLO!!! LET'S SING TOGETHER ~ !! 【こぼ・かなえる 様】\nKobo Kanaeru Ch. hololive\n將於 2026/10/19 開始實況 (20:30)\nTalk\n【#アキちょこナイパレ|第56回】タイムマシンで行くなら過去🆚未来 あなたはどっち?|シスターローズの懺悔室 🌹~深夜のひとくちラジオ~\nアキロゼCh。Vtuber/ホロライブ所属\n將於 2026/10/19 開始實況 (22:40)",
+ "stderr": "3:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/yj/9w2b892s44g0mq19rqnrrv_40000gn/T/): 86466658304B (80.528GiB) / 494332366848B (460.383GiB)\n[81331:21075461:1018/022030.311642:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log\n[81333:21075465:1018/022030.317432:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, ARM_64, command line: /Users/wuxianyou/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/wuxianyou/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=157.0.8089.0 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2\n[81333:21075465:1018/022030.317705:VERBOSE1:chrome/updater/updater.cc:378] OS version: 27.0.1, arch: arm64, System uptime (seconds): 300106, parent pid: 1\n[81333:21075465:1018/022030.318654:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/wuxianyou/Library/Application Support/Google/GoogleUpdater): 86466658304B (80.528GiB) / 494332366848B (460.383GiB)\n[81333:21075465:1018/022030.318673:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/yj/9w2b892s44g0mq19rqnrrv_40000gn/T/): 86466658304B (80.528GiB) / 494332366848B (460.383GiB)\n[81333:21075465:1018/022030.318714:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log\n[81331:21075461:1018/022030.318984:VERBOSE1:chrome/updater/crash_reporter.cc:123] Crash handler launched and ready.\n[81331:21075461:1018/022030.319402:VERBOSE1:chrome/updater/crash_client.cc:109] Found 0 completed crash reports\n[81331:21075461:1018/022030.319446:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports\n[81331:21075461:1018/022030.319492:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/wuxianyou/Library/Application Support/Google/RLZ/Crashpad/settings.dat: No such file or directory (2)\n[81331:21075461:1018/022030.319613:VERBOSE1:chrome/updater/updater.cc:107] Crash reporting initialized.\n[81331:21075461:1018/022030.319739:VERBOSE1:chrome/updater/ipc/update_service_internal_proxy_mojo.cc:61] Run\n[80927:21072889:1018/022036.271011:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\n[81331:21075461:1018/022047.087866:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0\n[81331:21075461:1018/022047.088337:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log\n[81331:21075461:1018/022047.088378:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--wake) returned 0.\n[81328:21075455:1018/022047.342544:VERBOSE1:chrome/updater/app/app_wakeall.cc:68] `/Users/wuxianyou/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake` exited 0\n[81328:21075443:1018/022047.342881:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0\n[81328:21075443:1018/022047.343845:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log\n[81328:21075443:1018/022047.343940:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--wake-all) returned 0.\n[81333:21075465:1018/022057.101760:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log\n[81333:21075465:1018/022057.101798:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--crash-handler) returned 0.\n[81330:21075447:1018/022057.103176:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log\n[81330:21075447:1018/022057.103363:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--crash-handler) returned 0.\n",
+ "failReason": "exception"
+}

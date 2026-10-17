@@ -1,0 +1,455 @@
+{
+ "label": "review6-fallback",
+ "mode": "fallback",
+ "extDir": "/Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/dist_chrome",
+ "versions": {
+  "chrome": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+  "vue": "2.7.8"
+ },
+ "picks": {
+  "twitch": "eslcs",
+  "youtube": "1-LpQekNa9g",
+  "method": "default-env-or-plan"
+ },
+ "calibration": {},
+ "scenarios": {},
+ "twitchObserved": true,
+ "vIsRefErrors": 34,
+ "updateStateMessages": 0,
+ "twitchCommandsReceived": {
+  "mute": 0,
+  "unmute": 0
+ },
+ "audioLockWarnings": [
+  {
+   "t": 1792261284687,
+   "type": "warning",
+   "text": "[Holodex+ AudioLock] Object"
+  },
+  {
+   "t": 1792261284687,
+   "type": "log",
+   "text": "[Holodex+] Activated"
+  },
+  {
+   "t": 1792261285183,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.login.twitterMsg.0' with 'en' locale."
+  },
+  {
+   "t": 1792261285184,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.home' with 'en' locale."
+  },
+  {
+   "t": 1792261285184,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.favorites' with 'en' locale."
+  },
+  {
+   "t": 1792261285185,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.channels' with 'en' locale."
+  },
+  {
+   "t": 1792261285185,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.playlist' with 'en' locale."
+  },
+  {
+   "t": 1792261285185,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.multiview' with 'en' locale."
+  },
+  {
+   "t": 1792261285185,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.about' with 'en' locale."
+  },
+  {
+   "t": 1792261285185,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.settings' with 'en' locale."
+  },
+  {
+   "t": 1792261285186,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.mainNav.favorites' with 'en' locale."
+  },
+  {
+   "t": 1792261285186,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.favorites.manageFavorites' with 'en' locale."
+  },
+  {
+   "t": 1792261285193,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.favorites.showall' with 'en' locale."
+  },
+  {
+   "t": 1792261285193,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.channels.sortOptions.org' with 'en' locale."
+  },
+  {
+   "t": 1792261285193,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.search.searchLabel' with 'en' locale."
+  },
+  {
+   "t": 1792261285193,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  },
+  {
+   "t": 1792261285194,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.nowSupportsMultiOrg' with 'en' locale."
+  },
+  {
+   "t": 1792261285194,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.loginCallToAction' with 'en' locale."
+  },
+  {
+   "t": 1792261285196,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.search.searchLabel' with 'en' locale."
+  },
+  {
+   "t": 1792261285197,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath '$vuetify.noDataText' with 'en' locale."
+  },
+  {
+   "t": 1792261285200,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'component.reportDialog.success' with 'en' locale."
+  },
+  {
+   "t": 1792261285200,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  },
+  {
+   "t": 1792261285200,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.login.linkAcc' with 'en' locale."
+  },
+  {
+   "t": 1792261285200,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath 'views.app.close_btn' with 'en' locale."
+  },
+  {
+   "t": 1792261285476,
+   "type": "warning",
+   "text": "[vue-i18n] Value of key '$vuetify.noDataText' is not a string or function !"
+  },
+  {
+   "t": 1792261285476,
+   "type": "warning",
+   "text": "[vue-i18n] Fall back to translate the keypath '$vuetify.noDataText' with 'en' locale."
+  },
+  {
+   "t": 1792261285688,
+   "type": "error",
+   "text": "[Vue warn]: The computed property \"hidePlaceholder\" is already defined as a prop.\n\nfound in\n\n---> <VideoSelector> at src/components/multiview/VideoSelector.vue\n       <VToolbar>\n         <MultiviewToolbar> at src/components/multiview/MultiviewToolbar.vue\n           <MultiView> at src/views/MultiView.vue\n             <VMain>\n               <VApp>\n                 <App> at src/App.vue\n              "
+  },
+  {
+   "t": 1792261285933,
+   "type": "log",
+   "text": "[Holodex+] yt-watch script loaded"
+  },
+  {
+   "t": 1792261285985,
+   "type": "log",
+   "text": "[Holodex+] yt-watch script loaded"
+  },
+  {
+   "t": 1792261289000,
+   "type": "warning",
+   "text": "MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 Playing listeners added. Use emitter.setMaxListeners() to increase limit\n    at c (https://assets.twitch.tv/assets/68199-885570d89ba43d2af314.js:1:38883)\n    at o.addListener (https://assets.twitch.tv/assets/68199-885570d89ba43d2af314.js:1:41435)\n    at t.on (https://assets.twitch.tv/assets/player-core-variant-a-5dc10d8b49"
+  },
+  {
+   "t": 1792261289000,
+   "type": "warning",
+   "text": "MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 Playing listeners added. Use emitter.setMaxListeners() to increase limit\n    at c (https://assets.twitch.tv/assets/68199-885570d89ba43d2af314.js:1:38883)\n    at o.addListener (https://assets.twitch.tv/assets/68199-885570d89ba43d2af314.js:1:41435)\n    at t.on (https://assets.twitch.tv/assets/player-core-variant-a-5dc10d8b49"
+  },
+  {
+   "t": 1792261290368,
+   "type": "warning",
+   "text": "02:21:30 - (playback-monitor) Play - moving to buffered region 0.009333 0"
+  },
+  {
+   "t": 1792261290368,
+   "type": "warning",
+   "text": "02:21:30 - (playback-monitor) Play - moving to buffered region 0.009333 0"
+  }
+ ],
+ "verdict": "FAIL",
+ "errors": [
+  [
+   "exception",
+   "{\"exceptionId\":1,\"text\":\"Uncaught (in promise)\",\"lineNumber\":14,\"columnNumber\":32229,\"scriptId\":\"15\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"\",\"scriptId\":\"15\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"lineNumber\":14,\"columnNumber\":32229},{\"functionName\":\"fetchVideoData\",\"scriptId\":\"15\",\"url\":\"https://holodex.net/assets/main.fbfbbe9c.js\",\"lineNumber\":14,\"columnNumber\":32167}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"TypeError\",\"description\":\"TypeError: Cannot read properties of null (reading 'length')\\n    at https://holodex.net/assets/main.fbfbbe9c.js:15:32230\\n    at Array.map (<anonymous>)\\n    at t.fetchVideoData (https://holodex.net/assets/main.fbfbbe9c.js:15:32168)\",\"objectId\":\"3486044188221626698.2.4\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"TypeError: Cannot read properties of null (reading 'length')\\n    at https://holodex.net/assets/main.fbfbbe9c.js:15:32230\\n    at Array.map (<anonymous>)\\n    at t.fetchVideoData (https://holodex.net/assets/main.fbfbbe9c.js:15:32168)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"TypeError: Cannot read properties of null (reading…s://holodex.net/assets/main.fbfbbe9c.js:15:32168)\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Cannot read properties of null (reading 'length')\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":2,\"text\":\"Uncaught (in promise)\",\"lineNumber\":0,\"columnNumber\":1567,\"scriptId\":\"34\",\"url\":\"https://holodex.net/assets/TwitchPlayer.56c23ec6.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"getCurrentTime\",\"scriptId\":\"34\",\"url\":\"https://holodex.net/assets/TwitchPlayer.56c23ec6.js\",\"lineNumber\":0,\"columnNumber\":1567},{\"functionName\":\"\",\"scriptId\":\"27\",\"url\":\"https://holodex.net/assets/MultiView.8cbb4dab.js\",\"lineNumber\":6,\"columnNumber\":31364}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"TypeError\",\"description\":\"TypeError: this.player.getCurrentTime is not a function\\n    at o.getCurrentTime (https://holodex.net/assets/TwitchPlayer.56c23ec6.js:1:1568)\\n    at https://holodex.net/assets/MultiView.8cbb4dab.js:7:31365\",\"objectId\":\"3486044188221626698.2.5\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"TypeError: this.player.getCurrentTime is not a function\\n    at o.getCurrentTime (https://holodex.net/assets/TwitchPlayer.56c23ec6.js:1:1568)\\n    at https://holodex.net/assets/MultiView.8cbb4dab.js:7:31365\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"TypeError: this.player.getCurrentTime is not a fun…/holodex.net/assets/MultiView.8cbb4dab.js:7:31365\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"this.player.getCurrentTime is not a function\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":3,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.6\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":4,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.7\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":5,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.8\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":6,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.9\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":7,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.10\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":8,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.11\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":9,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.12\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":10,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.13\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":11,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.14\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":12,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.15\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":13,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.16\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":14,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.17\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":15,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.18\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":16,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.19\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":17,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.20\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":18,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_sendCommand\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14686},{\"functionName\":\"setQuality\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":13789},{\"functionName\":\"\",\"scriptId\":\"34\",\"url\":\"https://holodex.net/assets/TwitchPlayer.56c23ec6.js\",\"lineNumber\":0,\"columnNumber\":1376},{\"functionName\":\"o.emit\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":2420},{\"functionName\":\"C._forwardEmbedEvents\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":16304}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._sendCommand (https://player.twitch.tv/js/embed/v1.js:1:14687)\\n    at _.setQuality (https://player.twitch.tv/js/embed/v1.js:1:13790)\\n    at o.<anonymous> (https://holodex.net/assets/TwitchPlayer.56c23ec6.js:1:1377)\\n    at o.emit (https://player.twitch.tv/js/embed/v1.js:1:2421)\\n    at C._forwardEmbedEvents (https://player.twitch.tv/js/embed/v1.js:1:16305)\",\"objectId\":\"3486044188221626698.2.21\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._sendCommand (https://player.twitch.tv/js/embed/v1.js:1:14687)\\n    at _.setQuality (https://player.twitch.tv/js/embed/v1.js:1:13790)\\n    at o.<anonymous> (https://holodex.net/assets/TwitchPlayer.56c23ec6.js:1:1377)\\n    at o.emit (https://player.twitch.tv/js/embed/v1.js:1:2421)\\n    at C._forwardEmbedEvents (https://player.twitch.tv/js/embed/v1.js:1:16305)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:16305)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":19,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.22\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":20,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.23\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":21,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.24\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":22,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.25\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":23,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.26\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":24,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.27\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":25,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.28\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":26,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.29\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":27,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.30\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":28,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.31\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":29,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.32\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":30,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.33\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":31,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.34\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":32,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.35\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":33,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.36\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":34,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.37\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":35,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.38\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  [
+   "exception",
+   "{\"exceptionId\":36,\"text\":\"Uncaught\",\"lineNumber\":4,\"columnNumber\":8645,\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"stackTrace\":{\"callFrames\":[{\"functionName\":\"get\",\"scriptId\":\"14\",\"url\":\"https://holodex.net/assets/vendor.be3ecd61.js\",\"lineNumber\":4,\"columnNumber\":8645},{\"functionName\":\"_handleResponses\",\"scriptId\":\"35\",\"url\":\"https://player.twitch.tv/js/embed/v1.js\",\"lineNumber\":0,\"columnNumber\":14958}]},\"exception\":{\"type\":\"object\",\"subtype\":\"error\",\"className\":\"DOMException\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"objectId\":\"3486044188221626698.2.39\",\"preview\":{\"type\":\"object\",\"subtype\":\"error\",\"description\":\"SecurityError: Failed to read a named property '__v_isRef' from 'Window': Blocked a frame with origin \\\"https://holodex.net\\\" from accessing a cross-origin frame.\\n    at _.get [as _embedWindow] (https://holodex.net/assets/vendor.be3ecd61.js:5:8646)\\n    at _._handleResponses (https://player.twitch.tv/js/embed/v1.js:1:14959)\",\"overflow\":false,\"properties\":[{\"name\":\"stack\",\"type\":\"string\",\"value\":\"SecurityError: Failed to read a named property '__…(https://player.twitch.tv/js/embed/v1.js:1:14959)\"},{\"name\":\"code\",\"type\":\"number\",\"value\":\"18\"},{\"name\":\"name\",\"type\":\"string\",\"value\":\"SecurityError\"},{\"name\":\"message\",\"type\":\"string\",\"value\":\"Failed to read a named property '__v_isRef' from '…holodex.net\\\" from accessing a cross-origin frame.\"}]}},\"executionContextId\":2}"
+  ],
+  "Error: missing mute control/video: youtube\n    at toggleMute (file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:345:31)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async file:///Users/wuxianyou/orca/workspaces/Holodex-Plus/twitch-audio-lock/tests/e2e-browser/audio-lock/live.mjs:401:25"
+ ],
+ "clickPoints": {
+  "blank": {
+   "x": 1472,
+   "y": 789,
+   "tag": "DIV",
+   "cls": "mv-background"
+  },
+  "twitchPlay": {
+   "x": 1134.5,
+   "y": 297.5,
+   "localX": 356.5,
+   "localY": 211.5,
+   "selector": "button[data-a-target=\"player-overlay-play-button\"]",
+   "sid": "6162824D7E4B30C43FC91AB855F347CC"
+  }
+ },
+ "extensionId": "oomfamdacecpbodnlfojpkfhjcigldpc",
+ "step": "calibration-twitch-mounted",
+ "mountDiagnostics": {
+  "body": "HOLOLIVE\n80h\n10h\n10h\n5h\n2h\n1h\n20m\n12 x 16\n提示：你可以在這裡切換團體！\n登入以自訂您的收藏",
+  "iframe": "<iframe src=\"https://player.twitch.tv?autoplay=false&amp;channel=eslcs&amp;height=720&amp;parent=holodex.net&amp;playsinline=true&amp;referrer=https%3A%2F%2Fholodex.net%2Fmultiview&amp;width=1280\" allowfullscreen=\"\" scrolling=\"no\" frameborder=\"0\" allow=\"autoplay; fullscreen\" title=\"Twitch\" sandbox=\"allow-modals allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-storage-access-by-user-activation\" width=\"1280\" height=\"720\" data-gtm-yt-inspected-9=\"true\"></iframe>",
+  "box": {
+   "x": 778,
+   "y": 86,
+   "width": 713,
+   "height": 423,
+   "top": 86,
+   "right": 1491,
+   "bottom": 509,
+   "left": 778
+  }
+ },
+ "frameDiagnostics": {
+  "targets": [
+   {
+    "type": "service_worker",
+    "url": "chrome-extension://fignfifoniblkonapihmkfakmlgkbkcf/service_worker.js"
+   },
+   {
+    "type": "service_worker",
+    "url": "chrome-extension://oomfamdacecpbodnlfojpkfhjcigldpc/service-worker-loader.js"
+   },
+   {
+    "type": "service_worker",
+    "url": "chrome-extension://ghbmnnjooekpmoecnnnilnnbdlolhkhi/service_worker_bin_prod.js"
+   },
+   {
+    "type": "browser_ui",
+    "url": "chrome://omnibox-popup.top-chrome/omnibox_popup_aim.html"
+   },
+   {
+    "type": "page",
+    "url": "about:blank"
+   },
+   {
+    "type": "background_page",
+    "url": "chrome-extension://nkeimhogjdpnpccoofpliimaahmaaome/background.html"
+   },
+   {
+    "type": "background_page",
+    "url": "chrome-extension://nmmhkkegccagdldgiimedpiccmgmieda/_generated_background_page.html"
+   },
+   {
+    "type": "browser_ui",
+    "url": "chrome://omnibox-popup.top-chrome/"
+   },
+   {
+    "type": "page",
+    "url": "https://holodex.net/multiview"
+   },
+   {
+    "type": "iframe",
+    "url": "https://www.youtube.com/embed/1-LpQekNa9g?playsinline=1&cc_lang_pref=zh-Hant&hl=zh-Hant&enablejsapi=1&origin=https%3A%2F%2Fholodex.net&widgetid=1&forigin=https%3A%2F%2Fholodex.net%2Fmultiview&aoriginsup=1&vf=6"
+   }
+  ],
+  "frames": [
+   {
+    "id": "BD74C0DAA7FE259894C8D7C9E3FAFE63",
+    "loaderId": "FDC8769D838CCBF09AE7295676DEFACF",
+    "url": "https://holodex.net/multiview",
+    "domainAndRegistry": "holodex.net",
+    "securityOrigin": "https://holodex.net",
+    "securityOriginDetails": {
+     "isLocalhost": false
+    },
+    "mimeType": "text/html",
+    "adFrameStatus": {
+     "adFrameType": "none"
+    },
+    "secureContextType": "Secure",
+    "crossOriginIsolatedContextType": "NotIsolated",
+    "gatedAPIFeatures": []
+   },
+   {
+    "id": "AB18CFF9EB38AD2A782A11ACEAA0EC60",
+    "parentId": "BD74C0DAA7FE259894C8D7C9E3FAFE63",
+    "loaderId": "E8B5534D1B16CDA9519B0ED66DFE3883",
+    "name": "",
+    "url": "",
+    "domainAndRegistry": "",
+    "securityOrigin": "://",
+    "securityOriginDetails": {
+     "isLocalhost": false
+    },
+    "mimeType": "text/html",
+    "adFrameStatus": {
+     "adFrameType": "none",
+     "explanations": []
+    },
+    "secureContextType": "Secure",
+    "crossOriginIsolatedContextType": "NotIsolated",
+    "gatedAPIFeatures": []
+   }
+  ]
+ },
+ "stderr": "\nDevTools listening on ws://127.0.0.1:55553/devtools/browser/a73f4bac-b625-4eea-8f98-ac2f5d4922ff\nTrying to load the allocator multiple times. This is *not* supported.\n[82120:21078552:1018/022126.170997:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT\n",
+ "failReason": "exception"
+}
