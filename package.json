@@ -13,7 +13,10 @@
     "build:firefox": "vite build --config vite.config.firefox.ts",
     "dev": "nodemon --config nodemon.chrome.json",
     "dev:chrome": "nodemon --config nodemon.chrome.json",
-    "dev:firefox": "nodemon --config nodemon.firefox.json"
+    "dev:firefox": "nodemon --config nodemon.firefox.json",
+    "test:audio-lock": "vitest run --config vitest.audio-lock.config.ts",
+    "test:audio-lock:watch": "vitest --config vitest.audio-lock.config.ts",
+    "typecheck:audio-lock": "tsc --noEmit && tsc --noEmit -p tsconfig.audio-lock.tests.json"
   },
   "type": "module",
   "dependencies": {
@@ -48,6 +51,8 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "vite": "7.1.11",
-    "vite-tsconfig-paths": "^6.0.3"
+    "vite-tsconfig-paths": "^6.0.3",
+    "vitest": "3.2.6",
+    "jsdom": "26.1.0"
   }
 }
